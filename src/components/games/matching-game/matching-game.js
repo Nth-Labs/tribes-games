@@ -1,17 +1,18 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 import Card from './match-card';
 import uniqueCardsArray from './unique-cards';
+import ResultsScreen from './results-screen';
 
-const MatchingGame = () => {
-  const [cards, setCards] = useState(
-    () => shuffleCards(uniqueCardsArray.concat(uniqueCardsArray))
-  );
+const MatchingGame = ({ config }) => {
+  const cardsFromConfig = config?.cards || uniqueCardsArray;
+  const [cards] = useState(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)));
   const [openCards, setOpenCards] = useState([]);
   const [clearedCards, setClearedCards] = useState({});
   const [moves, setMoves] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [result, setResult] = useState(null);
   const [shouldDisableAllCards, setShouldDisableAllCards] = useState(false);
   const timeout = useRef(null);
+  const moveLimit = config?.moveLimit || 5;
 
   // Check if both the cards have same type. If they do, mark them inactive
   const evaluate = () => {
@@ -46,6 +47,14 @@ const MatchingGame = () => {
     }
   }, [openCards]);
 
+  useEffect(() => {
+    if (moves === moveLimit) {
+      const score = Object.keys(clearedCards).length;
+      const url = `/api/${config.gameType}/${config.gameId}`;
+      mockSubmitResults(url, { score }).then((res) => setResult(res));
+    }
+  }, [moves]);
+
   const checkIsFlipped = (index) => {
     return openCards.includes(index);
   };
@@ -54,17 +63,16 @@ const MatchingGame = () => {
     return Boolean(clearedCards[card.type]);
   };
 
+  if (result) {
+    return <ResultsScreen score={result.score} voucher={result.voucher} />;
+  }
+
   return (
     <div className='flex flex-col items-center justify-center'>
       <header className='flex flex-col items-center justify-center'>
         <h2 className='text-3xl p-3'>Matching Game</h2>
         <p className='text-xl p-3'>Match the cards!</p>
-        <p className='text-xl p-3'>You have {5 - moves} moves left!</p>
-        {moves === 5 && (
-          <p className='text-xl p-3'>
-            Game Over! You scored {Object.keys(clearedCards).length} points!
-          </p>
-        )}
+        <p className='text-xl p-3'>You have {moveLimit - moves} moves left!</p>
       </header>
       <div className="grid grid-cols-3 gap-4">
         {cards.map((card, index) => {
@@ -77,13 +85,14 @@ const MatchingGame = () => {
               isInactive={checkIsInactive(card)}
               isFlipped={checkIsFlipped(index)}
               onClick={handleCardClick}
+              cardBackImage={config?.cardBackImage}
             />
           );
         })}
       </div>
     </div>
   );
-}
+};
 
 // Fisher Yates Shuffle
 const swap = (array, i, j) => {
@@ -102,4 +111,12 @@ const shuffleCards = (array) => {
   return array;
 }
 
-export default MatchingGame
+const mockSubmitResults = (url, payload) => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({ voucher: 'Free Dessert', score: payload.score });
+    }, 1000);
+  });
+};
+
+export default MatchingGame;
