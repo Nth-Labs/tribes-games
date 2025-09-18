@@ -2,7 +2,15 @@ import React from 'react';
 import { IoCheckmarkCircle } from "react-icons/io5";
 
 
-const Card = ({ onClick, card, index, isInactive, isFlipped, isDisabled }) => {
+const Card = ({
+    onClick,
+    card,
+    index,
+    isInactive,
+    isFlipped,
+    isDisabled,
+    cardBackImage
+}) => {
     const handleClick = () => {
         !isFlipped && !isDisabled && onClick(index);
     };
@@ -23,7 +31,7 @@ const Card = ({ onClick, card, index, isInactive, isFlipped, isDisabled }) => {
                 {!isFlipped ? (
                     <div className='absolute inset-0 flex items-center justify-center'>
                         <img
-                            src='/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png'
+                            src={cardBackImage}
                             alt="cardBack"
                             className='w-15 h-15'
                         />
