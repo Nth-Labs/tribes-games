@@ -1,0 +1,31 @@
+<svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="orbGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(120 96) rotate(90) scale(120)">
+      <stop offset="0" stop-color="#FEF9C3" />
+      <stop offset="0.45" stop-color="#FDE68A" />
+      <stop offset="0.82" stop-color="#FBBF24" />
+      <stop offset="1" stop-color="#F59E0B" />
+    </radialGradient>
+    <radialGradient id="orbHighlight" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(90 80) rotate(90) scale(90)">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9" />
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="ringGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(120 200) rotate(90) scale(46 92)">
+      <stop offset="0" stop-color="#6366F1" stop-opacity="0.45" />
+      <stop offset="1" stop-color="#312E81" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+  <g filter="url(#outerBlur)">
+    <circle cx="120" cy="120" r="92" fill="url(#orbGlow)" />
+    <circle cx="120" cy="120" r="92" fill="url(#orbHighlight)" />
+  </g>
+  <ellipse cx="120" cy="196" rx="82" ry="24" fill="url(#ringGlow)" />
+  <ellipse cx="120" cy="188" rx="60" ry="16" fill="#A5B4FC" fill-opacity="0.35" />
+  <circle cx="120" cy="120" r="70" stroke="#FDE68A" stroke-opacity="0.4" stroke-width="4" />
+  <circle cx="120" cy="120" r="98" stroke="#FBBF24" stroke-opacity="0.25" stroke-width="6" />
+  <defs>
+    <filter id="outerBlur" x="12" y="12" width="216" height="216" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="6" />
+    </filter>
+  </defs>
+</svg>

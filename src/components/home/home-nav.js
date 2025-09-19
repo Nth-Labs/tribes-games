@@ -5,7 +5,7 @@ const HomeNav = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <h2 className="p-10 text-3xl">NthLabs' Game Library</h2>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
         <Link to="/game1">
           <div className="flex flex-col items-center justify-center">
             <img
@@ -74,6 +74,16 @@ const HomeNav = () => {
               className="h-48 w-48 rounded-md object-contain"
             />
             <p>Radiant Scratch Card</p>
+          </div>
+        </Link>
+        <Link to="/game8">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/vocal-lift-game-thumb.svg"
+              alt="Vocal Lift Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Vocal Lift Challenge</p>
           </div>
         </Link>
       </div>
