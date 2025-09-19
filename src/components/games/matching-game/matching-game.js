@@ -52,12 +52,14 @@ const MatchingGame = ({ config }) => {
   const [isInitialRevealActive, setIsInitialRevealActive] = useState(initialRevealDuration > 0);
   const [shouldDisableAllCards, setShouldDisableAllCards] = useState(initialRevealDuration > 0);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
 
   const gameStartTimeRef = useRef(Date.now());
   const gameStatusRef = useRef('playing');
   const flipBackTimeoutRef = useRef(null);
   const evaluationTimeoutRef = useRef(null);
   const initialRevealTimeoutRef = useRef(null);
+  const preloadedSourcesRef = useRef('');
 
   const movesLeft = Math.max(moveLimit - moves, 0);
 
@@ -83,10 +85,61 @@ const MatchingGame = ({ config }) => {
   }, [gameStatus]);
 
   useEffect(() => {
+    const imageSources = [
+      ...cardsFromConfig.map((card) => card?.image).filter(Boolean),
+      config?.cardBackImage,
+    ].filter(Boolean);
+
+    const uniqueSources = Array.from(new Set(imageSources));
+    const sortedKey = uniqueSources.slice().sort().join('|');
+
+    if (sortedKey === preloadedSourcesRef.current && assetsLoaded) {
+      return;
+    }
+
+    preloadedSourcesRef.current = sortedKey;
+
+    if (uniqueSources.length === 0) {
+      setAssetsLoaded(true);
+      return;
+    }
+
+    let isCancelled = false;
+
+    setShouldDisableAllCards(true);
+    setAssetsLoaded(false);
+
+    const preloadPromises = uniqueSources.map((src) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = resolve;
+        img.src = src;
+      });
+    });
+
+    Promise.all(preloadPromises).then(() => {
+      if (!isCancelled) {
+        setAssetsLoaded(true);
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [assetsLoaded, cardsFromConfig, config?.cardBackImage]);
+
+  useEffect(() => {
     if (initialRevealTimeoutRef.current) {
       clearTimeout(initialRevealTimeoutRef.current);
       initialRevealTimeoutRef.current = null;
     }
+
+    if (!assetsLoaded) {
+      return undefined;
+    }
+
+    gameStartTimeRef.current = Date.now();
 
     if (initialRevealDuration > 0) {
       setIsInitialRevealActive(true);
@@ -111,7 +164,7 @@ const MatchingGame = ({ config }) => {
         initialRevealTimeoutRef.current = null;
       }
     };
-  }, [initialRevealDuration]);
+  }, [initialRevealDuration, assetsLoaded]);
 
   const finalizeGame = (status) => {
     if (gameStatusRef.current !== 'playing') {
@@ -229,6 +282,24 @@ const MatchingGame = ({ config }) => {
         setIsSubmitting(false);
       });
   };
+
+  if (!assetsLoaded) {
+    return (
+      <div
+        className="flex min-h-[50vh] w-full items-center justify-center"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex flex-col items-center space-y-3">
+          <div
+            className="h-12 w-12 animate-spin rounded-full border-4 border-blue-300 border-t-blue-600"
+            aria-hidden="true"
+          />
+          <span className="text-lg font-medium text-gray-700">Loading game assets...</span>
+        </div>
+      </div>
+    );
+  }
 
   if (result) {
     return <ResultsScreen {...result} />;
