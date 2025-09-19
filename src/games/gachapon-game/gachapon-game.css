@@ -1,0 +1,128 @@
+.gachapon-stage {
+  perspective: 1200px;
+}
+
+.gachapon-box {
+  position: relative;
+  width: 240px;
+  height: 260px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #312e81, #1f2937);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.gachapon-box::before,
+.gachapon-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.gachapon-box::after {
+  inset: 12px;
+  border-radius: 20px;
+  background: linear-gradient(225deg, rgba(59, 130, 246, 0.15), rgba(14, 116, 144, 0));
+}
+
+.gachapon-box--shake {
+  animation: gachapon-shake 0.12s ease-in-out infinite;
+}
+
+.gachapon-box--hidden {
+  opacity: 0;
+  transform: scale(0.85) rotateX(12deg);
+}
+
+@keyframes gachapon-shake {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(-5px, 3px, 0) rotate(-1.6deg);
+  }
+  50% {
+    transform: translate3d(4px, -4px, 0) rotate(1.4deg);
+  }
+  75% {
+    transform: translate3d(-4px, -2px, 0) rotate(-1deg);
+  }
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+.gachapon-explosion {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.9) 0%, rgba(249, 115, 22, 0.6) 55%, rgba(0, 0, 0, 0) 70%);
+  animation: gachapon-explosion-burst 0.6s forwards ease-out;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes gachapon-explosion-burst {
+  0% {
+    transform: scale(0.35);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.9);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(3.8);
+    opacity: 0;
+  }
+}
+
+.gachapon-capsule {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50% 50% 60% 60%;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.35);
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.gachapon-capsule::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%);
+  mix-blend-mode: screen;
+}
+
+.gachapon-capsule--hidden {
+  transform: translate(-50%, -50%) scale(0.6) rotateX(22deg);
+  opacity: 0;
+}
+
+.gachapon-capsule-display {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50% 50% 60% 60%;
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.35);
+  overflow: hidden;
+}
+
+.gachapon-capsule-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%);
+  mix-blend-mode: screen;
+}
