@@ -46,6 +46,16 @@ const HomeNav = () => {
             <p>Precision Timer</p>
           </div>
         </Link>
+        <Link to="/game5">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/shake-off-game-thumb.svg"
+              alt="Shake Off Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Shake Off Challenge</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
