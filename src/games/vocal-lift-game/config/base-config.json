@@ -6,7 +6,7 @@
   "description": "Project your voice to keep the relic suspended. Hold a steady sound for 30 seconds to win.",
   "instructions": "Press \"Start Challenge\" and keep a steady stream of sound to levitate the relic. Drop below the threshold and it will fall.",
   "targetSeconds": 30,
-  "soundThreshold": 0.22,
+  "soundThreshold": 0.04,
   "silenceToleranceMs": 450,
   "ballAsset": {
     "url": "/images/vocal-lift-game/levitating-orb.svg",
