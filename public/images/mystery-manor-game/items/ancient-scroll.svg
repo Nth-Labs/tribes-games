@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="scroll-paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fcd34d" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="26" fill="#0f172a" />
+  <g transform="translate(20 24)" stroke="#78350f" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M12 4h64a12 12 0 0 1 12 12v52H24a12 12 0 0 1-12-12V4z" fill="url(#scroll-paper)" />
+    <path d="M76 20h16v36a12 12 0 0 1-12 12H64V32a12 12 0 0 1 12-12z" fill="#fbbf24" />
+    <path d="M28 24h36M28 38h36M28 52h28" />
+    <circle cx="84" cy="64" r="10" fill="#b91c1c" />
+  </g>
+</svg>
