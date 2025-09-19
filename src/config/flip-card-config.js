@@ -5,6 +5,7 @@ const flipCardConfig = {
   gameType: 'flip-card',
   moveLimit: 5,
   initialRevealSeconds: 3,
+  cardUpflipSeconds: 1,
   cards: uniqueCardsArray,
   cardBackImage: '/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png'
 };

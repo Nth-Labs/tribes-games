@@ -41,6 +41,13 @@ const MatchingGame = ({ config }) => {
   const totalPairs = cards.length / 2;
   const moveLimit = config?.moveLimit || 5;
   const initialRevealDuration = config?.initialRevealSeconds ?? 0;
+  const cardUpflipSecondsValue = Number(config?.cardUpflipSeconds);
+  const cardUpflipSeconds = Number.isFinite(cardUpflipSecondsValue) && cardUpflipSecondsValue >= 0
+    ? cardUpflipSecondsValue
+    : 1;
+  const cardUpflipDurationMs = cardUpflipSeconds * 1000;
+  const evaluationDelayMs = Math.min(cardUpflipDurationMs, 500);
+  const flipBackDelayMs = Math.max(cardUpflipDurationMs - evaluationDelayMs, 0);
 
   const [openCards, setOpenCards] = useState([]);
   const [clearedCards, setClearedCards] = useState({});
@@ -202,22 +209,39 @@ const MatchingGame = ({ config }) => {
       });
       setOpenCards([]);
     } else {
-      flipBackTimeoutRef.current = setTimeout(() => {
+      if (flipBackTimeoutRef.current) {
+        clearTimeout(flipBackTimeoutRef.current);
+        flipBackTimeoutRef.current = null;
+      }
+
+      if (flipBackDelayMs <= 0) {
         setOpenCards([]);
         if (gameStatusRef.current === 'playing') {
           setShouldDisableAllCards(false);
         }
-        flipBackTimeoutRef.current = null;
-      }, 500);
+      } else {
+        flipBackTimeoutRef.current = setTimeout(() => {
+          setOpenCards([]);
+          if (gameStatusRef.current === 'playing') {
+            setShouldDisableAllCards(false);
+          }
+          flipBackTimeoutRef.current = null;
+        }, flipBackDelayMs);
+      }
     }
   };
 
   useEffect(() => {
     if (openCards.length === 2) {
+      if (evaluationTimeoutRef.current) {
+        clearTimeout(evaluationTimeoutRef.current);
+        evaluationTimeoutRef.current = null;
+      }
+
       evaluationTimeoutRef.current = setTimeout(() => {
         evaluate();
         evaluationTimeoutRef.current = null;
-      }, 500);
+      }, evaluationDelayMs);
     }
 
     return () => {
@@ -226,7 +250,7 @@ const MatchingGame = ({ config }) => {
         evaluationTimeoutRef.current = null;
       }
     };
-  }, [openCards]);
+  }, [openCards, evaluationDelayMs, flipBackDelayMs]);
 
   const handleCardClick = (index) => {
     if (shouldDisableAllCards || gameStatusRef.current !== 'playing' || isInitialRevealActive) {
