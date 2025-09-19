@@ -5,6 +5,7 @@ import MatchingGameInit from './games/matching-game/matching-game-init';
 import HomeNav from './components/home/home-nav';
 import StwGame from './games/stw-game/stw-game';
 import MysteryManorGame from './games/mystery-manor-game/mystery-manor-game';
+import PrecisionTimerGameInit from './games/precision-timer-game/precision-timer-game-init';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
               <Route path="/game1" element={<MatchingGameInit />} />
               <Route path="/game2" element={<StwGame />} />
               <Route path="/game3" element={<MysteryManorGame />} />
+              <Route path="/game4" element={<PrecisionTimerGameInit />} />
             </Routes>
           </div>
         </Router>
