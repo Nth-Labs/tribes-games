@@ -1,0 +1,52 @@
+{
+  "gameId": "mm-001",
+  "gameType": "mystery-manor",
+  "title": "Mystery Manor",
+  "subtitle": "Find the hidden artefacts before time runs out",
+  "description": "Players explore a static scene and tap hidden objects to solve the manor mystery.",
+  "backgroundImage": "/images/mystery-manor-game/background.png",
+  "sceneImage": "/images/mystery-manor-game/scene.png",
+  "hintIcon": "/images/mystery-manor-game/hint.png",
+  "timerSeconds": 120,
+  "maxHints": 3,
+  "submissionEndpoint": "/api/games/mystery-manor/mm-001/results",
+  "items": [
+    {
+      "id": "silver-key",
+      "name": "Silver Key",
+      "image": "/images/mystery-manor-game/items/silver-key.png",
+      "hotspot": {
+        "type": "circle",
+        "x": 0.18,
+        "y": 0.52,
+        "radius": 0.05
+      },
+      "hint": "Look near the ornate chest."
+    },
+    {
+      "id": "ancient-scroll",
+      "name": "Ancient Scroll",
+      "image": "/images/mystery-manor-game/items/ancient-scroll.png",
+      "hotspot": {
+        "type": "rect",
+        "x": 0.61,
+        "y": 0.38,
+        "width": 0.12,
+        "height": 0.08
+      },
+      "hint": "Check the shelves by the staircase."
+    },
+    {
+      "id": "mystic-orb",
+      "name": "Mystic Orb",
+      "image": "/images/mystery-manor-game/items/mystic-orb.png",
+      "hotspot": {
+        "type": "circle",
+        "x": 0.74,
+        "y": 0.72,
+        "radius": 0.07
+      },
+      "hint": "A faint glow comes from the ballroom floor."
+    }
+  ]
+}

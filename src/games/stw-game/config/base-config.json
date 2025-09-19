@@ -1,0 +1,43 @@
+{
+  "gameId": "stw-001",
+  "gameType": "spin-the-wheel",
+  "title": "Spin the Wheel",
+  "description": "Players spin the wheel once per eligible session to receive a random reward.",
+  "wheelImage": "/images/stw-game-assets/wheel.png",
+  "pointerImage": "/images/stw-game-assets/pointer.png",
+  "backgroundImage": "/images/stw-game-assets/background.png",
+  "spinButtonImage": "/images/stw-game-assets/spin-button.png",
+  "maxSpinsPerUser": 1,
+  "spinCooldownSeconds": 86400,
+  "submissionEndpoint": "/api/games/spin-the-wheel/stw-001/results",
+  "prizeSegments": [
+    {
+      "id": "voucher-5",
+      "label": "$5 Voucher",
+      "probability": 0.2,
+      "image": "/images/stw-game-assets/segments/voucher-5.png",
+      "description": "Discount on next purchase"
+    },
+    {
+      "id": "voucher-10",
+      "label": "$10 Voucher",
+      "probability": 0.1,
+      "image": "/images/stw-game-assets/segments/voucher-10.png",
+      "description": "Premium discount reward"
+    },
+    {
+      "id": "free-shipping",
+      "label": "Free Shipping",
+      "probability": 0.3,
+      "image": "/images/stw-game-assets/segments/free-shipping.png",
+      "description": "Waive delivery fees"
+    },
+    {
+      "id": "try-again",
+      "label": "Try Again",
+      "probability": 0.4,
+      "image": "/images/stw-game-assets/segments/try-again.png",
+      "description": "No reward"
+    }
+  ]
+}
