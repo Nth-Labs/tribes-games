@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import MatchingGame from './matching-game';
-import flipCardConfig from '../../../config/flip-card-config';
+import flipCardConfig from './config';
 
 const MatchingGameInit = () => {
   const [config, setConfig] = useState(null);

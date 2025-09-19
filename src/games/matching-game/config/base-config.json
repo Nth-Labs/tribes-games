@@ -1,0 +1,49 @@
+{
+  "gameId": "flip-001",
+  "gameType": "flip-card",
+  "title": "White Tiffin Flip & Match",
+  "description": "Players flip cards to match pairs of dishes before they run out of moves.",
+  "moveLimit": 5,
+  "initialRevealSeconds": 3,
+  "cardUpflipSeconds": 1,
+  "cardBackImage": "/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png",
+  "submissionEndpoint": "/api/games/flip-card/flip-001/results",
+  "cards": [
+    {
+      "id": "mee-siam-with-prawns",
+      "type": "Mee Siam With Prawns",
+      "image": "/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png",
+      "altText": "White Tiffin Mee Siam With Prawns card artwork"
+    },
+    {
+      "id": "local-trio",
+      "type": "Local Trio",
+      "image": "/images/matching-game-assets/white-tiffin-assets/local-trio.png",
+      "altText": "White Tiffin Local Trio card artwork"
+    },
+    {
+      "id": "nasi-lemak-beef",
+      "type": "Nasi Lemak Beef",
+      "image": "/images/matching-game-assets/white-tiffin-assets/nasi-lemak-beef.png",
+      "altText": "White Tiffin Nasi Lemak Beef card artwork"
+    },
+    {
+      "id": "chicken-curry",
+      "type": "Chicken Curry",
+      "image": "/images/matching-game-assets/white-tiffin-assets/chicken-curry.png",
+      "altText": "White Tiffin Chicken Curry card artwork"
+    },
+    {
+      "id": "trio-snack-platter",
+      "type": "Trio Snack Platter",
+      "image": "/images/matching-game-assets/white-tiffin-assets/trio-snack-platter.png",
+      "altText": "White Tiffin Trio Snack Platter card artwork"
+    },
+    {
+      "id": "fish-maw-seafood-soup",
+      "type": "Fish Maw Seafood Soup",
+      "image": "/images/matching-game-assets/white-tiffin-assets/fish-maw-seafood-soup.png",
+      "altText": "White Tiffin Fish Maw Seafood Soup card artwork"
+    }
+  ]
+}

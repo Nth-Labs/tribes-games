@@ -1,10 +1,10 @@
 import logo from './logo.svg';
 import './App.css';
-import { BrowserRouter as Router, Route, Link, Routes } from 'react-router-dom';
-import MatchingGameInit from './components/games/matching-game/matching-game-init';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import MatchingGameInit from './games/matching-game/matching-game-init';
 import HomeNav from './components/home/home-nav';
-import StwGame from './components/games/stw-game/stw-game';
-import MysteryManorGame from './components/games/mystery-manor-game/mystery-manor-game';
+import StwGame from './games/stw-game/stw-game';
+import MysteryManorGame from './games/mystery-manor-game/mystery-manor-game';
 
 function App() {
   return (
