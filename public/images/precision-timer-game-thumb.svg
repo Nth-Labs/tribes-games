@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="gradient" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2563eb" />
+      <stop offset="100%" stop-color="#10b981" />
+    </linearGradient>
+  </defs>
+  <rect width="200" height="200" rx="24" fill="url(#gradient)" />
+  <g transform="translate(100 90)">
+    <circle r="56" fill="rgba(255,255,255,0.15)" />
+    <circle r="52" fill="rgba(255,255,255,0.25)" />
+    <circle r="48" fill="rgba(255,255,255,0.35)" />
+    <text
+      x="0"
+      y="14"
+      text-anchor="middle"
+      font-family="'Fira Mono', 'Menlo', 'Courier New', monospace"
+      font-size="28"
+      fill="#ffffff"
+    >
+      0.000
+    </text>
+  </g>
+  <text
+    x="100"
+    y="160"
+    text-anchor="middle"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="20"
+    font-weight="600"
+    fill="#ffffff"
+  >
+    Precision Timer
+  </text>
+</svg>
