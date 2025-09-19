@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="hintGradient" cx="0.3" cy="0.3" r="0.9">
+      <stop offset="0%" stop-color="#facc15" />
+      <stop offset="100%" stop-color="#f59e0b" />
+    </radialGradient>
+  </defs>
+  <circle cx="64" cy="64" r="60" fill="#111827" stroke="#facc15" stroke-width="6" />
+  <circle cx="64" cy="64" r="46" fill="url(#hintGradient)" opacity="0.85" />
+  <path d="M64 30c-15 0-26 9.2-26 21.8 0 14 14.4 17.8 14.4 24.2v4.2h23.2v-4.6c0-7.6 14.4-10.8 14.4-24 0-12.4-11-21.6-26-21.6zm0 11.2c6.8 0 11.4 3.8 11.4 9 0 7.8-8.4 9.6-9.8 17.6h-3.2c-1.4-8-9.8-9.8-9.8-17.6 0-5.2 4.6-9 11.4-9z" fill="#0f172a" />
+  <circle cx="64" cy="94" r="8" fill="#0f172a" />
+</svg>

@@ -56,6 +56,26 @@ const HomeNav = () => {
             <p>Shake Off Challenge</p>
           </div>
         </Link>
+        <Link to="/game6">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/gachapon-game-thumb.svg"
+              alt="Gachapon Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Celestial Capsule Gachapon</p>
+          </div>
+        </Link>
+        <Link to="/game7">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/scratch-card-game-thumb.svg"
+              alt="Scratch Card Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Radiant Scratch Card</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
