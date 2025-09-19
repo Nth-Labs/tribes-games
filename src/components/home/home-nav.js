@@ -46,6 +46,16 @@ const HomeNav = () => {
             <p>Precision Timer</p>
           </div>
         </Link>
+        <Link to="/game5">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/gachapon-game-thumb.svg"
+              alt="Gachapon Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Celestial Capsule Gachapon</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
