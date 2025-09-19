@@ -9,7 +9,8 @@ jest.mock(
     Route: ({ element }) => element,
     Routes: ({ children }) => <>{children}</>,
     Link: ({ children, to }) => <a href={to}>{children}</a>,
-    useNavigate: () => jest.fn(),
+    useNavigate: () => jest.fn()
+
   }),
   { virtual: true }
 );
