@@ -4,6 +4,8 @@ const flipCardConfig = {
   gameId: 'flip-001',
   gameType: 'flip-card',
   moveLimit: 5,
+  initialRevealSeconds: 3,
+  cardUpflipSeconds: 0.75,
   cards: uniqueCardsArray,
   cardBackImage: '/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png'
 };
