@@ -1,6 +1,6 @@
 import baseConfig from './base-config.json';
 
-export const matchingGameFieldSchema = {
+export const flipCardNewFieldSchema = {
   admin: {
     moveLimit: {
       type: 'number',
@@ -44,7 +44,7 @@ export const matchingGameFieldSchema = {
     },
     theme: {
       type: 'object',
-      description: 'Visual customisation options for the matching game surface and interface.',
+      description: 'Visual customisation options for the flip card game surface and interface.',
       fields: {
         backgroundColor: {
           type: 'string',
@@ -76,11 +76,11 @@ export const matchingGameFieldSchema = {
         },
         panelBackgroundColor: {
           type: 'string',
-          description: 'Background colour for the information sidebar and modals.'
+          description: 'Background colour for the information panels and modals.'
         },
         panelBorderColor: {
           type: 'string',
-          description: 'Border colour for the sidebar and modal surfaces.'
+          description: 'Border colour for the panels and modal surfaces.'
         },
         panelShadowColor: {
           type: 'string',
@@ -143,7 +143,7 @@ export const matchingGameFieldSchema = {
   }
 };
 
-export const matchingGameApiContract = {
+export const flipCardNewApiContract = {
   method: 'GET',
   responseType: 'application/json',
   notes: 'The API should respond with the exact shape of baseConfig, optionally overriding the editable fields based on campaign needs.',
@@ -151,13 +151,13 @@ export const matchingGameApiContract = {
   documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`
 };
 
-const matchingGameConfig = {
+const flipCardNewConfig = {
   ...baseConfig,
   cards: baseConfig.cards.map((card) => ({ ...card })),
-  fieldSchema: matchingGameFieldSchema,
-  apiContract: matchingGameApiContract
+  fieldSchema: flipCardNewFieldSchema,
+  apiContract: flipCardNewApiContract
 };
 
-export const baseMatchingGameConfig = baseConfig;
+export const baseFlipCardNewConfig = baseConfig;
 
-export default matchingGameConfig;
+export default flipCardNewConfig;

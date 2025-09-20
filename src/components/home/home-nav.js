@@ -76,6 +76,16 @@ const HomeNav = () => {
             <p>Radiant Scratch Card</p>
           </div>
         </Link>
+        <Link to="/game8">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/flip-card-new-thumb.svg"
+              alt="Flip Card New Game Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Flip Card (New)</p>
+          </div>
+        </Link>
       </div>
     </div>
   );
