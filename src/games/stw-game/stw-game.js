@@ -6,6 +6,7 @@ const DEFAULT_SPIN_DURATION = 4500;
 const DEFAULT_ROTATION_COUNT = 6;
 const WHEEL_SIZE = 360;
 const LABEL_RADIUS = (WHEEL_SIZE / 2) * 0.65;
+const POINTER_TARGET_ANGLE = 90;
 
 const FALLBACK_SEGMENT_COLORS = [
   '#f97316',
@@ -171,19 +172,13 @@ const createLabelPosition = (index, anglePerSlice) => {
   };
 };
 
-const formatDropRate = (weight, totalWeight) => {
-  if (!totalWeight || totalWeight <= 0) {
-    return '—';
-  }
-
-  const percentage = (weight / totalWeight) * 100;
-
-  if (percentage < 0.1) {
-    return '<0.1%';
-  }
-
-  return `${percentage.toFixed(1)}%`;
+const normalizeAngle = (angle) => {
+  const normalized = angle % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
 };
+
+const calculateAlignmentRotation = (segmentIndex, anglePerSlice) =>
+  POINTER_TARGET_ANGLE - (segmentIndex + 0.5) * anglePerSlice;
 
 const formatCooldown = (seconds) => {
   if (!Number.isFinite(seconds) || seconds <= 0) {
@@ -219,12 +214,15 @@ const Wheel = ({
   const sanitizedDuration = Math.max(600, Math.floor(spinDuration ?? DEFAULT_SPIN_DURATION));
   const sanitizedRotationCount = Math.max(1, Math.floor(rotationCount ?? DEFAULT_ROTATION_COUNT));
 
-  const [rotation, setRotation] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(false);
-  const spinCountRef = useRef(0);
   const timeoutRef = useRef(null);
-
   const anglePerSlice = useMemo(() => (segments.length ? 360 / segments.length : 360), [segments.length]);
+  const initialRotation = useMemo(
+    () => calculateAlignmentRotation(0, anglePerSlice),
+    [anglePerSlice],
+  );
+  const rotationRef = useRef(initialRotation);
+  const [rotation, setRotation] = useState(initialRotation);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   useEffect(() => () => {
     if (timeoutRef.current) {
@@ -233,9 +231,14 @@ const Wheel = ({
   }, []);
 
   useEffect(() => {
-    spinCountRef.current = 0;
-    setRotation(0);
-  }, [segments]);
+    rotationRef.current = initialRotation;
+    setRotation(initialRotation);
+    setIsSpinning(false);
+  }, [initialRotation]);
+
+  useEffect(() => {
+    rotationRef.current = rotation;
+  }, [rotation]);
 
   const handleSpin = useCallback(() => {
     if (isSpinning || disabled || segments.length < 2) {
@@ -244,13 +247,17 @@ const Wheel = ({
 
     const targetIndex = pickWeightedIndex(segments);
     const boundedIndex = Math.max(0, Math.min(targetIndex, segments.length - 1));
-    const nextSpinCount = spinCountRef.current + 1;
-    const totalRotation = nextSpinCount * 360 * sanitizedRotationCount + anglePerSlice * boundedIndex;
+    const alignmentRotation = calculateAlignmentRotation(boundedIndex, anglePerSlice);
+    const baseRotation = rotationRef.current + sanitizedRotationCount * 360;
+    const normalizedBase = normalizeAngle(baseRotation);
+    const normalizedTarget = normalizeAngle(alignmentRotation);
+    const additionalRotation = (normalizedTarget - normalizedBase + 360) % 360;
+    const totalRotation = baseRotation + additionalRotation;
     const landedSegment = segments[boundedIndex];
 
     onSpinStart?.();
     setIsSpinning(true);
-    spinCountRef.current = nextSpinCount;
+    rotationRef.current = totalRotation;
     setRotation(totalRotation);
 
     if (timeoutRef.current) {
@@ -288,7 +295,7 @@ const Wheel = ({
         <div
           className="stw-wheel__spinner"
           style={{
-            transform: `rotate(${rotation + anglePerSlice / 2 - 90}deg)`,
+            transform: `rotate(${rotation}deg)`,
             transitionDuration: `${sanitizedDuration}ms`,
           }}
         >
@@ -512,9 +519,6 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
                       />
                     </div>
                   ) : null}
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
-                    Drop rate: {formatDropRate(currentResult.segment.weight, totalWeight)}
-                  </p>
                   {currentResult.spinNumber ? (
                     <p className="text-xs text-slate-500">Spin {currentResult.spinNumber}{maxSpins ? ` of ${maxSpins}` : ''}</p>
                   ) : null}
@@ -532,7 +536,7 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
             <div>
               <h3 className="text-2xl font-semibold sm:text-3xl">Available rewards</h3>
               <p className="mt-2 text-sm text-slate-300 sm:text-base">
-                Each wedge is configurable from the campaign dashboard. Update the probability or creative to refresh the
+                Each wedge is configurable from the campaign dashboard. Update the rewards or creative to refresh the
                 experience instantly.
               </p>
             </div>
@@ -552,9 +556,6 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
                     <div className="flex flex-col gap-3">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <h4 className="text-lg font-semibold text-white">{segment.label}</h4>
-                        <span className="rounded-full bg-slate-900/60 px-3 py-1 text-xs font-semibold text-slate-200">
-                          {formatDropRate(segment.weight, totalWeight)}
-                        </span>
                       </div>
                       {segment.description ? (
                         <p className="text-sm text-slate-300">{segment.description}</p>

@@ -10,6 +10,7 @@ import PrecisionTimerGameInit from './games/precision-timer-game/precision-timer
 import ShakeOffGame from './games/shake-off-game/shake-off-game';
 import GachaponGame from './games/gachapon-game/gachapon-game';
 import ScratchCardGame from './games/scratch-card-game/scratch-card-game';
+import VocalLiftGameInit from './games/vocal-lift-game/vocal-lift-game-init';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
               <Route path="/game5" element={<ShakeOffGame />} />
               <Route path="/game6" element={<GachaponGame />} />
               <Route path="/game7" element={<ScratchCardGame />} />
+              <Route path="/game8" element={<VocalLiftGameInit />} />
             </Routes>
           </div>
         </Router>
