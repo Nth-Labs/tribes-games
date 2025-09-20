@@ -2,6 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MatchingGameInit from './games/matching-game/matching-game-init';
+import FlipCardNewGameInit from './games/flip-card-new/flip-card-new-init';
 import HomeNav from './components/home/home-nav';
 import StwGame from './games/stw-game/stw-game';
 import MysteryManorGame from './games/mystery-manor-game/mystery-manor-game';
@@ -20,6 +21,7 @@ function App() {
             <Routes>
               <Route path="/" element={<HomeNav />} />
               <Route path="/game1" element={<MatchingGameInit />} />
+              <Route path="/game8" element={<FlipCardNewGameInit />} />
               <Route path="/game2" element={<StwGame />} />
               <Route path="/game3" element={<MysteryManorGame />} />
               <Route path="/game4" element={<PrecisionTimerGameInit />} />

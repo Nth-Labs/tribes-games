@@ -1,7 +1,7 @@
 import React from 'react';
 import { IoCheckmarkCircle } from 'react-icons/io5';
 
-const Card = ({
+const FlipCard = ({
   onClick,
   card,
   index,
@@ -31,22 +31,22 @@ const Card = ({
   };
 
   const outerStyle = {
-    '--mg-accent': theme?.accentColor || '#facc15',
-    borderColor: theme?.cardBorderColor || 'rgba(148, 163, 184, 0.28)',
+    '--flip-accent': theme?.accentColor || '#60a5fa',
+    borderColor: theme?.cardBorderColor || 'rgba(191, 219, 254, 0.9)',
     boxShadow: isInactive
-      ? `0 26px 60px -32px ${theme?.cardMatchedGlowColor || 'rgba(34, 197, 94, 0.55)'}`
-      : `0 32px 70px -40px ${theme?.cardShadowColor || 'rgba(15, 23, 42, 0.78)'}`,
+      ? `0 22px 55px -30px ${theme?.cardMatchedGlowColor || 'rgba(96, 165, 250, 0.58)'}`
+      : `0 26px 65px -38px ${theme?.cardShadowColor || 'rgba(148, 163, 184, 0.4)'}`,
     background: isInactive
-      ? theme?.cardMatchedBackgroundColor || 'rgba(34, 197, 94, 0.18)'
-      : theme?.cardBackBackgroundColor || 'rgba(30, 41, 59, 0.85)'
+      ? theme?.cardMatchedBackgroundColor || 'rgba(191, 227, 255, 0.65)'
+      : theme?.cardBackBackgroundColor || 'rgba(226, 232, 240, 0.85)'
   };
 
   const faceSharedStyles = {
-    background: theme?.cardFaceBackgroundColor || 'rgba(15, 23, 42, 0.65)'
+    background: theme?.cardFaceBackgroundColor || 'rgba(239, 246, 255, 0.92)'
   };
 
   const backFaceStyles = {
-    background: theme?.cardBackBackgroundColor || 'rgba(30, 41, 59, 0.85)'
+    background: theme?.cardBackBackgroundColor || 'rgba(226, 232, 240, 0.85)'
   };
 
   return (
@@ -55,7 +55,7 @@ const Card = ({
       onClick={handleClick}
       disabled={isDisabled || isInactive}
       aria-label={buttonLabel}
-      className="group relative flex aspect-[3/4] w-24 items-center justify-center overflow-hidden rounded-2xl border transition-transform duration-300 ease-out hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60 disabled:cursor-not-allowed sm:w-28 md:w-32 lg:w-36"
+      className="group relative flex aspect-[3/4] w-full items-center justify-center overflow-hidden rounded-3xl border transition-transform duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sky-200 disabled:cursor-not-allowed"
       style={outerStyle}
     >
       <div
@@ -72,12 +72,12 @@ const Card = ({
             <img
               src={cardBackImage}
               alt="Card back"
-              className="max-h-[72%] max-w-[72%] object-contain drop-shadow-[0_20px_45px_rgba(8,15,32,0.45)]"
+              className="max-h-[75%] max-w-[75%] object-contain drop-shadow-[0_16px_35px_rgba(148,163,184,0.35)]"
             />
           ) : (
             <span
-              className="text-xs font-semibold uppercase tracking-[0.45em]"
-              style={{ color: theme?.accentColor || '#facc15' }}
+              className="text-[0.65rem] font-semibold uppercase tracking-[0.38em]"
+              style={{ color: theme?.accentColor || '#60a5fa' }}
             >
               Flip
             </span>
@@ -90,22 +90,22 @@ const Card = ({
           <img
             src={card.image}
             alt={card.altText || card.type || 'Card front'}
-            className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_22px_55px_rgba(8,15,32,0.45)]"
+            className="max-h-[78%] max-w-[78%] object-contain drop-shadow-[0_18px_45px_rgba(148,163,184,0.35)]"
           />
         </div>
       </div>
       {isInactive && (
         <div
-          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-2xl text-center backdrop-blur-[1.5px]"
+          className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center rounded-3xl text-center backdrop-blur-sm"
           style={{
-            background: theme?.cardMatchedBackgroundColor || 'rgba(34, 197, 94, 0.18)',
-            color: theme?.titleColor || '#f8fafc'
+            background: theme?.cardMatchedBackgroundColor || 'rgba(191, 227, 255, 0.65)',
+            color: theme?.titleColor || '#0f172a'
           }}
         >
-          <IoCheckmarkCircle size={42} color={theme?.accentColor || '#facc15'} />
+          <IoCheckmarkCircle size={40} color={theme?.accentColor || '#60a5fa'} />
           <span
-            className="mt-2 text-[0.65rem] font-semibold uppercase tracking-[0.32em]"
-            style={{ color: theme?.subtleTextColor || 'rgba(226, 232, 240, 0.78)' }}
+            className="mt-1 text-[0.6rem] font-semibold uppercase tracking-[0.32em]"
+            style={{ color: theme?.subtleTextColor || 'rgba(71, 85, 105, 0.75)' }}
           >
             Matched
           </span>
@@ -115,4 +115,4 @@ const Card = ({
   );
 };
 
-export default Card;
+export default FlipCard;

@@ -1,11 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import Card from './match-card';
+import FlipCard from './flip-card';
 import uniqueCardsArray from './unique-cards';
-import ResultsScreen from './results-screen';
+import ResultsScreen from '../matching-game/results-screen';
 
-const isCssGradient = (value) => {
-  return typeof value === 'string' && value.trim().includes('gradient(');
-};
+const isCssGradient = (value) => typeof value === 'string' && value.trim().includes('gradient(');
 
 const formatDuration = (seconds) => {
   const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
@@ -20,73 +18,75 @@ const formatDuration = (seconds) => {
 };
 
 const defaultTheme = {
-  backgroundColor: '#020617',
+  backgroundColor: '#fdfaf5',
   backgroundImage:
-    'radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.18), transparent 45%), radial-gradient(circle at 85% 5%, rgba(250, 204, 21, 0.22), transparent 48%), linear-gradient(140deg, #020617 0%, #0f172a 55%, #020617 100%)',
-  backgroundOverlayColor: 'rgba(4, 7, 15, 0.82)',
-  accentColor: '#facc15',
-  titleColor: '#f8fafc',
-  textColor: '#e2e8f0',
-  subtleTextColor: 'rgba(226, 232, 240, 0.78)',
-  panelBackgroundColor: 'rgba(8, 15, 32, 0.68)',
+    'radial-gradient(circle at 10% 0%, rgba(125, 211, 252, 0.45), transparent 55%), radial-gradient(circle at 90% -20%, rgba(253, 224, 171, 0.6), transparent 52%), linear-gradient(160deg, #fdfaf5 0%, #e8f3ff 55%, #fdfaf5 100%)',
+  backgroundOverlayColor: 'rgba(255, 255, 255, 0.82)',
+  accentColor: '#60a5fa',
+  titleColor: '#0f172a',
+  textColor: '#1f2937',
+  subtleTextColor: 'rgba(71, 85, 105, 0.75)',
+  panelBackgroundColor: 'rgba(255, 255, 255, 0.88)',
   panelBorderColor: 'rgba(148, 163, 184, 0.32)',
-  panelShadowColor: 'rgba(8, 15, 32, 0.7)',
-  boardBackgroundColor: 'rgba(8, 15, 32, 0.6)',
-  boardBorderColor: 'rgba(148, 163, 184, 0.28)',
-  boardShadowColor: 'rgba(8, 15, 32, 0.68)',
-  cardBackBackgroundColor: 'rgba(30, 41, 59, 0.88)',
-  cardFaceBackgroundColor: 'rgba(15, 23, 42, 0.65)',
-  cardBorderColor: 'rgba(148, 163, 184, 0.28)',
-  cardMatchedBackgroundColor: 'rgba(34, 197, 94, 0.16)',
-  cardMatchedGlowColor: 'rgba(34, 197, 94, 0.55)',
-  cardShadowColor: 'rgba(8, 15, 32, 0.75)',
-  buttonBackgroundColor: '#facc15',
-  buttonHoverBackgroundColor: '#fbbf24',
-  buttonTextColor: '#0f172a',
-  cardFlipDurationMs: 550
+  panelShadowColor: 'rgba(148, 163, 184, 0.26)',
+  boardBackgroundColor: 'rgba(255, 255, 255, 0.92)',
+  boardBorderColor: 'rgba(191, 219, 254, 0.7)',
+  boardShadowColor: 'rgba(100, 116, 139, 0.24)',
+  cardBackBackgroundColor: 'rgba(226, 232, 240, 0.85)',
+  cardFaceBackgroundColor: 'rgba(239, 246, 255, 0.92)',
+  cardBorderColor: 'rgba(191, 219, 254, 0.9)',
+  cardMatchedBackgroundColor: 'rgba(191, 227, 255, 0.65)',
+  cardMatchedGlowColor: 'rgba(96, 165, 250, 0.58)',
+  cardShadowColor: 'rgba(148, 163, 184, 0.4)',
+  buttonBackgroundColor: '#3b82f6',
+  buttonHoverBackgroundColor: '#2563eb',
+  buttonTextColor: '#f8fafc',
+  cardFlipDurationMs: 520
 };
 
 const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmitting, theme }) => {
   const isWin = status === 'won';
-  const title = isWin ? 'Great job!' : 'Game over';
+  const title = isWin ? 'You did it!' : 'Better luck next time';
   const description = isWin
-    ? 'You matched all of the cards before running out of moves.'
-    : 'You ran out of moves before matching all of the cards.';
+    ? 'You matched every card before using all of your moves.'
+    : 'You ran out of moves before all of the pairs were discovered.';
 
   const modalBackground = theme?.panelBackgroundColor || '#ffffff';
   const modalTextColor = theme?.textColor || '#1f2937';
   const modalBorderColor = theme?.panelBorderColor || 'rgba(148, 163, 184, 0.28)';
-  const modalSubtleTextColor = theme?.subtleTextColor || 'rgba(100, 116, 139, 0.88)';
-  const buttonBackground = theme?.buttonBackgroundColor || theme?.accentColor || '#2563eb';
+  const modalSubtleTextColor = theme?.subtleTextColor || 'rgba(100, 116, 139, 0.75)';
+  const buttonBackground = theme?.buttonBackgroundColor || theme?.accentColor || '#60a5fa';
   const buttonHoverBackground = theme?.buttonHoverBackgroundColor || buttonBackground;
   const buttonTextColor = theme?.buttonTextColor || '#ffffff';
 
   return (
     <div className="fixed inset-0 z-20 flex items-center justify-center px-4 py-6">
-      <div className="absolute inset-0 bg-black/60" aria-hidden="true" />
+      <div className="absolute inset-0 bg-slate-900/30" aria-hidden="true" />
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="matching-game-status-title"
-        aria-describedby="matching-game-status-description"
-        className="relative w-full max-w-md overflow-hidden rounded-3xl border backdrop-blur-lg shadow-[0_35px_120px_rgba(8,15,32,0.65)]"
+        aria-labelledby="flip-card-new-status-title"
+        aria-describedby="flip-card-new-status-description"
+        className="relative w-full max-w-sm overflow-hidden rounded-[28px] border shadow-[0_25px_80px_rgba(148,163,184,0.28)] backdrop-blur-md"
         style={{
           background: modalBackground,
           borderColor: modalBorderColor
         }}
       >
-        <div className="space-y-6 px-8 py-9 text-center" style={{ color: modalTextColor }}>
+        <div className="space-y-6 px-7 py-8 text-center" style={{ color: modalTextColor }}>
           <div className="space-y-2">
-            <h3 id="matching-game-status-title" className="text-2xl font-semibold tracking-tight sm:text-3xl">{title}</h3>
-            <p id="matching-game-status-description" className="text-sm sm:text-base" style={{ color: modalSubtleTextColor }}>
+            <h3 id="flip-card-new-status-title" className="text-2xl font-semibold tracking-tight">
+              {title}
+            </h3>
+            <p id="flip-card-new-status-description" className="text-sm" style={{ color: modalSubtleTextColor }}>
               {description}
             </p>
           </div>
           <div
-            className="grid grid-cols-3 gap-3 rounded-2xl border px-4 py-3 text-xs font-medium uppercase tracking-[0.32em]"
+            className="grid grid-cols-3 gap-3 rounded-2xl border px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.32em]"
             style={{
               borderColor: modalBorderColor,
-              background: theme?.boardBackgroundColor || 'rgba(15, 23, 42, 0.08)'
+              background: theme?.boardBackgroundColor || 'rgba(239, 246, 255, 0.82)'
             }}
           >
             <div className="space-y-1">
@@ -112,14 +112,14 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
             type="button"
             onClick={onSubmit}
             disabled={isSubmitting}
-            className="w-full rounded-2xl px-6 py-3 text-base font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/70 disabled:cursor-not-allowed disabled:opacity-70 [background:var(--mg-button-bg)] [color:var(--mg-button-text)] hover:[background:var(--mg-button-hover-bg)]"
+            className="w-full rounded-2xl px-6 py-3 text-base font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-sky-200 disabled:cursor-not-allowed disabled:opacity-75 [background:var(--flip-button-bg)] [color:var(--flip-button-text)] hover:[background:var(--flip-button-hover-bg)]"
             style={{
-              '--mg-button-bg': buttonBackground,
-              '--mg-button-hover-bg': buttonHoverBackground,
-              '--mg-button-text': buttonTextColor
+              '--flip-button-bg': buttonBackground,
+              '--flip-button-hover-bg': buttonHoverBackground,
+              '--flip-button-text': buttonTextColor
             }}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Results'}
+            {isSubmitting ? 'Submitting…' : 'Submit results'}
           </button>
         </div>
       </div>
@@ -127,11 +127,11 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
   );
 };
 
-const MatchingGame = ({ config }) => {
+const FlipCardNewGame = ({ config }) => {
   const cardsFromConfig = useMemo(() => config?.cards || uniqueCardsArray, [config?.cards]);
   const [cards] = useState(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)));
   const totalPairs = cards.length / 2;
-  const moveLimit = config?.moveLimit || 5;
+  const moveLimit = config?.moveLimit || 8;
   const initialRevealDuration = config?.initialRevealSeconds ?? 0;
   const cardUpflipSecondsValue = Number(config?.cardUpflipSeconds);
   const cardUpflipSeconds = Number.isFinite(cardUpflipSecondsValue) && cardUpflipSecondsValue >= 0
@@ -166,10 +166,13 @@ const MatchingGame = ({ config }) => {
 
   const movesLeft = Math.max(moveLimit - moves, 0);
 
-  const theme = useMemo(() => ({
-    ...defaultTheme,
-    ...(config?.theme || {})
-  }), [config?.theme]);
+  const theme = useMemo(
+    () => ({
+      ...defaultTheme,
+      ...(config?.theme || {})
+    }),
+    [config?.theme]
+  );
 
   const flipDurationMs = useMemo(() => {
     const parsed = Number(theme?.cardFlipDurationMs);
@@ -199,9 +202,10 @@ const MatchingGame = ({ config }) => {
     return style;
   }, [theme.backgroundColor, theme.backgroundImage]);
 
-  const overlayStyle = useMemo(() => ({
-    background: theme.backgroundOverlayColor || defaultTheme.backgroundOverlayColor
-  }), [theme.backgroundOverlayColor]);
+  const overlayStyle = useMemo(
+    () => ({ background: theme.backgroundOverlayColor || defaultTheme.backgroundOverlayColor }),
+    [theme.backgroundOverlayColor]
+  );
 
   const pairsFound = useMemo(() => Object.keys(clearedCards).length, [clearedCards]);
 
@@ -241,7 +245,7 @@ const MatchingGame = ({ config }) => {
     const imageSources = [
       ...cardsFromConfig.map((card) => card?.image).filter(Boolean),
       config?.cardBackImage,
-      isCssGradient(backgroundImageSource) ? null : backgroundImageSource,
+      isCssGradient(backgroundImageSource) ? null : backgroundImageSource
     ].filter(Boolean);
 
     const uniqueSources = Array.from(new Set(imageSources));
@@ -263,14 +267,12 @@ const MatchingGame = ({ config }) => {
     setShouldDisableAllCards(true);
     setAssetsLoaded(false);
 
-    const preloadPromises = uniqueSources.map((src) => {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = resolve;
-        img.onerror = resolve;
-        img.src = src;
-      });
-    });
+    const preloadPromises = uniqueSources.map((src) => new Promise((resolve) => {
+      const img = new Image();
+      img.onload = resolve;
+      img.onerror = resolve;
+      img.src = src;
+    }));
 
     Promise.all(preloadPromises).then(() => {
       if (!isCancelled) {
@@ -458,13 +460,9 @@ const MatchingGame = ({ config }) => {
     }
   };
 
-  const checkIsFlipped = (index) => {
-    return isInitialRevealActive || openCards.includes(index);
-  };
+  const checkIsFlipped = (index) => isInitialRevealActive || openCards.includes(index);
 
-  const checkIsInactive = (card) => {
-    return Boolean(clearedCards[card.type]);
-  };
+  const checkIsInactive = (card) => Boolean(clearedCards[card.type]);
 
   const handleSubmitResults = () => {
     if (isSubmitting || gameStatusRef.current === 'playing') {
@@ -478,9 +476,9 @@ const MatchingGame = ({ config }) => {
       gameType: config?.gameType,
       outcome: gameStatus === 'won' ? 'Won' : 'Lost',
       movesLeft,
-      timeElapsed: finalElapsedTime,
+      timeElapsed: finalElapsedTime
     };
-    const url = `/api/${config?.gameType}/${config?.gameId}`;
+    const url = config?.submissionEndpoint || `/api/${config?.gameType}/${config?.gameId}`;
 
     mockSubmitResults(url, payload)
       .then((response) => {
@@ -498,19 +496,16 @@ const MatchingGame = ({ config }) => {
         <div className="absolute inset-0" style={overlayStyle} aria-hidden="true" />
         <div className="relative z-10 flex flex-col items-center space-y-5 text-center">
           <div
-            className="h-16 w-16 animate-spin rounded-full border-[3px] border-white/20"
+            className="h-14 w-14 animate-spin rounded-full border-[3px] border-slate-200"
             style={{ borderTopColor: theme.accentColor || defaultTheme.accentColor }}
             aria-hidden="true"
           />
-          <div className="space-y-2">
-            <p
-              className="text-lg font-semibold tracking-wide"
-              style={{ color: theme.titleColor || defaultTheme.titleColor }}
-            >
-              Preparing your game board
+          <div className="space-y-1.5">
+            <p className="text-base font-semibold tracking-wide" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
+              Shuffling your cards
             </p>
             <p className="text-sm" style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
-              Loading artwork and shuffling cards...
+              Loading artwork and preparing the deck…
             </p>
           </div>
         </div>
@@ -526,217 +521,133 @@ const MatchingGame = ({ config }) => {
     <div className="relative min-h-screen w-full overflow-hidden">
       <div className="absolute inset-0" style={backgroundStyle} aria-hidden="true" />
       <div className="absolute inset-0" style={overlayStyle} aria-hidden="true" />
-      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-12 sm:px-8 lg:px-12">
-        <div className="grid items-start gap-10 lg:grid-cols-[minmax(280px,360px)_minmax(0,1fr)]">
-          <aside
-            className="relative overflow-hidden rounded-3xl border px-6 py-8 backdrop-blur-md sm:px-8"
+      <div className="relative z-10 mx-auto flex min-h-screen w-full max-w-md flex-col px-4 py-6">
+        <header
+          className="rounded-[32px] border px-5 py-6 shadow-[0_25px_80px_rgba(148,163,184,0.26)] backdrop-blur-sm"
+          style={{
+            background: theme.panelBackgroundColor || defaultTheme.panelBackgroundColor,
+            borderColor: theme.panelBorderColor || defaultTheme.panelBorderColor
+          }}
+        >
+          <div className="space-y-3 text-center">
+            <span
+              className="inline-flex items-center justify-center rounded-full px-3 py-1 text-[0.6rem] font-semibold uppercase tracking-[0.45em]"
+              style={{
+                background: theme.cardMatchedBackgroundColor || defaultTheme.cardMatchedBackgroundColor,
+                color: theme.accentColor || defaultTheme.accentColor
+              }}
+            >
+              Flip & Match
+            </span>
+            <h1 className="text-2xl font-semibold leading-snug" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
+              {config?.title || 'Flip Card New'}
+            </h1>
+            {config?.description && (
+              <p className="text-sm leading-relaxed" style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
+                {config.description}
+              </p>
+            )}
+          </div>
+          <div
+            className="mt-6 grid grid-cols-3 gap-3 rounded-2xl border px-3 py-3 text-[0.6rem] font-semibold uppercase tracking-[0.38em]"
             style={{
-              background: theme.panelBackgroundColor || defaultTheme.panelBackgroundColor,
-              borderColor: theme.panelBorderColor || defaultTheme.panelBorderColor,
-              boxShadow: `0 45px 120px -60px ${theme.panelShadowColor || defaultTheme.panelShadowColor}`
+              borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
+              background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor,
+              color: theme.subtleTextColor || defaultTheme.subtleTextColor
             }}
           >
+            <div className="space-y-1 text-center">
+              <span>Moves</span>
+              <p className="text-lg font-semibold" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
+                {movesLeft}
+              </p>
+            </div>
+            <div className="space-y-1 text-center">
+              <span>Pairs</span>
+              <p className="text-lg font-semibold" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
+                {pairsFound}/{totalPairs}
+              </p>
+            </div>
+            <div className="space-y-1 text-center">
+              <span>Time</span>
+              <p className="text-lg font-semibold" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
+                {formattedLiveDuration}
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 space-y-2">
             <div
-              className="pointer-events-none absolute -right-28 top-24 h-64 w-64 rounded-full opacity-20 blur-3xl"
-              style={{ background: theme.accentColor || defaultTheme.accentColor }}
-              aria-hidden="true"
-            />
-            <div className="relative space-y-8">
-              <div className="space-y-4 text-center lg:text-left">
-                <span
-                  className="inline-flex items-center justify-center rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.38em]"
-                  style={{
-                    background: theme.cardMatchedBackgroundColor || defaultTheme.cardMatchedBackgroundColor,
-                    color: theme.accentColor || defaultTheme.accentColor
-                  }}
-                >
-                  Memory Match
+              className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.32em]"
+              style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
+            >
+              <span>Round progress</span>
+              <span>{progressPercentage}%</span>
+            </div>
+            <div className="h-1.5 w-full overflow-hidden rounded-full" style={{ background: 'rgba(191, 219, 254, 0.45)' }}>
+              <div
+                className="h-full rounded-full transition-[width] duration-500 ease-out"
+                style={{ width: `${progressPercentage}%`, background: theme.accentColor || defaultTheme.accentColor }}
+              />
+            </div>
+          </div>
+          {isInitialRevealActive && (
+            <div
+              className="mt-5 flex items-center justify-between rounded-2xl border px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-[0.32em]"
+              style={{
+                borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
+                background: theme.cardMatchedBackgroundColor || defaultTheme.cardMatchedBackgroundColor,
+                color: theme.titleColor || defaultTheme.titleColor
+              }}
+            >
+              <span>Memorise the cards</span>
+              {initialRevealCountdown > 0 && (
+                <span style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
+                  Starts in {initialRevealCountdown}s
                 </span>
-                <h1
-                  className="text-3xl font-semibold leading-tight sm:text-4xl"
-                  style={{ color: theme.titleColor || defaultTheme.titleColor }}
-                >
-                  {config?.title || 'Matching Game'}
-                </h1>
-                {config?.description && (
-                  <p
-                    className="text-sm leading-relaxed sm:text-base"
-                    style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                  >
-                    {config.description}
-                  </p>
-                )}
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div
-                  className="rounded-2xl border px-4 py-4 text-left"
-                  style={{
-                    borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                    background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor
-                  }}
-                >
-                  <p
-                    className="text-xs uppercase tracking-[0.4em]"
-                    style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                  >
-                    Moves left
-                  </p>
-                  <p
-                    className="mt-3 text-3xl font-semibold"
-                    style={{ color: theme.titleColor || defaultTheme.titleColor }}
-                  >
-                    {movesLeft}
-                  </p>
-                </div>
-                <div
-                  className="rounded-2xl border px-4 py-4 text-left"
-                  style={{
-                    borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                    background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor
-                  }}
-                >
-                  <p
-                    className="text-xs uppercase tracking-[0.4em]"
-                    style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                  >
-                    Pairs found
-                  </p>
-                  <p
-                    className="mt-3 text-3xl font-semibold"
-                    style={{ color: theme.titleColor || defaultTheme.titleColor }}
-                  >
-                    {pairsFound}/{totalPairs}
-                  </p>
-                </div>
-                <div
-                  className="col-span-2 rounded-2xl border px-4 py-4 text-left"
-                  style={{
-                    borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                    background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor
-                  }}
-                >
-                  <p
-                    className="text-xs uppercase tracking-[0.4em]"
-                    style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                  >
-                    Time played
-                  </p>
-                  <p
-                    className="mt-3 text-2xl font-semibold"
-                    style={{ color: theme.titleColor || defaultTheme.titleColor }}
-                  >
-                    {formattedLiveDuration}
-                  </p>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div
-                  className="flex items-center justify-between text-[0.7rem] uppercase tracking-[0.35em]"
-                  style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                >
-                  <span>Round progress</span>
-                  <span>{progressPercentage}% complete</span>
-                </div>
-                <div
-                  className="h-2 w-full overflow-hidden rounded-full"
-                  style={{ background: 'rgba(148, 163, 184, 0.24)' }}
-                >
-                  <div
-                    className="h-full rounded-full transition-[width] duration-500 ease-out"
-                    style={{ width: `${progressPercentage}%`, background: theme.accentColor || defaultTheme.accentColor }}
-                  />
-                </div>
-              </div>
-              {isInitialRevealActive && (
-                <div
-                  className="flex items-center justify-between rounded-2xl border px-4 py-4 text-xs font-semibold uppercase tracking-[0.32em]"
-                  style={{
-                    borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                    background: theme.cardMatchedBackgroundColor || defaultTheme.cardMatchedBackgroundColor,
-                    color: theme.titleColor || defaultTheme.titleColor
-                  }}
-                >
-                  <span>Memorise the cards</span>
-                  {initialRevealCountdown > 0 && (
-                    <span style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
-                      Starts in {initialRevealCountdown}s
-                    </span>
-                  )}
-                </div>
               )}
             </div>
-          </aside>
-          <section
-            className="relative overflow-hidden rounded-3xl border backdrop-blur-md"
-            style={{
-              background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor,
-              borderColor: theme.boardBorderColor || defaultTheme.boardBorderColor,
-              boxShadow: `0 60px 140px -65px ${theme.boardShadowColor || defaultTheme.boardShadowColor}`
-            }}
-          >
+          )}
+        </header>
+        <main
+          className="relative mt-6 flex-1 rounded-[32px] border px-4 pb-6 pt-5 shadow-[0_32px_90px_rgba(148,163,184,0.22)] backdrop-blur-sm"
+          style={{
+            background: theme.boardBackgroundColor || defaultTheme.boardBackgroundColor,
+            borderColor: theme.boardBorderColor || defaultTheme.boardBorderColor
+          }}
+        >
+          <div className="flex items-center justify-between text-[0.65rem] uppercase tracking-[0.32em]" style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
+            <span>Find all {totalPairs} pairs</span>
+            <span>{isInitialRevealActive ? 'Memorise' : isBoardLocked ? 'Checking' : 'Flip away'}</span>
+          </div>
+          {isBoardLocked && (
             <div
-              className="pointer-events-none absolute -left-24 top-10 h-56 w-56 rounded-full opacity-20 blur-3xl"
-              style={{ background: theme.accentColor || defaultTheme.accentColor }}
-              aria-hidden="true"
-            />
-            <div className="relative flex flex-wrap items-center justify-between gap-4 px-6 py-6 sm:px-8">
-              <div>
-                <p
-                  className="text-xs uppercase tracking-[0.35em]"
-                  style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
-                >
-                  Find all {totalPairs} pairs
-                </p>
-                <h2
-                  className="mt-2 text-2xl font-semibold sm:text-3xl"
-                  style={{ color: theme.titleColor || defaultTheme.titleColor }}
-                >
-                  {movesLeft} moves remaining
-                </h2>
-              </div>
-              <div
-                className="rounded-full border px-4 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em]"
-                style={{
-                  borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                  background: theme.cardBackBackgroundColor || defaultTheme.cardBackBackgroundColor,
-                  color: theme.accentColor || defaultTheme.accentColor
-                }}
-              >
-                {isInitialRevealActive ? 'Memorise' : isBoardLocked ? 'Checking' : 'Keep Matching'}
-              </div>
+              className="mt-4 rounded-2xl border px-3 py-2 text-center text-[0.65rem] font-medium uppercase tracking-[0.3em]"
+              style={{
+                borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
+                background: 'rgba(255, 255, 255, 0.75)',
+                color: theme.subtleTextColor || defaultTheme.subtleTextColor
+              }}
+            >
+              Checking match…
             </div>
-            {isBoardLocked && (
-              <div
-                className="pointer-events-none absolute inset-x-6 top-24 z-10 flex items-center justify-center rounded-2xl border px-4 py-3 text-xs font-medium uppercase tracking-[0.32em] sm:inset-x-8"
-                style={{
-                  borderColor: theme.cardBorderColor || defaultTheme.cardBorderColor,
-                  background: 'rgba(15, 23, 42, 0.55)',
-                  color: theme.subtleTextColor || defaultTheme.subtleTextColor
-                }}
-              >
-                Evaluating match...
-              </div>
-            )}
-            <div className="relative px-4 pb-8 sm:px-8 sm:pb-10">
-              <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-4 lg:gap-5 xl:gap-6">
-                {cards.map((card, index) => (
-                  <Card
-                    key={index}
-                    card={card}
-                    index={index}
-                    isDisabled={shouldDisableAllCards}
-                    isInactive={checkIsInactive(card)}
-                    isFlipped={checkIsFlipped(index)}
-                    onClick={handleCardClick}
-                    cardBackImage={config?.cardBackImage}
-                    theme={theme}
-                    flipDurationMs={flipDurationMs}
-                  />
-                ))}
-              </div>
-            </div>
-          </section>
-        </div>
+          )}
+          <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4 sm:gap-3.5">
+            {cards.map((card, index) => (
+              <FlipCard
+                key={index}
+                card={card}
+                index={index}
+                isDisabled={shouldDisableAllCards}
+                isInactive={checkIsInactive(card)}
+                isFlipped={checkIsFlipped(index)}
+                onClick={handleCardClick}
+                cardBackImage={config?.cardBackImage}
+                theme={theme}
+                flipDurationMs={flipDurationMs}
+              />
+            ))}
+          </div>
+        </main>
       </div>
       {showModal && (
         <GameStatusModal
@@ -752,7 +663,6 @@ const MatchingGame = ({ config }) => {
   );
 };
 
-// Fisher Yates Shuffle
 const swap = (array, i, j) => {
   const temp = array[i];
   array[i] = array[j];
@@ -769,12 +679,10 @@ const shuffleCards = (array) => {
   return array;
 };
 
-const mockSubmitResults = (url, payload) => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(payload);
-    }, 1000);
-  });
-};
+const mockSubmitResults = (url, payload) => new Promise((resolve) => {
+  setTimeout(() => {
+    resolve(payload);
+  }, 800);
+});
 
-export default MatchingGame;
+export default FlipCardNewGame;
