@@ -1,103 +1,99 @@
-const MOCK_SCRATCH_PRIZES = [
-  {
-    id: 'starlit-token',
-    name: 'Starlit Token',
-    rarity: 'common',
-    description: 'A token etched with constellations, good for a single campfire wish.',
-    weight: 45,
-  },
-  {
-    id: 'glimmer-thread',
-    name: 'Glimmer Thread',
-    rarity: 'uncommon',
-    description: 'Woven from comet tails, it reinforces any gear you stitch it into.',
-    weight: 30,
-  },
-  {
-    id: 'dawn-charm',
-    name: 'Charm of Dawn',
-    rarity: 'rare',
-    description: 'A radiant charm that greets every sunrise with a burst of optimism.',
-    weight: 18,
-  },
-  {
-    id: 'eclipse-crest',
-    name: 'Eclipse Crest',
-    rarity: 'epic',
-    description: 'A crest forged from shadow and light, empowering the bearer at dusk.',
-    weight: 6,
-  },
-  {
-    id: 'aurora-heart',
-    name: 'Aurora Heart',
-    rarity: 'legendary',
-    description: 'A prismatic core that pulses with the aurora\'s rhythm and courage.',
-    weight: 1,
-  },
-];
+import scratchCardConfig from './config';
 
-const rarityFoilColors = {
-  common: '#CBD5F5',
-  uncommon: '#8DE6C9',
-  rare: '#95C6FF',
-  epic: '#D4B3FF',
-  legendary: '#FDE48A',
-};
+const FETCH_DELAY_MS = 650;
+const ATTEMPT_DELAY_MS = 1150;
 
-const rarityGlowColors = {
-  common: 'rgba(96, 165, 250, 0.4)',
-  uncommon: 'rgba(52, 211, 153, 0.45)',
-  rare: 'rgba(59, 130, 246, 0.55)',
-  epic: 'rgba(167, 139, 250, 0.55)',
-  legendary: 'rgba(251, 191, 36, 0.6)',
-};
-
-const rarityLabels = {
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
-
-const mapPrizeForResponse = (prize) => ({
+const clonePrize = (prize) => ({
   ...prize,
-  rarityLabel: rarityLabels[prize.rarity] ?? prize.rarity,
-  foilColor: rarityFoilColors[prize.rarity] ?? '#E0E7FF',
-  glowColor: rarityGlowColors[prize.rarity] ?? 'rgba(96, 165, 250, 0.35)',
+  weight: Number.isFinite(prize?.weight) && prize.weight > 0 ? prize.weight : 0
 });
 
-export const fetchScratchPrizes = () =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_SCRATCH_PRIZES.map(mapPrizeForResponse));
-    }, 650);
-  });
+const getPrizesFromConfig = (config) => {
+  if (!config) {
+    return [];
+  }
 
-const pickWeightedPrize = () => {
-  const totalWeight = MOCK_SCRATCH_PRIZES.reduce((sum, prize) => sum + prize.weight, 0);
+  const rawPrizes = Array.isArray(config.prizes) ? config.prizes : [];
+  return rawPrizes.map((prize) => clonePrize(prize));
+};
+
+const pickWeightedPrize = (weightedPrizes) => {
+  if (!Array.isArray(weightedPrizes) || weightedPrizes.length === 0) {
+    return null;
+  }
+
+  const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
+
+  if (totalWeight <= 0) {
+    return weightedPrizes[0];
+  }
+
   let threshold = Math.random() * totalWeight;
 
-  for (const prize of MOCK_SCRATCH_PRIZES) {
-    threshold -= prize.weight;
+  for (const entry of weightedPrizes) {
+    threshold -= entry.weight;
     if (threshold <= 0) {
-      return prize;
+      return entry;
     }
   }
 
-  return MOCK_SCRATCH_PRIZES[MOCK_SCRATCH_PRIZES.length - 1];
+  return weightedPrizes[weightedPrizes.length - 1];
 };
 
-export const attemptScratchCard = () =>
-  new Promise((resolve) => {
-    const selectedPrize = pickWeightedPrize();
+const resolveFlairText = (prize, config) => {
+  const defaultFlair =
+    typeof config?.defaultFlairText === 'string' && config.defaultFlairText.trim()
+      ? config.defaultFlairText
+      : scratchCardConfig.defaultFlairText ?? 'The foil peels away and the prize gleams brilliantly! ✨';
+
+  if (typeof prize?.flairText === 'string' && prize.flairText.trim()) {
+    return prize.flairText;
+  }
+
+  return defaultFlair;
+};
+
+export const fetchScratchPrizes = (config = scratchCardConfig) =>
+  new Promise((resolve, reject) => {
+    const prizes = getPrizesFromConfig(config);
+
+    setTimeout(() => {
+      if (!prizes.length) {
+        reject(new Error('No scratch card prizes configured'));
+        return;
+      }
+
+      resolve(prizes.map((prize) => ({ ...prize })));
+    }, FETCH_DELAY_MS);
+  });
+
+export const attemptScratchCard = (config = scratchCardConfig) =>
+  new Promise((resolve, reject) => {
+    const prizes = getPrizesFromConfig(config);
+
+    if (!prizes.length) {
+      reject(new Error('No scratch card prizes configured'));
+      return;
+    }
+
+    const weightedPrizes = prizes.map((prize) => ({ prize, weight: prize.weight }));
+    const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
+
+    if (totalWeight <= 0) {
+      reject(new Error('Scratch card prizes require a positive weight'));
+      return;
+    }
+
+    const selectedEntry = pickWeightedPrize(weightedPrizes) ?? weightedPrizes[0];
+    const selectedPrize = selectedEntry?.prize ?? prizes[0];
+    const flairText = resolveFlairText(selectedPrize, config);
 
     setTimeout(() => {
       resolve({
         attemptId: `scratch-${Date.now()}`,
-        prize: mapPrizeForResponse(selectedPrize),
-        flairText: 'The foil peels away and the prize gleams brilliantly! ✨',
+        prize: { ...selectedPrize },
+        flairText,
         awardedAt: new Date().toISOString(),
       });
-    }, 1150);
+    }, ATTEMPT_DELAY_MS);
   });
