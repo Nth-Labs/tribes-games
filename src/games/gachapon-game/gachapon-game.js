@@ -178,38 +178,95 @@ const GachaponGame = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 py-10 text-white">
-      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h1 className="text-3xl font-semibold text-white sm:text-4xl">Celestial Capsule Gachapon</h1>
-            <p className="mt-2 max-w-xl text-sm text-slate-300 sm:text-base">
-              Pull the lever to see what treasure is sealed within the capsule. Every attempt draws from the same
-              prize pool, and your luck determines the rarity of your reward.
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 py-12 text-white">
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-16 left-16 h-60 w-60 rounded-full bg-indigo-500/25 blur-3xl" />
+        <div className="absolute top-1/3 right-12 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 h-72 w-72 rounded-full bg-fuchsia-500/15 blur-3xl" />
+      </div>
+
+      <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-4">
+        <div className="text-center">
+          <p className="text-sm uppercase tracking-[0.35em] text-indigo-300">Arcade Feature</p>
+          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">Celestial Capsule Gachapon</h1>
+          <p className="mt-4 max-w-2xl text-sm text-slate-300 sm:text-base">
+            Pull the lever to see what treasure is sealed within the capsule. Every attempt draws from the same prize
+            pool, and your luck determines the rarity of your reward.
+          </p>
+        </div>
+
+        <div className="mt-10 w-full max-w-3xl overflow-hidden rounded-[2.5rem] border border-indigo-400/30 bg-slate-900/80 p-10 text-center shadow-2xl shadow-indigo-900/40 backdrop-blur">
+          <div className="flex flex-col items-center gap-8">
+            <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">Capsule Machine</p>
+            <div className="gachapon-stage relative flex h-80 w-full max-w-md items-center justify-center rounded-[2rem] border border-indigo-400/30 bg-slate-950/70 p-8 shadow-[0_24px_45px_rgba(15,23,42,0.55)]">
+              <div className="relative flex h-full w-full flex-col items-center justify-center">
+                <div
+                  className={`gachapon-box ${
+                    animationPhase === 'shaking' ? 'gachapon-box--shake' : ''
+                  } ${animationPhase === 'explosion' ? 'gachapon-box--hidden' : ''}`}
+                >
+                  <div
+                    className={`gachapon-capsule ${
+                      animationPhase === 'explosion' || animationPhase === 'result' ? 'gachapon-capsule--hidden' : ''
+                    }`}
+                    style={{ background: result?.prize?.capsuleColor ?? '#38bdf8' }}
+                  />
+                  <div className="absolute inset-x-8 bottom-6 rounded-full bg-slate-800/80 py-3 text-xs uppercase tracking-[0.3em] text-slate-400">
+                    {animationPhase === 'shaking'
+                      ? 'Shaking…'
+                      : animationPhase === 'explosion'
+                      ? 'Opening…'
+                      : animationPhase === 'result'
+                      ? 'Capsule opened!'
+                      : 'Ready'}
+                  </div>
+                </div>
+                {animationPhase === 'explosion' && (
+                  <div key={animationKey} className="gachapon-explosion" />
+                )}
+              </div>
+            </div>
+            <p className="max-w-lg text-sm text-indigo-100/80">
+              Every shake builds anticipation before the capsule bursts open to reveal your prize. Hold tight and watch
+              the glow change as the machine prepares your reward.
             </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <button
-              type="button"
-              className="rounded-full border border-slate-700 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
-              onClick={() => navigate('/')}
-            >
-              Back to Store
-            </button>
-            <button
-              type="button"
-              onClick={handleAttempt}
-              disabled={isAttempting || loadingPrizes}
-              className="flex items-center justify-center rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:bg-slate-600"
-            >
-              {isAttempting ? 'Dispensing…' : 'Start Gachapon'}
-            </button>
+            {attemptError && (
+              <p className="w-full rounded-2xl border border-rose-500/40 bg-rose-500/10 px-5 py-3 text-sm text-rose-200" role="status">
+                {attemptError}
+              </p>
+            )}
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <div className="flex flex-1 flex-col gap-6 rounded-2xl border border-slate-800 bg-slate-900/70 p-6 shadow-2xl shadow-indigo-900/30">
-            <h2 className="text-lg font-semibold text-white">Prize Showcase</h2>
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <button
+            type="button"
+            onClick={handleAttempt}
+            disabled={isAttempting || loadingPrizes}
+            className="gachapon-start-button"
+          >
+            <span>{isAttempting ? 'Dispensing…' : 'Start Gachapon'}</span>
+          </button>
+          <button
+            type="button"
+            className="rounded-full border border-slate-700/70 px-6 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
+            onClick={() => navigate('/')}
+          >
+            Back to Store
+          </button>
+        </div>
+
+        <div className="mt-12 w-full overflow-hidden rounded-[2.5rem] border border-slate-800/70 bg-slate-900/80 p-8 shadow-2xl shadow-indigo-900/30 backdrop-blur">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
+              <div>
+                <h2 className="text-lg font-semibold text-white sm:text-xl">Prize Showcase</h2>
+                <p className="mt-1 text-sm text-slate-400">Browse every prize currently loaded into the capsule.</p>
+              </div>
+              <span className="rounded-full border border-slate-700/60 bg-slate-950/60 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-300">
+                {prizes.length} Rewards
+              </span>
+            </div>
             {loadingPrizes ? (
               <p className="text-sm text-slate-400">Loading prize lineup…</p>
             ) : prizeError ? (
@@ -225,40 +282,6 @@ const GachaponGame = () => {
                 ))}
               </div>
             )}
-          </div>
-
-          <div className="gachapon-stage flex flex-1 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900/60 p-6 text-center shadow-2xl shadow-indigo-900/30">
-            <div className="relative flex h-80 w-full flex-col items-center justify-center">
-              <div
-                className={`gachapon-box ${
-                  animationPhase === 'shaking' ? 'gachapon-box--shake' : ''
-                } ${animationPhase === 'explosion' ? 'gachapon-box--hidden' : ''}`}
-              >
-                <div
-                  className={`gachapon-capsule ${
-                    animationPhase === 'explosion' || animationPhase === 'result' ? 'gachapon-capsule--hidden' : ''
-                  }`}
-                  style={{ background: result?.prize?.capsuleColor ?? '#38bdf8' }}
-                />
-                <div className="absolute inset-x-8 bottom-6 rounded-full bg-slate-800/80 py-3 text-xs uppercase tracking-[0.3em] text-slate-400">
-                  {animationPhase === 'shaking'
-                    ? 'Shaking…'
-                    : animationPhase === 'explosion'
-                    ? 'Opening…'
-                    : animationPhase === 'result'
-                    ? 'Capsule opened!'
-                    : 'Ready'}
-                </div>
-              </div>
-              {animationPhase === 'explosion' && (
-                <div key={animationKey} className="gachapon-explosion" />
-              )}
-              {attemptError && (
-                <p className="mt-6 rounded-lg border border-rose-500/40 bg-rose-500/10 px-4 py-2 text-sm text-rose-200">
-                  {attemptError}
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </div>

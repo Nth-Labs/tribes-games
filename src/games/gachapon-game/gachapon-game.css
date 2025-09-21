@@ -126,3 +126,82 @@
   background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%);
   mix-blend-mode: screen;
 }
+
+.gachapon-start-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.1rem 3.5rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: #fff7ed;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 18px 0 #9a3412, 0 28px 45px rgba(249, 115, 22, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.gachapon-start-button::before {
+  content: '';
+  position: absolute;
+  inset: -18px -28px -40px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.35), rgba(249, 115, 22, 0));
+  z-index: 0;
+}
+
+.gachapon-start-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 20%, #fde68a 0%, #fb923c 45%, #f97316 70%, #ea580c 100%);
+  box-shadow: inset 0 -10px 0 rgba(124, 45, 18, 0.6), inset 0 8px 18px rgba(255, 255, 255, 0.25);
+  z-index: 1;
+  transition: inherit;
+}
+
+.gachapon-start-button span {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 12px rgba(120, 53, 15, 0.6);
+}
+
+.gachapon-start-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 0 #b45309, 0 34px 55px rgba(249, 115, 22, 0.6);
+}
+
+.gachapon-start-button:hover:not(:disabled)::after {
+  filter: brightness(1.05);
+}
+
+.gachapon-start-button:active:not(:disabled) {
+  transform: translateY(6px);
+  box-shadow: 0 10px 0 #9a3412, 0 18px 32px rgba(153, 27, 27, 0.45);
+}
+
+.gachapon-start-button:active:not(:disabled)::after {
+  box-shadow: inset 0 -4px 0 rgba(124, 45, 18, 0.6), inset 0 4px 12px rgba(255, 255, 255, 0.25);
+}
+
+.gachapon-start-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.3) brightness(0.92);
+  box-shadow: 0 14px 0 #9a3412, 0 20px 32px rgba(15, 23, 42, 0.45);
+}
+
+.gachapon-start-button:disabled::after {
+  background: radial-gradient(circle at 50% 30%, #fcd34d 0%, #fb923c 55%, #f97316 90%);
+}
+
+.gachapon-start-button:focus-visible {
+  outline: 4px solid rgba(253, 224, 71, 0.7);
+  outline-offset: 6px;
+}
