@@ -1,4 +1,5 @@
-import baseConfig from './base-config.json';
+import baseGameDocument from './base-config.json';
+import { buildGameConfigBase, cloneConfigValue } from '../../../utils/gameConfig';
 
 export const matchingGameFieldSchema = {
   admin: {
@@ -143,21 +144,43 @@ export const matchingGameFieldSchema = {
   }
 };
 
+const baseConfig = buildGameConfigBase(baseGameDocument);
+const { options } = baseConfig;
+
+const normalisedTheme =
+  options.theme && typeof options.theme === 'object' ? cloneConfigValue(options.theme) : {};
+const normalisedCards = Array.isArray(options.cards) ? cloneConfigValue(options.cards) : [];
+
 export const matchingGameApiContract = {
-  method: 'GET',
+  method: 'POST',
+  path: '/games/list',
+  requestBody: {
+    game_ids: [baseGameDocument.game_id],
+    merchant_id: baseGameDocument.merchant_id
+  },
   responseType: 'application/json',
-  notes: 'The API should respond with the exact shape of baseConfig, optionally overriding the editable fields based on campaign needs.',
-  collection: 'gameConfigs',
-  documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`
+  notes:
+    'POST /games/list returns full Game documents. Each document includes immutable metadata plus the options array mirrored in this mock payload.',
+  sampleResponse: baseGameDocument
 };
 
 const matchingGameConfig = {
-  ...baseConfig,
-  cards: baseConfig.cards.map((card) => ({ ...card })),
+  gameId: baseConfig.gameId,
+  gameType: baseConfig.gameType,
+  title: baseConfig.title,
+  description: options.description ?? options.gameDescription ?? '',
+  moveLimit: options.moveLimit ?? 0,
+  initialRevealSeconds: options.initialRevealSeconds ?? 0,
+  cardUpflipSeconds: options.cardUpflipSeconds ?? 0,
+  cardBackImage: options.cardBackImage ?? '',
+  theme: normalisedTheme,
+  submissionEndpoint: options.submissionEndpoint ?? '',
+  cards: normalisedCards,
   fieldSchema: matchingGameFieldSchema,
-  apiContract: matchingGameApiContract
+  apiContract: matchingGameApiContract,
+  gameDocument: baseGameDocument
 };
 
-export const baseMatchingGameConfig = baseConfig;
+export const baseMatchingGameConfig = baseGameDocument;
 
 export default matchingGameConfig;

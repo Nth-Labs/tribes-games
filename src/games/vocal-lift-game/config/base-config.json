@@ -1,19 +1,96 @@
 {
-  "gameId": "vocal-lift-001",
-  "gameType": "vocal-lift",
-  "title": "Vocal Lift Challenge",
-  "subtitle": "Keep the relic levitating with your voice",
-  "description": "Project your voice to keep the relic suspended. Hold a steady sound for 30 seconds to win.",
-  "instructions": "Press \"Start Challenge\" and keep a steady stream of sound to levitate the relic. Drop below the threshold and it will fall.",
-  "targetSeconds": 30,
-  "soundThreshold": 0.04,
-  "silenceToleranceMs": 450,
-  "ballAsset": {
-    "url": "/images/vocal-lift-game/levitating-orb.svg",
-    "altText": "Golden orb hovering above a glowing pedestal"
-  },
-  "startButtonLabel": "Start Challenge",
-  "stopButtonLabel": "Stop & Reset",
-  "submissionEndpoint": "/api/games/vocal-lift/vocal-lift-001/results",
-  "notes": "Sound intensity is measured from microphone input. The API should resolve the ballAsset.url to a CDN-hosted image when used in production."
+  "game_id": "vocal-lift-001",
+  "game_template_name": "vocal-lift",
+  "name": "Vocal Lift Challenge",
+  "merchant_id": "merchant-demo",
+  "game_background_image": "",
+  "game_logo_image": "",
+  "start_date": "2024-01-01T00:00:00.000Z",
+  "end_date": "2024-12-31T23:59:59.000Z",
+  "status": "created",
+  "is_active": true,
+  "hard_play_count_limit": 0,
+  "play_count": 0,
+  "prizes": {},
+  "is_quests_enabled": false,
+  "quests": [],
+  "leaderboard_id": null,
+  "prize_distribution_strategy": "cascade",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "__v": 0,
+  "options": [
+    {
+      "input_name": "title",
+      "input_type": "string",
+      "value": "Vocal Lift Challenge",
+      "required": true
+    },
+    {
+      "input_name": "subtitle",
+      "input_type": "string",
+      "value": "Keep the relic levitating with your voice",
+      "required": false
+    },
+    {
+      "input_name": "description",
+      "input_type": "string",
+      "value": "Project your voice to keep the relic suspended. Hold a steady sound for 30 seconds to win.",
+      "required": true
+    },
+    {
+      "input_name": "instructions",
+      "input_type": "string",
+      "value": "Press \"Start Challenge\" and keep a steady stream of sound to levitate the relic. Drop below the threshold and it will fall.",
+      "required": true
+    },
+    {
+      "input_name": "targetSeconds",
+      "input_type": "number",
+      "value": "30",
+      "required": true
+    },
+    {
+      "input_name": "soundThreshold",
+      "input_type": "number",
+      "value": "0.22",
+      "required": true
+    },
+    {
+      "input_name": "silenceToleranceMs",
+      "input_type": "number",
+      "value": "450",
+      "required": true
+    },
+    {
+      "input_name": "ballAsset",
+      "input_type": "string",
+      "value": "{\"url\": \"/images/vocal-lift-game/levitating-orb.svg\", \"altText\": \"Golden orb hovering above a glowing pedestal\"}",
+      "required": true
+    },
+    {
+      "input_name": "startButtonLabel",
+      "input_type": "string",
+      "value": "Start Challenge",
+      "required": true
+    },
+    {
+      "input_name": "stopButtonLabel",
+      "input_type": "string",
+      "value": "Stop & Reset",
+      "required": true
+    },
+    {
+      "input_name": "submissionEndpoint",
+      "input_type": "string",
+      "value": "/api/games/vocal-lift/vocal-lift-001/results",
+      "required": true
+    },
+    {
+      "input_name": "notes",
+      "input_type": "string",
+      "value": "Sound intensity is measured from microphone input. The API should resolve the ballAsset.url to a CDN-hosted image when used in production.",
+      "required": false
+    }
+  ]
 }

@@ -1,4 +1,5 @@
-import baseConfig from './base-config.json';
+import baseGameDocument from './base-config.json';
+import { buildGameConfigBase } from '../../../utils/gameConfig';
 
 export const precisionTimerFieldSchema = {
   admin: {
@@ -35,20 +36,37 @@ export const precisionTimerFieldSchema = {
   }
 };
 
+const baseConfig = buildGameConfigBase(baseGameDocument);
+const { options } = baseConfig;
+
 export const precisionTimerApiContract = {
-  method: 'GET',
+  method: 'POST',
+  path: '/games/list',
+  requestBody: {
+    game_ids: [baseGameDocument.game_id],
+    merchant_id: baseGameDocument.merchant_id
+  },
   responseType: 'application/json',
-  collection: 'gameConfigs',
-  documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`,
-  notes: 'Backend services should merge merchant overrides with the base configuration before returning the payload.'
+  notes:
+    'POST /games/list responds with an array of Game documents. Values in the options array are persisted as strings and should be parsed on the client.',
+  sampleResponse: baseGameDocument
 };
 
 const precisionTimerConfig = {
-  ...baseConfig,
+  gameId: baseConfig.gameId,
+  gameType: baseConfig.gameType,
+  title: baseConfig.title,
+  subtitle: options.subtitle ?? '',
+  description: options.description ?? '',
+  countdownSeconds: options.countdownSeconds ?? 0,
+  startButtonLabel: options.startButtonLabel ?? '',
+  stopButtonLabel: options.stopButtonLabel ?? '',
+  submissionEndpoint: options.submissionEndpoint ?? '',
   fieldSchema: precisionTimerFieldSchema,
-  apiContract: precisionTimerApiContract
+  apiContract: precisionTimerApiContract,
+  gameDocument: baseGameDocument
 };
 
-export const basePrecisionTimerConfig = baseConfig;
+export const basePrecisionTimerConfig = baseGameDocument;
 
 export default precisionTimerConfig;
