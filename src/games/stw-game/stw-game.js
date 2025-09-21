@@ -206,8 +206,11 @@ const Wheel = ({
   spinDuration,
   rotationCount,
   spinButtonImage,
+  onSpinInitiated,
   onSpinStart,
   onSpinEnd,
+  onSpinError,
+  resolveSpinTarget,
   disabled,
   disabledReason,
 }) => {
@@ -222,53 +225,102 @@ const Wheel = ({
   );
   const rotationRef = useRef(initialRotation);
   const [rotation, setRotation] = useState(initialRotation);
-  const [isSpinning, setIsSpinning] = useState(false);
+  const [spinPhase, setSpinPhase] = useState('idle');
 
-  useEffect(() => () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-  }, []);
+  useEffect(
+    () => () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
     rotationRef.current = initialRotation;
     setRotation(initialRotation);
-    setIsSpinning(false);
+    setSpinPhase('idle');
   }, [initialRotation]);
 
   useEffect(() => {
     rotationRef.current = rotation;
   }, [rotation]);
 
-  const handleSpin = useCallback(() => {
-    if (isSpinning || disabled || segments.length < 2) {
+  const handleSpin = useCallback(async () => {
+    if (spinPhase !== 'idle' || disabled || segments.length < 2) {
       return;
     }
 
-    const targetIndex = pickWeightedIndex(segments);
-    const boundedIndex = Math.max(0, Math.min(targetIndex, segments.length - 1));
+    onSpinInitiated?.();
+
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+
+    setSpinPhase('resolving');
+
+    let resolution;
+
+    try {
+      if (resolveSpinTarget) {
+        resolution = await resolveSpinTarget();
+      } else {
+        resolution = { index: pickWeightedIndex(segments) };
+      }
+    } catch (error) {
+      setSpinPhase('idle');
+      onSpinError?.(error);
+      return;
+    }
+
+    const effectiveSegments = segments.length ? segments : [];
+    let targetIndex = Number.isFinite(resolution?.index) ? Math.floor(resolution.index) : NaN;
+
+    if (!Number.isFinite(targetIndex)) {
+      const candidateId =
+        resolution?.segmentId ??
+        resolution?.segment_id ??
+        resolution?.result?.segmentId ??
+        resolution?.result?.segment_id ??
+        resolution?.segment?.id;
+
+      if (candidateId) {
+        const foundIndex = effectiveSegments.findIndex((segment) => segment.id === candidateId);
+        if (foundIndex !== -1) {
+          targetIndex = foundIndex;
+        }
+      }
+    }
+
+    if (!Number.isFinite(targetIndex) || targetIndex < 0 || targetIndex >= effectiveSegments.length) {
+      targetIndex = pickWeightedIndex(effectiveSegments);
+    }
+
+    const boundedIndex = Math.max(0, Math.min(targetIndex, effectiveSegments.length - 1));
     const alignmentRotation = calculateAlignmentRotation(boundedIndex, anglePerSlice);
     const baseRotation = rotationRef.current + sanitizedRotationCount * 360;
     const normalizedBase = normalizeAngle(baseRotation);
     const normalizedTarget = normalizeAngle(alignmentRotation);
     const additionalRotation = (normalizedTarget - normalizedBase + 360) % 360;
     const totalRotation = baseRotation + additionalRotation;
-    const landedSegment = segments[boundedIndex];
+    const landedSegment = resolution?.segment ?? effectiveSegments[boundedIndex];
 
-    onSpinStart?.();
-    setIsSpinning(true);
     rotationRef.current = totalRotation;
     setRotation(totalRotation);
-
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
+    setSpinPhase('animating');
+    onSpinStart?.();
 
     timeoutRef.current = setTimeout(() => {
-      setIsSpinning(false);
-      onSpinEnd?.(landedSegment, boundedIndex);
+      setSpinPhase('idle');
+      onSpinEnd?.(landedSegment, boundedIndex, resolution);
     }, sanitizedDuration);
-  }, [anglePerSlice, disabled, isSpinning, onSpinEnd, onSpinStart, sanitizedDuration, sanitizedRotationCount, segments]);
+  }, [anglePerSlice, disabled, onSpinEnd, onSpinError, onSpinInitiated, onSpinStart, resolveSpinTarget, sanitizedDuration, sanitizedRotationCount, segments, spinPhase]);
 
   const pointerElement = pointerImage ? (
     <img src={pointerImage} alt="Wheel pointer" className="stw-wheel__pointer-image" />
@@ -276,9 +328,15 @@ const Wheel = ({
     <div className="stw-wheel__pointer" aria-hidden="true" />
   );
 
-  const buttonLabel = isSpinning ? 'Spinning…' : ctaLabel ?? 'Spin';
-  const isButtonDisabled = disabled || isSpinning || segments.length < 2;
-  const buttonTitle = isButtonDisabled && !isSpinning ? disabledReason ?? 'Spin unavailable' : undefined;
+  const buttonLabel =
+    spinPhase === 'resolving'
+      ? 'Preparing spin…'
+      : spinPhase === 'animating'
+      ? 'Spinning…'
+      : ctaLabel ?? 'Spin';
+  const isButtonDisabled = disabled || spinPhase !== 'idle' || segments.length < 2;
+  const buttonTitle =
+    (disabled || segments.length < 2) && spinPhase === 'idle' ? disabledReason ?? 'Spin unavailable' : undefined;
   const buttonStyle = spinButtonImage
     ? {
         backgroundImage: `linear-gradient(rgba(2, 6, 23, 0.2), rgba(2, 6, 23, 0.2)), url(${spinButtonImage})`,
@@ -375,12 +433,17 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
   const [spinsUsed, setSpinsUsed] = useState(0);
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentResult, setCurrentResult] = useState(null);
+  const [isSpinPending, setIsSpinPending] = useState(false);
+  const [spinError, setSpinError] = useState(null);
   const pendingResultRef = useRef(null);
 
   useEffect(() => {
     setSpinsUsed(0);
     setCurrentResult(null);
     pendingResultRef.current = null;
+    setIsSpinning(false);
+    setIsSpinPending(false);
+    setSpinError(null);
   }, [normalisedConfig.segments, normalisedConfig.maxSpinsPerUser]);
 
   const maxSpins = Number.isFinite(normalisedConfig.maxSpinsPerUser)
@@ -403,20 +466,29 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
     }
   }, [spinsUsed]);
 
-  const handleSpinStart = useCallback(() => {
-    setIsSpinning(true);
+  const handleSpinInitiated = useCallback(() => {
+    setSpinError(null);
+    setIsSpinPending(true);
     setCurrentResult(null);
   }, []);
 
+  const handleSpinStart = useCallback(() => {
+    setIsSpinning(true);
+    setIsSpinPending(false);
+  }, []);
+
   const handleSpinEnd = useCallback(
-    (segment, index) => {
+    (segment, index, resolution) => {
       setIsSpinning(false);
+      setIsSpinPending(false);
+      setSpinError(null);
       setSpinsUsed((previous) => {
         const next = maxSpins !== null ? Math.min(maxSpins, previous + 1) : previous + 1;
         pendingResultRef.current = {
           segment,
           index,
           spinNumber: next,
+          response: resolution?.response ?? resolution ?? null,
         };
         return next;
       });
@@ -424,14 +496,65 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
     [maxSpins],
   );
 
+  const handleSpinError = useCallback((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Spin request failed', error);
+    setIsSpinPending(false);
+    setIsSpinning(false);
+    setSpinError('We could not complete your spin. Please try again.');
+  }, []);
+
+  const resolveSpinTarget = useCallback(async () => {
+    const segments = normalisedConfig.segments;
+
+    if (!Array.isArray(segments) || segments.length === 0) {
+      throw new Error('No prize segments configured');
+    }
+
+    const payload = {
+      gameId: normalisedConfig.gameId,
+      gameType: normalisedConfig.gameType,
+      spinNumber: spinsUsed + 1,
+    };
+
+    const response = await submitSpinResult(
+      normalisedConfig.submissionEndpoint,
+      payload,
+      segments,
+    );
+
+    let targetIndex = extractSegmentIndex(response, segments);
+
+    if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= segments.length) {
+      targetIndex = pickWeightedIndex(segments);
+    }
+
+    const boundedIndex = Math.max(0, Math.min(targetIndex, segments.length - 1));
+    const segmentFromResponse = response?.segment;
+    const targetSegment =
+      segmentFromResponse && segmentFromResponse.id === segments[boundedIndex]?.id
+        ? segmentFromResponse
+        : segments[boundedIndex];
+
+    return {
+      index: boundedIndex,
+      segment: targetSegment,
+      response,
+    };
+  }, [normalisedConfig.gameId, normalisedConfig.gameType, normalisedConfig.segments, normalisedConfig.submissionEndpoint, spinsUsed]);
+
   const cooldownText = formatCooldown(normalisedConfig.spinCooldownSeconds);
 
   let statusMessage = '';
 
-  if (!hasViableSegments) {
+  if (spinError) {
+    statusMessage = spinError;
+  } else if (!hasViableSegments) {
     statusMessage = 'Add at least two prize segments with a positive probability to enable the wheel.';
   } else if (isSpinning) {
     statusMessage = 'The wheel is spinning… good luck!';
+  } else if (isSpinPending) {
+    statusMessage = 'Preparing your spin result…';
   } else if (isSpinLimitReached) {
     statusMessage = 'You have used all available spins for now.';
   } else if (maxSpins !== null) {
@@ -477,10 +600,13 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
               ctaLabel={normalisedConfig.ctaLabel}
               spinDuration={normalisedConfig.spinDuration}
               rotationCount={normalisedConfig.rotationCount}
+              onSpinInitiated={handleSpinInitiated}
               disabled={!hasViableSegments || isSpinLimitReached}
               disabledReason={spinDisabledReason}
+              resolveSpinTarget={resolveSpinTarget}
               onSpinStart={handleSpinStart}
               onSpinEnd={handleSpinEnd}
+              onSpinError={handleSpinError}
             />
 
             <div
@@ -498,7 +624,12 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
             </div>
 
             <div className="rounded-2xl border border-white/5 bg-slate-800/70 p-6 text-center shadow-inner shadow-slate-950/60" aria-live="polite">
-              {isSpinning ? (
+              {isSpinPending ? (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Preparing</p>
+                  <p className="text-base text-slate-300">Securing your prize result…</p>
+                </div>
+              ) : isSpinning ? (
                 <div className="space-y-2">
                   <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Good luck</p>
                   <p className="text-xl font-semibold text-white">The wheel is spinning…</p>
@@ -522,6 +653,11 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
                   {currentResult.spinNumber ? (
                     <p className="text-xs text-slate-500">Spin {currentResult.spinNumber}{maxSpins ? ` of ${maxSpins}` : ''}</p>
                   ) : null}
+                </div>
+              ) : spinError ? (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-[0.3em] text-amber-300">Unable to spin</p>
+                  <p className="text-sm text-slate-300">{spinError}</p>
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -580,5 +716,125 @@ const StwGame = ({ config = spinTheWheelConfig }) => {
     </div>
   );
 };
+
+const parseIndexCandidate = (candidate, segmentsLength) => {
+  if (typeof candidate === 'string' && candidate.trim() !== '') {
+    const numeric = Number(candidate);
+    if (Number.isFinite(numeric)) {
+      const index = Math.floor(numeric);
+      if (index >= 0 && index < segmentsLength) {
+        return index;
+      }
+    }
+  } else if (Number.isFinite(candidate)) {
+    const index = Math.floor(candidate);
+    if (index >= 0 && index < segmentsLength) {
+      return index;
+    }
+  }
+
+  return undefined;
+};
+
+const extractSegmentIndex = (response, segments) => {
+  if (!response || !Array.isArray(segments) || segments.length === 0) {
+    return undefined;
+  }
+
+  const indexCandidates = [
+    response.index,
+    response.segmentIndex,
+    response.segment_index,
+    response.result?.index,
+    response.result?.segmentIndex,
+    response.result?.segment_index,
+  ];
+
+  for (const candidate of indexCandidates) {
+    const parsed = parseIndexCandidate(candidate, segments.length);
+    if (typeof parsed === 'number') {
+      return parsed;
+    }
+  }
+
+  const idCandidates = [
+    response.segmentId,
+    response.segment_id,
+    response.result?.segmentId,
+    response.result?.segment_id,
+    response.segment?.id,
+  ];
+
+  for (const id of idCandidates) {
+    if (typeof id === 'string' && id.trim()) {
+      const foundIndex = segments.findIndex((segment) => segment.id === id.trim());
+      if (foundIndex !== -1) {
+        return foundIndex;
+      }
+    }
+  }
+
+  return undefined;
+};
+
+const parseJsonSafely = async (response) => {
+  try {
+    return await response.json();
+  } catch (error) {
+    return null;
+  }
+};
+
+const submitSpinResult = async (endpoint, payload, segments) => {
+  const hasEndpoint = typeof endpoint === 'string' && endpoint.trim() !== '';
+
+  if (hasEndpoint && typeof fetch === 'function') {
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+
+      const data = await parseJsonSafely(response);
+
+      if (data && typeof data === 'object') {
+        return data;
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Falling back to mock spin response', error);
+    }
+  }
+
+  return mockSubmitSpinResult(endpoint, payload, segments);
+};
+
+const mockSubmitSpinResult = (endpoint, payload, segments) =>
+  new Promise((resolve) => {
+    const safeSegments = Array.isArray(segments) ? segments : [];
+    const hasSegments = safeSegments.length > 0;
+    const index = hasSegments ? pickWeightedIndex(safeSegments) : 0;
+    const boundedIndex = hasSegments ? Math.max(0, Math.min(index, safeSegments.length - 1)) : 0;
+    const segment = hasSegments ? safeSegments[boundedIndex] : null;
+
+    setTimeout(() => {
+      resolve({
+        endpoint,
+        requestBody: payload,
+        result: {
+          segmentIndex: boundedIndex,
+          segmentId: segment?.id ?? null,
+          segmentLabel: segment?.label ?? null,
+          simulated: true,
+        },
+        segment,
+      });
+    }, 900);
+  });
 
 export default StwGame;
