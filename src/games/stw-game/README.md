@@ -1,67 +1,75 @@
-# Spin The Wheel Module
+# Spin the Wheel Game Module
 
-This directory encapsulates the assets, configuration, and placeholder React
-component for the Spin The Wheel experience. The folder is self-contained so it
-can be dropped into another repository without additional wiring.
+This module contains the spin-the-wheel experience, along with a colocated
+`GameTemplate` definition and preview configuration that mirror the runtime API
+payload.
 
 ## Folder contents
 
-- `stw-game.js` – Placeholder React component that consumes the configuration.
-- `config/base-config.json` – Canonical configuration shape suitable for MongoDB storage.
-- `config/index.js` – Adds field metadata and exports the runtime default config.
+- `stw-game.js` and supporting components – UI and gameplay logic.
+- `stw-game-init.js` – Lightweight wrapper that injects the preview config.
+- `config/template.json` – Canonical template contract for admin/merchant tooling.
+- `config/index.js` – Expands the template defaults into preview-friendly config and a sample `/games/list` document.
 
-## API contract
+## Template contract
 
-The frontend expects a JSON document that matches `config/base-config.json`. An
-example response is shown below:
+`config/template.json` documents every configurable field, its scope, and default
+value. Because defaults remain typed, complex data (like prize segments) are easy
+to manipulate before being serialised for runtime use:
 
 ```json
 {
-  "gameId": "stw-001",
-  "gameType": "spin-the-wheel",
-  "title": "Spin the Wheel",
-  "description": "Players spin the wheel once per eligible session to receive a random reward.",
-  "wheelImage": "/images/stw-game-assets/wheel.png",
-  "pointerImage": "/images/stw-game-assets/pointer.png",
-  "backgroundImage": "/images/stw-game-assets/background.png",
-  "spinButtonImage": "/images/stw-game-assets/spin-button.png",
-  "maxSpinsPerUser": 1,
-  "spinCooldownSeconds": 86400,
-  "submissionEndpoint": "/api/games/spin-the-wheel/stw-001/results",
-  "prizeSegments": [
+  "name": "prizeSegments",
+  "type": "array",
+  "scope": "admin",
+  "merchantEditableFields": ["label", "image", "description"],
+  "item": {
+    "type": "object",
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "probability", "type": "number", "required": true }
+    ]
+  }
+}
+```
+
+## Runtime payload
+
+`config/index.js` serialises the template defaults into the shape returned by
+`POST /games/list`. The exported `spinTheWheelConfig.gameDocument` matches the
+expected runtime contract:
+
+```json
+{
+  "game_id": "stw-001",
+  "game_template_name": "spin-the-wheel",
+  "merchant_id": "merchant-demo",
+  "options": [
     {
-      "id": "voucher-5",
-      "label": "$5 Voucher",
-      "probability": 0.2,
-      "image": "/images/stw-game-assets/segments/voucher-5.png",
-      "description": "Discount on next purchase"
+      "input_name": "maxSpinsPerUser",
+      "input_type": "number",
+      "required": true,
+      "value": "1"
     }
   ]
 }
 ```
 
-The backend should merge any merchant overrides with the base configuration
-before returning the payload.
+Structured data such as `prizeSegments` are stringified as part of this
+conversion so the storefront continues to receive strings.
 
 ## Editable fields
 
-`config/index.js` exposes a `fieldSchema` that can drive dashboard forms:
+Scope metadata is stored directly on the template:
 
-- **Admin dashboard**: `maxSpinsPerUser`, `spinCooldownSeconds`, full
-  management of `prizeSegments`, and `submissionEndpoint`.
-- **Merchant dashboard**: creative assets (`wheelImage`, `pointerImage`,
-  `backgroundImage`, `spinButtonImage`) and the marketing copy or imagery on
-  each `prizeSegments` entry (`label`, `image`, `description`).
+- **Admin dashboard** – `maxSpinsPerUser`, `spinCooldownSeconds`, `prizeSegments`,
+  `submissionEndpoint`.
+- **Merchant dashboard** – `title`, `description`, `wheelImage`, `pointerImage`,
+  `backgroundImage`, `spinButtonImage`, and selected fields on each prize
+  segment.
 
-## Image requirements
+## Storage notes
 
-- Wheel and pointer: transparent PNG or SVG, at least 2048 × 2048 px.
-- Background: JPG or PNG, 1920 × 1080 px.
-- Prize segment tiles: 512 × 512 px PNG with transparency where applicable.
-
-## MongoDB storage
-
-Insert the base config into the `gameConfigs` collection using the key
-`spin-the-wheel:stw-001`. Each new campaign can clone this document and override
-only the fields allowed by the `fieldSchema`. This keeps the runtime API simple
-and ensures the module can be copied between projects without manual tweaks.
+Keep `config/template.json` in the template catalog. When a campaign is created,
+clone `template.defaults`, collect overrides, and serialise the result into the
+runtime `options` array using the approach demonstrated in `config/index.js`.

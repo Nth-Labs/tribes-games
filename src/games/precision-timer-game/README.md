@@ -1,54 +1,68 @@
-# Precision Timer Module
+# Precision Timer Game Module
 
-This directory houses the configuration and React implementation for the
-Precision Timer challenge. Players start a five-second countdown and try to stop
-it as close to zero as possible. The folder mirrors the structure of the other
-modules so it can be copied into another project without additional wiring.
+This folder packages the countdown challenge, along with a colocated template
+contract and preview configuration that mirrors the runtime payload.
 
 ## Folder contents
 
-- `precision-timer-game-init.js` – Lightweight wrapper that fetches the config
-  and mounts the gameplay component.
-- `precision-timer-game.js` – Countdown gameplay logic, submission mock, and UI.
-- `results-screen.js` – Post-game summary and return-to-home link.
-- `config/base-config.json` – Canonical configuration document for storage.
-- `config/index.js` – Exports the runtime config plus schema metadata.
+- `precision-timer-game.js`, `results-screen.js` – UI and game logic.
+- `precision-timer-game-init.js` – React wrapper that loads the preview config.
+- `config/template.json` – Canonical `GameTemplate` document for admin/merchant tooling.
+- `config/index.js` – Expands the template defaults into preview-friendly config and a sample `/games/list` response.
 
-## API contract
+## Template contract
 
-The frontend expects a JSON payload that matches the shape of
-`config/base-config.json`. A representative response looks like this:
+`config/template.json` defines the editable fields, their scopes, validation, and
+default values. The defaults stay strongly typed:
 
 ```json
 {
-  "gameId": "precision-001",
-  "gameType": "precision-timer",
-  "title": "Precision Timer Challenge",
-  "subtitle": "Stop the countdown at the perfect moment",
-  "description": "Players start a five-second countdown and try to stop it as close to zero as possible.",
-  "countdownSeconds": 5,
-  "startButtonLabel": "Start Countdown",
-  "stopButtonLabel": "Stop Timer",
-  "submissionEndpoint": "/api/games/precision-timer/precision-001/results"
+  "name": "countdownSeconds",
+  "type": "number",
+  "scope": "admin",
+  "required": true,
+  "description": "Number of seconds the countdown should run before players try to stop it."
 }
 ```
 
-When the player ends the countdown, the frontend posts the final score to the
-`submissionEndpoint`. The mock implementation in this repository resolves the
-promise locally but the production service should persist the results.
+Dashboards can render forms directly from this document and rely on
+`template.defaults` for initial values.
+
+## Runtime payload
+
+`config/index.js` shows how to serialise the template into the runtime `Game`
+document that `/games/list` returns. The helper exports the example via
+`precisionTimerConfig.gameDocument`:
+
+```json
+{
+  "game_id": "precision-001",
+  "game_template_name": "precision-timer",
+  "merchant_id": "merchant-demo",
+  "options": [
+    {
+      "input_name": "countdownSeconds",
+      "input_type": "number",
+      "required": true,
+      "value": "5"
+    }
+  ]
+}
+```
+
+Consumers should continue to parse numeric values from strings when reading the
+runtime payload.
 
 ## Editable fields
 
-`config/index.js` surfaces a `fieldSchema` that downstream dashboards can use to
-control access:
+The template encodes role-based access out of the box:
 
-- **Admin dashboard**: `countdownSeconds`, `submissionEndpoint`.
-- **Merchant dashboard**: marketing copy (`title`, `subtitle`, `description`) and
-  button labels (`startButtonLabel`, `stopButtonLabel`).
+- **Admin dashboard** – `countdownSeconds`, `submissionEndpoint`.
+- **Merchant dashboard** – `title`, `subtitle`, `description`, `startButtonLabel`,
+  `stopButtonLabel`.
 
-## MongoDB storage
+## Storage notes
 
-Store the base configuration document in a `gameConfigs` collection using the
-key `precision-timer:precision-001`. Clone this record for new campaigns and
-apply overrides according to the `fieldSchema`. The runtime payload should be a
-single merged document that mirrors `base-config.json`.
+Persist the template JSON in the template catalog. When creating a game, merge
+`template.defaults` with merchant overrides and serialise the result the same way
+`config/index.js` does for previews.

@@ -1,0 +1,129 @@
+{
+  "templateId": "vocal-lift",
+  "gameType": "vocal-lift",
+  "version": 1,
+  "metadata": {
+    "name": "Vocal Lift Challenge",
+    "description": "Keep the relic levitating by sustaining a vocal tone for the target duration.",
+    "thumbnailUrl": "/images/vocal-lift-game-thumb.svg"
+  },
+  "defaults": {
+    "title": "Vocal Lift Challenge",
+    "subtitle": "Keep the relic levitating with your voice",
+    "description": "Project your voice to keep the relic suspended. Hold a steady sound for 30 seconds to win.",
+    "instructions": "Press \"Start Challenge\" and keep a steady stream of sound to levitate the relic. Drop below the threshold and it will fall.",
+    "targetSeconds": 30,
+    "soundThreshold": 0.22,
+    "silenceToleranceMs": 450,
+    "ballAsset": {
+      "url": "/images/vocal-lift-game/levitating-orb.svg",
+      "altText": "Golden orb hovering above a glowing pedestal"
+    },
+    "startButtonLabel": "Start Challenge",
+    "stopButtonLabel": "Stop & Reset",
+    "submissionEndpoint": "/api/games/vocal-lift/vocal-lift-001/results",
+    "notes": "Sound intensity is measured from microphone input. The API should resolve the ballAsset.url to a CDN-hosted image when used in production."
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Game title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Headline displayed at the top of the experience."
+    },
+    {
+      "name": "subtitle",
+      "label": "Subtitle",
+      "type": "string",
+      "scope": "merchant",
+      "required": false,
+      "description": "Optional sub-heading that appears below the title."
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Introductory copy shown before the player starts the challenge."
+    },
+    {
+      "name": "instructions",
+      "label": "Instructions",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Optional instructions rendered above the call-to-action button."
+    },
+    {
+      "name": "targetSeconds",
+      "label": "Target duration (seconds)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Number of seconds the player must sustain sound to win the challenge."
+    },
+    {
+      "name": "soundThreshold",
+      "label": "Sound threshold",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Normalised microphone level (0-1) required to keep the floating object airborne."
+    },
+    {
+      "name": "silenceToleranceMs",
+      "label": "Silence tolerance (ms)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Grace period, in milliseconds, that the player can dip below the threshold before the object falls."
+    },
+    {
+      "name": "ballAsset",
+      "label": "Ball asset",
+      "type": "object",
+      "scope": "merchant",
+      "required": true,
+      "description": "Image object for the floating asset.",
+      "fields": [
+        { "name": "url", "type": "image", "required": true },
+        { "name": "altText", "type": "string", "required": false }
+      ]
+    },
+    {
+      "name": "startButtonLabel",
+      "label": "Start button label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Text for the button that initiates microphone access."
+    },
+    {
+      "name": "stopButtonLabel",
+      "label": "Stop button label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Text for the button that stops microphone capture and resets the session."
+    },
+    {
+      "name": "submissionEndpoint",
+      "label": "Submission endpoint",
+      "type": "string",
+      "scope": "admin",
+      "required": true,
+      "description": "Endpoint that receives post-game submissions when a player completes the challenge."
+    },
+    {
+      "name": "notes",
+      "label": "Implementation notes",
+      "type": "text",
+      "scope": "admin",
+      "required": false,
+      "description": "Additional context for integrators or QA teams."
+    }
+  ]
+}

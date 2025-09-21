@@ -1,0 +1,77 @@
+{
+  "templateId": "precision-timer",
+  "gameType": "precision-timer",
+  "version": 1,
+  "metadata": {
+    "name": "Precision Timer Challenge",
+    "description": "Players try to stop a countdown as close to zero as possible.",
+    "thumbnailUrl": "/images/precision-timer-game-thumb.svg"
+  },
+  "defaults": {
+    "title": "Precision Timer Challenge",
+    "subtitle": "Stop the countdown at the perfect moment",
+    "description": "Players start a five-second countdown and try to stop it as close to zero as possible.",
+    "countdownSeconds": 5,
+    "startButtonLabel": "Start Countdown",
+    "stopButtonLabel": "Stop Timer",
+    "submissionEndpoint": "/api/games/precision-timer/precision-001/results"
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Game title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Headline displayed at the top of the countdown screen."
+    },
+    {
+      "name": "subtitle",
+      "label": "Subtitle",
+      "type": "string",
+      "scope": "merchant",
+      "required": false,
+      "description": "Optional subheading reinforcing the campaign message."
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Supporting copy that explains how the challenge works."
+    },
+    {
+      "name": "countdownSeconds",
+      "label": "Countdown duration (seconds)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Number of seconds the countdown should run before players try to stop it."
+    },
+    {
+      "name": "startButtonLabel",
+      "label": "Start button label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Text displayed on the button that begins the countdown."
+    },
+    {
+      "name": "stopButtonLabel",
+      "label": "Stop button label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Text displayed on the button that submits the player's attempt."
+    },
+    {
+      "name": "submissionEndpoint",
+      "label": "Submission endpoint",
+      "type": "string",
+      "scope": "admin",
+      "required": true,
+      "description": "API endpoint that records the player's timing attempt once the game ends."
+    }
+  ]
+}

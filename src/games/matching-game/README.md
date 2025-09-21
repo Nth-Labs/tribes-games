@@ -1,77 +1,97 @@
 # Matching Game Module
 
 This folder contains everything required to run the flip-card matching mini-game.
-It includes the React components, a default configuration, and documentation for
-how the backend should serve configuration data.
+It includes the React components, a canonical template definition, and a preview
+configuration that mirrors the runtime payload served by the backend.
 
 ## Folder contents
 
 - `matching-game.js`, `match-card.js`, `results-screen.js` – UI and game logic.
 - `matching-game-init.js` – Thin wrapper that fetches and supplies configuration to the game.
-- `config/base-config.json` – Canonical configuration object that can be stored in MongoDB.
-- `config/index.js` – Helper that enriches the base config with schema metadata for the UI.
+- `config/template.json` – Canonical `GameTemplate` contract for admin and merchant tooling.
+- `config/index.js` – Builds preview-friendly config and a sample `/games/list` document from the template.
 - `unique-cards.js` – Convenience helper that exposes the default card list.
 
-## API contract
+## Template contract
 
-The game expects a JSON payload that mirrors the shape of
-`config/base-config.json`. A minimal payload looks like:
+`config/template.json` declares the fields that the dashboard should render. Each
+entry records the field name, input type, scope, validation rules, and any nested
+structures. Typed defaults are stored alongside the contract so complex values
+(like the card deck and theme) remain real JSON:
 
 ```json
 {
-  "gameId": "flip-001",
-  "gameType": "flip-card",
-  "title": "White Tiffin Flip & Match",
-  "description": "Players flip cards to match pairs of dishes before they run out of moves.",
-  "moveLimit": 5,
-  "initialRevealSeconds": 3,
-  "cardUpflipSeconds": 1,
-  "cardBackImage": "/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png",
-  "submissionEndpoint": "/api/games/flip-card/flip-001/results",
-  "cards": [
+  "name": "cards",
+  "type": "array",
+  "scope": "admin",
+  "merchantEditableFields": ["type", "image", "altText"],
+  "item": {
+    "type": "object",
+    "fields": [
+      { "name": "id", "type": "string", "required": true },
+      { "name": "type", "type": "string", "required": true },
+      { "name": "image", "type": "image", "required": true }
+    ]
+  }
+}
+```
+
+These defaults power both the admin preview tools and the storefront fixtures.
+
+## Runtime payload
+
+During preview builds we serialise the template defaults into the shape returned
+by `/games/list`. `config/index.js` exports this sample response via
+`matchingGameConfig.gameDocument`:
+
+```json
+{
+  "game_id": "flip-001",
+  "game_template_name": "flip-card",
+  "merchant_id": "merchant-demo",
+  "options": [
     {
-      "id": "mee-siam-with-prawns",
-      "type": "Mee Siam With Prawns",
-      "image": "/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png",
-      "altText": "White Tiffin Mee Siam With Prawns card artwork"
+      "input_name": "moveLimit",
+      "input_type": "number",
+      "required": true,
+      "value": "5"
+    },
+    {
+      "input_name": "cards",
+      "input_type": "array",
+      "required": true,
+      "value": "[{\"id\":\"mee-siam-with-prawns\",\"type\":\"Mee Siam With Prawns\"}]"
     }
   ]
 }
 ```
 
-The frontend calls the dedicated API using a GET request and expects a JSON
-response. Additional metadata can be included, but the fields above must be
-present for the current game implementation.
+The storefront still expects the server to respond with full `Game` documents,
+so downstream code should parse stringified JSON for complex fields.
 
 ## Editable fields
 
-`config/index.js` exposes a `fieldSchema` describing who can edit each field.
-Summarised below:
+`template.fields` includes the scope information that used to live in the
+`fieldSchema` helper:
 
-- **Admin dashboard**
-  - `moveLimit` (number)
-  - `initialRevealSeconds` (number)
-  - `cardUpflipSeconds` (number)
-  - `cards` (full CRUD access)
-  - `submissionEndpoint`
-- **Merchant dashboard**
-  - `cardBackImage` (image asset)
-  - `cards` (`type`, `image`, and `altText` for individual cards)
+- **Admin dashboard**: `moveLimit`, `initialRevealSeconds`, `cardUpflipSeconds`,
+  `cards`, `submissionEndpoint`.
+- **Merchant dashboard**: `cardBackImage`, `theme`, and card-level overrides for
+  `type`, `image`, and `altText`.
 
-The schema can be surfaced directly in form builders or used to drive access
-control logic.
+The template can be consumed directly by dynamic form builders or access-control
+logic.
 
 ## Image requirements
 
 - Card faces: transparent PNG, at least 512 × 512 px.
 - Card backs: transparent PNG, square ratio recommended.
-- Provide `altText` for accessibility – the frontend will pass it through to
-  the rendered `<img>` tags.
+- Provide `altText` for accessibility – the frontend will pass it through to the
+  rendered `<img>` tags.
 
-## MongoDB storage
+## Storage notes
 
-We recommend storing the base configuration in a `gameConfigs` collection using
-`<gameType>:<gameId>` (e.g. `flip-card:flip-001`) as the document key. The
-structure in `config/base-config.json` can be inserted directly. When a new
-campaign is created, clone this base record and allow merchants to override only
-the fields permitted for their role.
+Persist the template definition as-is in the template catalog. When a new
+campaign is created, clone `template.defaults`, collect overrides from the
+merchant, and publish the merged values. The helper in `config/index.js` shows
+how to serialise the result into the runtime `options` array.

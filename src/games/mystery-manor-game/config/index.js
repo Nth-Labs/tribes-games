@@ -1,97 +1,116 @@
-import baseGameDocument from './base-config.json';
-import { buildGameConfigBase, cloneConfigValue } from '../../../utils/gameConfig';
+import template from './template.json';
 
-export const mysteryManorFieldSchema = {
-  admin: {
-    timerSeconds: {
-      type: 'number',
-      description: 'Global time limit for the scene.'
-    },
-    maxHints: {
-      type: 'number',
-      description: 'Total number of hints a player can request.'
-    },
-    items: {
-      type: 'array',
-      description: 'List of hidden objects the player must find.',
-      itemSchema: {
-        type: 'object',
-        fields: {
-          id: { type: 'string', required: true },
-          name: { type: 'string', required: true },
-          image: { type: 'image', required: true },
-          hotspot: {
-            type: 'object',
-            required: true,
-            fields: {
-              type: { type: 'string', enum: ['circle', 'rect'] },
-              x: { type: 'number' },
-              y: { type: 'number' },
-              radius: { type: 'number', required: false },
-              width: { type: 'number', required: false },
-              height: { type: 'number', required: false }
-            }
-          },
-          hint: { type: 'string', required: false }
-        }
-      }
-    },
-    submissionEndpoint: {
-      type: 'string',
-      description: 'API route to log completion and reward details.'
-    }
-  },
-  merchant: {
-    title: { type: 'string', description: 'Campaign-specific headline.' },
-    subtitle: { type: 'string', description: 'Short marketing subline shown beneath the title.' },
-    description: { type: 'string', description: 'Full description displayed in the intro screen.' },
-    backgroundImage: { type: 'image', description: 'Background art, 1920 × 1080 px PNG or JPG.' },
-    sceneImage: { type: 'image', description: 'Gameplay scene image, same aspect ratio as background.' },
-    hintIcon: { type: 'image', description: 'Icon shown when hints are available.' },
-    items: {
-      type: 'array',
-      description: 'Merchants can update the visual assets and hint copy for each item.',
-      editableFields: ['image', 'hint', 'name']
-    }
-  }
+const previewMetadata = {
+  gameId: 'mm-001',
+  merchantId: 'merchant-demo'
 };
 
-const baseConfig = buildGameConfigBase(baseGameDocument);
-const { options } = baseConfig;
+const previewOptions = {
+  ...template.defaults
+};
 
-const normalisedItems = Array.isArray(options.items) ? cloneConfigValue(options.items) : [];
+const templateFields = Array.isArray(template.fields) ? template.fields : [];
 
-export const mysteryManorApiContract = {
-  method: 'POST',
-  path: '/games/list',
-  requestBody: {
-    game_ids: [baseGameDocument.game_id],
-    merchant_id: baseGameDocument.merchant_id
-  },
-  responseType: 'application/json',
-  notes:
-    'POST /games/list returns full Game documents for the requested IDs. Hidden object definitions are delivered as JSON-stringified values within the options array.',
-  sampleResponse: baseGameDocument
+const serialiseOptionValue = (field, value) => {
+  if (value === null) {
+    return null;
+  }
+
+  if (typeof value === 'undefined') {
+    return '';
+  }
+
+  const fieldType = field?.type;
+
+  if (fieldType === 'number' && typeof value === 'number') {
+    return value.toString();
+  }
+
+  if (fieldType === 'boolean' && typeof value === 'boolean') {
+    return value ? 'true' : 'false';
+  }
+
+  if (fieldType === 'array' || fieldType === 'object' || fieldType === 'json') {
+    return JSON.stringify(value);
+  }
+
+  if (Array.isArray(value) || typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return String(value);
+};
+
+const buildOptionEntry = (field) => {
+  const optionName = field?.name;
+
+  if (!optionName) {
+    return null;
+  }
+
+  const hasCustomValue = Object.prototype.hasOwnProperty.call(previewOptions, optionName);
+  const optionValue = hasCustomValue ? previewOptions[optionName] : field?.default;
+
+  if (typeof optionValue === 'undefined') {
+    return null;
+  }
+
+  return {
+    input_name: optionName,
+    input_type: field?.type ?? 'string',
+    required: Boolean(field?.required),
+    value: serialiseOptionValue(field, optionValue)
+  };
+};
+
+const previewGameDocument = {
+  game_id: previewMetadata.gameId,
+  game_template_name: template.gameType,
+  merchant_id: previewMetadata.merchantId,
+  name: previewOptions.title ?? template.metadata?.name ?? '',
+  status: 'draft',
+  is_active: true,
+  hard_play_count_limit: 0,
+  play_count: 0,
+  prize_distribution_strategy: 'cascade',
+  options: templateFields.map((field) => buildOptionEntry(field)).filter(Boolean)
 };
 
 const mysteryManorConfig = {
-  gameId: baseConfig.gameId,
-  gameType: baseConfig.gameType,
-  title: baseConfig.title,
-  subtitle: options.subtitle ?? '',
-  description: options.description ?? '',
-  backgroundImage: options.backgroundImage ?? '',
-  sceneImage: options.sceneImage ?? '',
-  hintIcon: options.hintIcon ?? '',
-  timerSeconds: options.timerSeconds ?? 0,
-  maxHints: options.maxHints ?? 0,
-  submissionEndpoint: options.submissionEndpoint ?? '',
-  items: normalisedItems,
-  fieldSchema: mysteryManorFieldSchema,
-  apiContract: mysteryManorApiContract,
-  gameDocument: baseGameDocument
+  gameId: previewMetadata.gameId,
+  gameType: template.gameType,
+  title: previewOptions.title,
+  subtitle: previewOptions.subtitle,
+  description: previewOptions.description,
+  backgroundImage: previewOptions.backgroundImage,
+  sceneImage: previewOptions.sceneImage,
+  hintIcon: previewOptions.hintIcon,
+  timerSeconds: previewOptions.timerSeconds,
+  maxHints: previewOptions.maxHints,
+  submissionEndpoint: previewOptions.submissionEndpoint,
+  items: previewOptions.items,
+  template,
+  templateVersion: template.version,
+  previewOptions,
+  previewMetadata,
+  fields: templateFields,
+  apiContract: {
+    method: 'POST',
+    path: '/games/list',
+    requestBody: {
+      game_ids: [previewMetadata.gameId],
+      merchant_id: previewMetadata.merchantId
+    },
+    responseType: 'application/json',
+    notes:
+      'POST /games/list returns Game documents with option values serialised as strings. Structured defaults are stringified during publishing.',
+    sampleResponse: previewGameDocument
+  },
+  gameDocument: previewGameDocument
 };
 
-export const baseMysteryManorConfig = baseGameDocument;
+export const mysteryManorTemplate = template;
+export const mysteryManorPreviewOptions = previewOptions;
+export const mysteryManorPreviewGameDocument = previewGameDocument;
 
 export default mysteryManorConfig;
