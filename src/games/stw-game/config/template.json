@@ -1,0 +1,144 @@
+{
+  "templateId": "spin-the-wheel",
+  "gameType": "spin-the-wheel",
+  "version": 1,
+  "metadata": {
+    "name": "Spin the Wheel",
+    "description": "Award randomised rewards with a branded spinning wheel.",
+    "thumbnailUrl": "/images/stw-game-thumb.png"
+  },
+  "defaults": {
+    "title": "Spin the Wheel",
+    "description": "Players spin the wheel once per eligible session to receive a random reward.",
+    "wheelImage": "/images/stw-game-assets/wheel.png",
+    "pointerImage": "/images/stw-game-assets/pointer.png",
+    "backgroundImage": "/images/stw-game-assets/background.png",
+    "spinButtonImage": "/images/stw-game-assets/spin-button.png",
+    "maxSpinsPerUser": 1,
+    "spinCooldownSeconds": 86400,
+    "submissionEndpoint": "/api/games/spin-the-wheel/stw-001/results",
+    "prizeSegments": [
+      {
+        "id": "voucher-5",
+        "label": "$5 Voucher",
+        "probability": 0.2,
+        "image": "/images/stw-game-assets/segments/voucher-5.png",
+        "description": "Discount on next purchase"
+      },
+      {
+        "id": "voucher-10",
+        "label": "$10 Voucher",
+        "probability": 0.1,
+        "image": "/images/stw-game-assets/segments/voucher-10.png",
+        "description": "Premium discount reward"
+      },
+      {
+        "id": "free-shipping",
+        "label": "Free Shipping",
+        "probability": 0.3,
+        "image": "/images/stw-game-assets/segments/free-shipping.png",
+        "description": "Waive delivery fees"
+      },
+      {
+        "id": "try-again",
+        "label": "Try Again",
+        "probability": 0.4,
+        "image": "/images/stw-game-assets/segments/try-again.png",
+        "description": "No reward"
+      }
+    ]
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Game title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Headline displayed at the top of the experience."
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Supporting copy that explains how the wheel works."
+    },
+    {
+      "name": "wheelImage",
+      "label": "Wheel image",
+      "type": "image",
+      "scope": "merchant",
+      "required": true,
+      "description": "PNG or SVG of the wheel face (2048 × 2048 px recommended)."
+    },
+    {
+      "name": "pointerImage",
+      "label": "Pointer image",
+      "type": "image",
+      "scope": "merchant",
+      "required": true,
+      "description": "Pointer or indicator asset (transparent PNG preferred)."
+    },
+    {
+      "name": "backgroundImage",
+      "label": "Background image",
+      "type": "image",
+      "scope": "merchant",
+      "required": true,
+      "description": "Background image for the experience. 1920 × 1080 px recommended."
+    },
+    {
+      "name": "spinButtonImage",
+      "label": "Spin button image",
+      "type": "image",
+      "scope": "merchant",
+      "required": true,
+      "description": "Asset for the spin trigger button."
+    },
+    {
+      "name": "maxSpinsPerUser",
+      "label": "Max spins per user",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Maximum number of spins allowed per user for the campaign."
+    },
+    {
+      "name": "spinCooldownSeconds",
+      "label": "Spin cooldown (seconds)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Cooldown period before a user can spin again."
+    },
+    {
+      "name": "submissionEndpoint",
+      "label": "Submission endpoint",
+      "type": "string",
+      "scope": "admin",
+      "required": true,
+      "description": "Endpoint that records the prize awarded after a spin completes."
+    },
+    {
+      "name": "prizeSegments",
+      "label": "Prize segments",
+      "type": "array",
+      "scope": "admin",
+      "required": true,
+      "description": "Defines the wheel segments and win probabilities.",
+      "merchantEditableFields": ["label", "image", "description"],
+      "item": {
+        "type": "object",
+        "fields": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "label", "type": "string", "required": true },
+          { "name": "probability", "type": "number", "required": true },
+          { "name": "image", "type": "image", "required": true },
+          { "name": "description", "type": "string", "required": false }
+        ]
+      }
+    }
+  ]
+}
