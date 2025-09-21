@@ -1,0 +1,300 @@
+{
+  "templateId": "gachapon",
+  "gameType": "gachapon",
+  "version": 1,
+  "metadata": {
+    "name": "Celestial Capsule Gachapon",
+    "description": "Dispense a capsule and reveal a randomised reward with dramatic flair.",
+    "thumbnailUrl": "/images/gachapon-game-thumb.png"
+  },
+  "defaults": {
+    "title": "Celestial Capsule Gachapon",
+    "tagline": "Arcade Feature",
+    "description": "Pull the lever to see what treasure is sealed within the capsule. Every attempt draws from the same prize pool, and your luck determines the rarity of your reward.",
+    "ctaLabel": "Start Gachapon",
+    "preparingLabel": "Dispensing…",
+    "resultModalTitle": "Gachapon Result",
+    "capsuleMachineLabel": "Capsule Machine",
+    "capsuleStatusIdleLabel": "Ready",
+    "capsuleStatusPreparingLabel": "Priming capsule…",
+    "capsuleStatusShakingLabel": "Shaking…",
+    "capsuleStatusOpeningLabel": "Opening…",
+    "capsuleStatusResultLabel": "Capsule opened!",
+    "capsuleDescription": "Every shake builds anticipation before the capsule bursts open to reveal your prize. Hold tight and watch the glow change as the machine prepares your reward.",
+    "prizeShowcaseTitle": "Prize Showcase",
+    "prizeShowcaseDescription": "Browse every prize currently loaded into the capsule.",
+    "prizeListLoadingText": "Loading prize lineup…",
+    "prizeListErrorText": "We could not load the prize list. Please refresh to try again.",
+    "attemptErrorText": "Something interrupted the gachapon attempt. Please try again.",
+    "defaultFlairText": "The capsule cracks open in a burst of light! 🎉",
+    "submissionEndpoint": "/api/games/gachapon/gacha-001/results",
+    "shakeDurationMs": 1200,
+    "explosionDurationMs": 650,
+    "defaultCapsuleColor": "#38bdf8",
+    "prizes": [
+      {
+        "id": "luminous-orb",
+        "name": "Luminous Orb",
+        "rarity": "common",
+        "rarityLabel": "Common",
+        "description": "A softly glowing orb that keeps your camp lit through the night.",
+        "weight": 45,
+        "capsuleColor": "#E5E7EB",
+        "flairText": "The orb hums gently as it rolls into your hands."
+      },
+      {
+        "id": "ember-charm",
+        "name": "Ember Charm",
+        "rarity": "uncommon",
+        "rarityLabel": "Uncommon",
+        "description": "A flickering charm that warms nearby allies by a few cozy degrees.",
+        "weight": 30,
+        "capsuleColor": "#86EFAC",
+        "flairText": "Sparks of emberlight trace the capsule as it opens."
+      },
+      {
+        "id": "aurora-cape",
+        "name": "Aurora Cape",
+        "rarity": "rare",
+        "rarityLabel": "Rare",
+        "description": "Shimmers with the northern lights and lets you glide short distances.",
+        "weight": 18,
+        "capsuleColor": "#93C5FD",
+        "flairText": "The cape unfurls with a cascade of aurora hues."
+      },
+      {
+        "id": "celestial-compass",
+        "name": "Celestial Compass",
+        "rarity": "epic",
+        "rarityLabel": "Epic",
+        "description": "Always points toward the nearest secret, no matter where you roam.",
+        "weight": 6,
+        "capsuleColor": "#C4B5FD",
+        "flairText": "Starlit runes ignite as the compass clicks into place."
+      },
+      {
+        "id": "dragon-heartfire",
+        "name": "Dragon Heartfire",
+        "rarity": "legendary",
+        "rarityLabel": "Legendary",
+        "description": "A fragment of dragon flame that grants a surge of courage to its bearer.",
+        "weight": 1,
+        "capsuleColor": "#FDE68A",
+        "flairText": "A plume of golden flame roars from the capsule's core."
+      }
+    ]
+  },
+  "fields": [
+    {
+      "name": "title",
+      "label": "Game title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Headline displayed at the top of the experience."
+    },
+    {
+      "name": "tagline",
+      "label": "Tagline",
+      "type": "string",
+      "scope": "merchant",
+      "required": false,
+      "description": "Upper label displayed above the title."
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Supporting copy that explains how the gachapon works."
+    },
+    {
+      "name": "ctaLabel",
+      "label": "Primary CTA label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Label for the button that initiates a gachapon attempt."
+    },
+    {
+      "name": "preparingLabel",
+      "label": "Preparing state label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Text displayed on the button while the capsule is being prepared."
+    },
+    {
+      "name": "resultModalTitle",
+      "label": "Result modal title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Heading displayed on the prize reveal modal."
+    },
+    {
+      "name": "capsuleMachineLabel",
+      "label": "Capsule machine label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Label shown above the capsule machine panel."
+    },
+    {
+      "name": "capsuleStatusIdleLabel",
+      "label": "Idle status label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Status text displayed when the machine is idle."
+    },
+    {
+      "name": "capsuleStatusPreparingLabel",
+      "label": "Preparing status label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Status text displayed while the prize is being prepared."
+    },
+    {
+      "name": "capsuleStatusShakingLabel",
+      "label": "Shaking status label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Status text displayed while the capsule is shaking."
+    },
+    {
+      "name": "capsuleStatusOpeningLabel",
+      "label": "Opening status label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Status text displayed during the opening animation."
+    },
+    {
+      "name": "capsuleStatusResultLabel",
+      "label": "Result status label",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Status text displayed when the prize is revealed."
+    },
+    {
+      "name": "capsuleDescription",
+      "label": "Capsule description",
+      "type": "text",
+      "scope": "merchant",
+      "required": true,
+      "description": "Supporting copy beneath the capsule machine."
+    },
+    {
+      "name": "prizeShowcaseTitle",
+      "label": "Prize showcase title",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Title for the prize showcase section."
+    },
+    {
+      "name": "prizeShowcaseDescription",
+      "label": "Prize showcase description",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Short description displayed beneath the prize showcase title."
+    },
+    {
+      "name": "prizeListLoadingText",
+      "label": "Prize list loading text",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Message shown while prize data is loading."
+    },
+    {
+      "name": "prizeListErrorText",
+      "label": "Prize list error text",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Message displayed when the prize list cannot be loaded."
+    },
+    {
+      "name": "attemptErrorText",
+      "label": "Attempt error message",
+      "type": "string",
+      "scope": "merchant",
+      "required": true,
+      "description": "Error message surfaced when a gachapon attempt fails."
+    },
+    {
+      "name": "defaultFlairText",
+      "label": "Default flair text",
+      "type": "string",
+      "scope": "merchant",
+      "required": false,
+      "description": "Fallback message used if a prize does not define its own flair copy."
+    },
+    {
+      "name": "defaultCapsuleColor",
+      "label": "Default capsule color",
+      "type": "color",
+      "scope": "merchant",
+      "required": true,
+      "description": "Base color for the capsule when no prize is revealed yet."
+    },
+    {
+      "name": "shakeDurationMs",
+      "label": "Shake duration (ms)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Duration of the shaking animation in milliseconds."
+    },
+    {
+      "name": "explosionDurationMs",
+      "label": "Explosion duration (ms)",
+      "type": "number",
+      "scope": "admin",
+      "required": true,
+      "description": "Duration of the capsule burst animation in milliseconds."
+    },
+    {
+      "name": "submissionEndpoint",
+      "label": "Result submission endpoint",
+      "type": "string",
+      "scope": "admin",
+      "required": true,
+      "description": "Endpoint that records the prize awarded after a gachapon attempt completes."
+    },
+    {
+      "name": "prizes",
+      "label": "Gachapon prizes",
+      "type": "array",
+      "scope": "admin",
+      "required": true,
+      "description": "Defines the prize pool, rarities, and odds for the capsule machine.",
+      "merchantEditableFields": [
+        "name",
+        "description",
+        "rarityLabel",
+        "flairText"
+      ],
+      "item": {
+        "type": "object",
+        "fields": [
+          { "name": "id", "type": "string", "required": true },
+          { "name": "name", "type": "string", "required": true },
+          { "name": "rarity", "type": "string", "required": true },
+          { "name": "rarityLabel", "type": "string", "required": true },
+          { "name": "description", "type": "string", "required": true },
+          { "name": "weight", "type": "number", "required": true },
+          { "name": "capsuleColor", "type": "color", "required": true },
+          { "name": "flairText", "type": "string", "required": false }
+        ]
+      }
+    }
+  ]
+}

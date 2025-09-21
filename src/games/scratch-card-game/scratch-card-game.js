@@ -1,6 +1,6 @@
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import scratchCardConfig from './config';
 import { attemptScratchCard, fetchScratchPrizes } from './scratch-card-api';
 import './scratch-card-game.css';
 
@@ -22,6 +22,90 @@ const rarityBackground = {
   rare: 'bg-sky-500/15',
   epic: 'bg-violet-500/15',
   legendary: 'bg-amber-500/20',
+};
+
+const defaultRarityLabels = {
+  common: 'Common',
+  uncommon: 'Uncommon',
+  rare: 'Rare',
+  epic: 'Epic',
+  legendary: 'Legendary',
+};
+
+const defaultRarityFoilColors = {
+  common: '#CBD5F5',
+  uncommon: '#8DE6C9',
+  rare: '#95C6FF',
+  epic: '#D4B3FF',
+  legendary: '#FDE48A',
+};
+
+const defaultRarityGlowColors = {
+  common: 'rgba(96, 165, 250, 0.35)',
+  uncommon: 'rgba(52, 211, 153, 0.45)',
+  rare: 'rgba(59, 130, 246, 0.55)',
+  epic: 'rgba(167, 139, 250, 0.55)',
+  legendary: 'rgba(251, 191, 36, 0.6)',
+};
+
+const normalisePrizes = (rawPrizes, fallbackPrizes, fallbackFlairText) => {
+  const basePrizes = Array.isArray(rawPrizes) ? rawPrizes.filter((prize) => prize && typeof prize === 'object') : [];
+  const templatePrizes = Array.isArray(fallbackPrizes)
+    ? fallbackPrizes.filter((prize) => prize && typeof prize === 'object')
+    : [];
+
+  let effectivePrizes = basePrizes.length ? basePrizes : templatePrizes;
+
+  if (!effectivePrizes.length) {
+    effectivePrizes = [
+      {
+        id: 'scratch-placeholder-1',
+        name: 'Mystery Reward',
+        description: 'Configure scratch card prizes to replace this placeholder reward.',
+        rarity: 'common',
+        rarityLabel: 'Mystery',
+        weight: 1,
+        foilColor: defaultRarityFoilColors.common,
+        glowColor: defaultRarityGlowColors.common,
+        flairText: fallbackFlairText,
+      },
+    ];
+  }
+
+  return effectivePrizes.map((prize, index) => {
+    const rarityValue =
+      typeof prize.rarity === 'string' && prize.rarity.trim()
+        ? prize.rarity.trim().toLowerCase()
+        : 'common';
+    const rarityLabel =
+      typeof prize.rarityLabel === 'string' && prize.rarityLabel.trim()
+        ? prize.rarityLabel
+        : defaultRarityLabels[rarityValue] ?? rarityValue.charAt(0).toUpperCase() + rarityValue.slice(1);
+    const weight = Number.isFinite(prize.weight) && prize.weight > 0 ? prize.weight : 1;
+    const foilColor =
+      typeof prize.foilColor === 'string' && prize.foilColor.trim()
+        ? prize.foilColor
+        : defaultRarityFoilColors[rarityValue] ?? defaultRarityFoilColors.common;
+    const glowColor =
+      typeof prize.glowColor === 'string' && prize.glowColor.trim()
+        ? prize.glowColor
+        : defaultRarityGlowColors[rarityValue] ?? defaultRarityGlowColors.common;
+    const flairText =
+      typeof prize.flairText === 'string' && prize.flairText.trim() ? prize.flairText : fallbackFlairText;
+
+    return {
+      ...prize,
+      id: prize.id ?? `scratch-prize-${index}`,
+      name: prize.name ?? `Prize ${index + 1}`,
+      description: prize.description ?? 'Configure prize details in the template options.',
+      rarity: rarityValue,
+      rarityLabel,
+      weight,
+      foilColor,
+      glowColor,
+      flairText,
+    };
+  });
 };
 
 const formatDropRate = (weight, totalWeight) => {
@@ -58,9 +142,59 @@ const PrizeCard = ({ prize, dropRate }) => {
   );
 };
 
-const ScratchCardGame = () => {
+const ScratchCardGame = ({ config = scratchCardConfig }) => {
   const navigate = useNavigate();
-  const [prizes, setPrizes] = useState([]);
+
+  const baseDefaultFlair =
+    typeof scratchCardConfig.defaultFlairText === 'string' && scratchCardConfig.defaultFlairText.trim()
+      ? scratchCardConfig.defaultFlairText
+      : 'The foil peels away and the prize gleams brilliantly! ✨';
+
+  const normalisedConfig = useMemo(() => {
+    const providedDefaultFlair =
+      typeof config?.defaultFlairText === 'string' && config.defaultFlairText.trim()
+        ? config.defaultFlairText
+        : baseDefaultFlair;
+
+    const prizes = normalisePrizes(config?.prizes, scratchCardConfig.prizes, providedDefaultFlair);
+
+    return {
+      ...scratchCardConfig,
+      ...config,
+      prizes,
+      title: config?.title ?? scratchCardConfig.title,
+      tagline: config?.tagline ?? scratchCardConfig.tagline,
+      description: config?.description ?? scratchCardConfig.description,
+      ctaLabel: config?.ctaLabel ?? scratchCardConfig.ctaLabel ?? 'Get a new card',
+      scratchActionLabel:
+        config?.scratchActionLabel ?? scratchCardConfig.scratchActionLabel ?? 'Scratch the foil',
+      playAgainLabel: config?.playAgainLabel ?? scratchCardConfig.playAgainLabel ?? 'Get another card',
+      preparingLabel: config?.preparingLabel ?? scratchCardConfig.preparingLabel ?? 'Preparing card…',
+      resultModalTitle:
+        config?.resultModalTitle ?? scratchCardConfig.resultModalTitle ?? 'Scratch Card Result',
+      prizeLedgerTitle: config?.prizeLedgerTitle ?? scratchCardConfig.prizeLedgerTitle ?? 'Prize Ledger',
+      prizeLedgerSubtitle:
+        config?.prizeLedgerSubtitle ??
+        scratchCardConfig.prizeLedgerSubtitle ??
+        'Review every reward hiding beneath the aurora foil.',
+      prizeLedgerBadgeLabel:
+        config?.prizeLedgerBadgeLabel ?? scratchCardConfig.prizeLedgerBadgeLabel ?? 'Drop Rates',
+      prizeListLoadingText:
+        config?.prizeListLoadingText ?? scratchCardConfig.prizeListLoadingText ?? 'Loading scratch card lineup…',
+      prizeListErrorText:
+        config?.prizeListErrorText ??
+        scratchCardConfig.prizeListErrorText ??
+        'We could not load the prize ledger. Please refresh to try again.',
+      attemptErrorText:
+        config?.attemptErrorText ??
+        scratchCardConfig.attemptErrorText ??
+        'Something interrupted the scratch card attempt. Please try again.',
+      defaultFlairText: providedDefaultFlair,
+      submissionEndpoint: config?.submissionEndpoint ?? scratchCardConfig.submissionEndpoint,
+    };
+  }, [baseDefaultFlair, config]);
+
+  const [prizes, setPrizes] = useState(normalisedConfig.prizes ?? []);
   const [loadingPrizes, setLoadingPrizes] = useState(true);
   const [prizeError, setPrizeError] = useState(null);
   const [isAttempting, setIsAttempting] = useState(false);
@@ -92,11 +226,21 @@ const ScratchCardGame = () => {
   }, []);
 
   useEffect(() => {
+    setPrizes(normalisedConfig.prizes ?? []);
+    setCardState('idle');
+    setScratchProgress(0);
+    setCoverCleared(false);
+    setResult(null);
+    setShowResultModal(false);
+    setAttemptError(null);
+  }, [normalisedConfig]);
+
+  useEffect(() => {
     let cancelled = false;
     setLoadingPrizes(true);
     setPrizeError(null);
 
-    fetchScratchPrizes()
+    fetchScratchPrizes(normalisedConfig)
       .then((availablePrizes) => {
         if (cancelled || !isMountedRef.current) {
           return;
@@ -107,7 +251,7 @@ const ScratchCardGame = () => {
         if (cancelled || !isMountedRef.current) {
           return;
         }
-        setPrizeError('We could not load the prize ledger. Please refresh to try again.');
+        setPrizeError(normalisedConfig.prizeListErrorText);
       })
       .finally(() => {
         if (cancelled || !isMountedRef.current) {
@@ -119,7 +263,7 @@ const ScratchCardGame = () => {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [normalisedConfig]);
 
   const totalWeight = useMemo(
     () => prizes.reduce((sum, prize) => sum + (prize.weight ?? 0), 0),
@@ -153,7 +297,7 @@ const ScratchCardGame = () => {
     totalCellsRef.current = 0;
     scratchCompletedRef.current = false;
 
-    attemptScratchCard()
+    attemptScratchCard(normalisedConfig)
       .then((outcome) => {
         if (!isMountedRef.current) {
           return;
@@ -165,7 +309,7 @@ const ScratchCardGame = () => {
         if (!isMountedRef.current) {
           return;
         }
-        setAttemptError('Something interrupted the scratch card attempt. Please try again.');
+        setAttemptError(normalisedConfig.attemptErrorText);
         setCardState('idle');
       })
       .finally(() => {
@@ -489,17 +633,22 @@ const ScratchCardGame = () => {
     return '';
   })();
 
+  const baseCtaLabel = normalisedConfig.ctaLabel ?? 'Get a new card';
+  const scratchActionLabel = normalisedConfig.scratchActionLabel ?? 'Scratch the foil';
+  const preparingLabel = normalisedConfig.preparingLabel ?? 'Preparing card…';
+  const playAgainLabel = normalisedConfig.playAgainLabel ?? scratchActionLabel;
+
   const buttonLabel = (() => {
     if (cardState === 'preparing' || isAttempting) {
-      return 'Preparing card…';
+      return preparingLabel;
     }
     if (cardState === 'ready') {
-      return 'Scratch the foil';
+      return scratchActionLabel;
     }
     if (cardState === 'revealed') {
-      return 'Get another card';
+      return playAgainLabel;
     }
-    return 'Get a new card';
+    return baseCtaLabel;
   })();
 
   const buttonDisabled =
@@ -510,12 +659,19 @@ const ScratchCardGame = () => {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 px-4">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-300/80">Glitterforge Games</p>
-            <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl">Aurora Scratch Card</h1>
-            <p className="max-w-2xl text-sm text-slate-300/90 sm:text-base">
-              Claim a radiant foil, then do the scratching yourself to reveal the treasure hidden beneath. Every swipe
-              clears the nebula shimmer until your prize erupts in full color.
-            </p>
+            {normalisedConfig.tagline ? (
+              <p className="text-xs font-semibold uppercase tracking-[0.4em] text-indigo-300/80">
+                {normalisedConfig.tagline}
+              </p>
+            ) : null}
+            <h1 className="text-3xl font-bold leading-tight text-white sm:text-4xl">
+              {normalisedConfig.title ?? 'Scratch Card Game'}
+            </h1>
+            {normalisedConfig.description ? (
+              <p className="max-w-2xl text-sm text-slate-300/90 sm:text-base">
+                {normalisedConfig.description}
+              </p>
+            ) : null}
           </div>
           <div className="flex flex-col items-start gap-3 sm:items-end">
             <div className="flex gap-2">
@@ -535,9 +691,9 @@ const ScratchCardGame = () => {
                 {buttonLabel}
               </button>
             </div>
-            {cardState === 'ready' && (
+            {cardState === 'ready' ? (
               <span className="text-xs uppercase tracking-[0.3em] text-indigo-200/70">Foil armed &amp; ready</span>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -559,7 +715,9 @@ const ScratchCardGame = () => {
                         : 'Awaiting scratch'}
                     </h3>
                     <p className="scratch-card__reward-helper">
-                      {hasRevealed && result ? result.flairText : 'Drag across the foil to lift the shimmer.'}
+                      {hasRevealed && result
+                        ? result.flairText ?? normalisedConfig.defaultFlairText
+                        : 'Drag across the foil to lift the shimmer.'}
                     </p>
                   </div>
                 </div>
@@ -588,33 +746,42 @@ const ScratchCardGame = () => {
             </div>
             <div className="scratch-card__status-panel">
               <div className="scratch-card__status-badge">{statusText}</div>
-              {showProgress && (
+              {showProgress ? (
                 <div className="scratch-card__progress">
                   <div className="scratch-card__progress-track">
                     <div className="scratch-card__progress-fill" style={{ width: `${progressPercent}%` }} />
                   </div>
                   <span className="scratch-card__progress-label">{progressPercent}% revealed</span>
                 </div>
-              )}
-              {cardState === 'revealed' && result && (
+              ) : null}
+              {cardState === 'revealed' && result ? (
                 <p className="scratch-card__status-detail">
                   You uncovered the <span>{result.prize.name}</span>!
                 </p>
-              )}
-              {attemptError && <div className="scratch-card-error">{attemptError}</div>}
+              ) : null}
+              {attemptError ? <div className="scratch-card-error">{attemptError}</div> : null}
             </div>
           </div>
         </div>
 
         <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-7 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur">
           <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-white">Prize Ledger</h2>
-            <span className="rounded-full border border-indigo-400/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
-              Drop Rates
-            </span>
+            <div>
+              <h2 className="text-lg font-semibold text-white">
+                {normalisedConfig.prizeLedgerTitle}
+              </h2>
+              {normalisedConfig.prizeLedgerSubtitle ? (
+                <p className="mt-1 text-sm text-slate-400">{normalisedConfig.prizeLedgerSubtitle}</p>
+              ) : null}
+            </div>
+            {normalisedConfig.prizeLedgerBadgeLabel ? (
+              <span className="rounded-full border border-indigo-400/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
+                {normalisedConfig.prizeLedgerBadgeLabel}
+              </span>
+            ) : null}
           </div>
           {loadingPrizes ? (
-            <p className="mt-4 text-sm text-slate-400">Loading scratch card lineup…</p>
+            <p className="mt-4 text-sm text-slate-400">{normalisedConfig.prizeListLoadingText}</p>
           ) : prizeError ? (
             <p className="mt-4 text-sm text-rose-300">{prizeError}</p>
           ) : (
@@ -631,10 +798,10 @@ const ScratchCardGame = () => {
         </div>
       </div>
 
-      {showResultModal && result && (
+      {showResultModal && result ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-10 backdrop-blur">
           <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-8 shadow-2xl shadow-indigo-900/50">
-            <p className="text-sm uppercase tracking-[0.25em] text-indigo-300">Scratch Card Result</p>
+            <p className="text-sm uppercase tracking-[0.25em] text-indigo-300">{normalisedConfig.resultModalTitle}</p>
             <h3 className="mt-2 text-3xl font-semibold text-white">{result.prize.name}</h3>
             <p className="mt-1 text-sm text-slate-400">{result.prize.rarityLabel}</p>
             <div className="mt-5 flex items-center justify-center">
@@ -651,14 +818,14 @@ const ScratchCardGame = () => {
               </div>
             </div>
             <p className="mt-6 text-sm text-slate-300">{result.prize.description}</p>
-            <p className="mt-4 text-sm text-indigo-200">{result.flairText}</p>
+            <p className="mt-4 text-sm text-indigo-200">{result.flairText ?? normalisedConfig.defaultFlairText}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 className="rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white"
                 onClick={closeModal}
               >
-                Scratch Again
+                {playAgainLabel}
               </button>
               <button
                 type="button"
@@ -670,7 +837,7 @@ const ScratchCardGame = () => {
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 };

@@ -1,95 +1,99 @@
-const MOCK_PRIZES = [
-  {
-    id: 'luminous-orb',
-    name: 'Luminous Orb',
-    rarity: 'common',
-    description: 'A softly glowing orb that keeps your camp lit through the night.',
-    weight: 45,
-  },
-  {
-    id: 'ember-charm',
-    name: 'Ember Charm',
-    rarity: 'uncommon',
-    description: 'A flickering charm that warms nearby allies by a few cozy degrees.',
-    weight: 30,
-  },
-  {
-    id: 'aurora-cape',
-    name: 'Aurora Cape',
-    rarity: 'rare',
-    description: 'Shimmers with the northern lights and lets you glide short distances.',
-    weight: 18,
-  },
-  {
-    id: 'celestial-compass',
-    name: 'Celestial Compass',
-    rarity: 'epic',
-    description: 'Always points toward the nearest secret, no matter where you roam.',
-    weight: 6,
-  },
-  {
-    id: 'dragon-heartfire',
-    name: 'Dragon Heartfire',
-    rarity: 'legendary',
-    description: 'A fragment of dragon flame that grants a surge of courage to its bearer.',
-    weight: 1,
-  },
-];
+import gachaponConfig from './config';
 
-const rarityColors = {
-  common: '#E5E7EB',
-  uncommon: '#86EFAC',
-  rare: '#93C5FD',
-  epic: '#C4B5FD',
-  legendary: '#FDE68A',
-};
+const FETCH_DELAY_MS = 700;
+const ATTEMPT_DELAY_MS = 1100;
 
-const rarityLabels = {
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
-
-const mapPrizeForResponse = (prize) => ({
+const clonePrize = (prize) => ({
   ...prize,
-  rarityLabel: rarityLabels[prize.rarity] ?? prize.rarity,
-  capsuleColor: rarityColors[prize.rarity] ?? '#F3F4F6',
+  weight: Number.isFinite(prize?.weight) && prize.weight > 0 ? prize.weight : 0,
 });
 
-export const fetchAvailablePrizes = () =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(MOCK_PRIZES.map(mapPrizeForResponse));
-    }, 700);
-  });
+const getPrizesFromConfig = (config) => {
+  if (!config) {
+    return [];
+  }
 
-const pickWeightedPrize = () => {
-  const totalWeight = MOCK_PRIZES.reduce((sum, prize) => sum + prize.weight, 0);
+  const rawPrizes = Array.isArray(config.prizes) ? config.prizes : [];
+  return rawPrizes.map((prize) => clonePrize(prize));
+};
+
+const pickWeightedPrize = (weightedPrizes) => {
+  if (!Array.isArray(weightedPrizes) || weightedPrizes.length === 0) {
+    return null;
+  }
+
+  const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
+
+  if (totalWeight <= 0) {
+    return weightedPrizes[0];
+  }
+
   let threshold = Math.random() * totalWeight;
 
-  for (const prize of MOCK_PRIZES) {
-    threshold -= prize.weight;
+  for (const entry of weightedPrizes) {
+    threshold -= entry.weight;
     if (threshold <= 0) {
-      return prize;
+      return entry;
     }
   }
 
-  return MOCK_PRIZES[MOCK_PRIZES.length - 1];
+  return weightedPrizes[weightedPrizes.length - 1];
 };
 
-export const attemptGachapon = () =>
-  new Promise((resolve) => {
-    const selectedPrize = pickWeightedPrize();
+const resolveFlairText = (prize, config) => {
+  const defaultFlair =
+    typeof config?.defaultFlairText === 'string' && config.defaultFlairText.trim()
+      ? config.defaultFlairText
+      : gachaponConfig.defaultFlairText ?? 'The capsule cracks open in a burst of light! 🎉';
+
+  if (typeof prize?.flairText === 'string' && prize.flairText.trim()) {
+    return prize.flairText;
+  }
+
+  return defaultFlair;
+};
+
+export const fetchAvailablePrizes = (config = gachaponConfig) =>
+  new Promise((resolve, reject) => {
+    const prizes = getPrizesFromConfig(config);
+
+    setTimeout(() => {
+      if (!prizes.length) {
+        reject(new Error('No gachapon prizes configured'));
+        return;
+      }
+
+      resolve(prizes.map((prize) => ({ ...prize })));
+    }, FETCH_DELAY_MS);
+  });
+
+export const attemptGachapon = (config = gachaponConfig) =>
+  new Promise((resolve, reject) => {
+    const prizes = getPrizesFromConfig(config);
+
+    if (!prizes.length) {
+      reject(new Error('No gachapon prizes configured'));
+      return;
+    }
+
+    const weightedPrizes = prizes.map((prize) => ({ prize, weight: prize.weight }));
+    const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
+
+    if (totalWeight <= 0) {
+      reject(new Error('Gachapon prizes require a positive weight'));
+      return;
+    }
+
+    const selectedEntry = pickWeightedPrize(weightedPrizes) ?? weightedPrizes[0];
+    const selectedPrize = selectedEntry?.prize ?? prizes[0];
+    const flairText = resolveFlairText(selectedPrize, config);
 
     setTimeout(() => {
       resolve({
         attemptId: `attempt-${Date.now()}`,
-        prize: mapPrizeForResponse(selectedPrize),
-        flairText: 'The capsule cracks open in a burst of light! 🎉',
+        prize: { ...selectedPrize },
+        flairText,
         awardedAt: new Date().toISOString(),
       });
-    }, 1100);
+    }, ATTEMPT_DELAY_MS);
   });
-
