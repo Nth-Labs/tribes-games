@@ -1,5 +1,7 @@
-import baseConfig from './config/base-config.json';
+import matchingGameConfig from './config';
 
-const uniqueCardsArray = baseConfig.cards.map((card) => ({ ...card }));
+const uniqueCardsArray = Array.isArray(matchingGameConfig.cards)
+  ? matchingGameConfig.cards.map((card) => ({ ...card }))
+  : [];
 
 export default uniqueCardsArray;

@@ -1,74 +1,78 @@
 {
-  "gameId": "flip-001",
-  "gameType": "flip-card",
-  "title": "White Tiffin Flip & Match",
-  "description": "Players flip cards to match pairs of dishes before they run out of moves.",
-  "moveLimit": 5,
-  "initialRevealSeconds": 3,
-  "cardUpflipSeconds": 1,
-  "cardBackImage": "/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png",
-  "theme": {
-    "backgroundColor": "#0b1220",
-    "backgroundImage": "radial-gradient(circle at 12% -18%, rgba(249, 115, 22, 0.18), transparent 52%), radial-gradient(circle at 82% 0%, rgba(249, 115, 22, 0.14), transparent 48%), linear-gradient(140deg, #0b1220 0%, #111c32 55%, #0b1220 100%)",
-    "backgroundOverlayColor": "rgba(7, 12, 24, 0.86)",
-    "accentColor": "#f97316",
-    "titleColor": "#f8fafc",
-    "textColor": "#e2e8f0",
-    "subtleTextColor": "rgba(226, 232, 240, 0.78)",
-    "panelBackgroundColor": "rgba(11, 17, 32, 0.78)",
-    "panelBorderColor": "rgba(148, 163, 184, 0.3)",
-    "panelShadowColor": "rgba(8, 15, 32, 0.7)",
-    "boardBackgroundColor": "rgba(11, 17, 32, 0.65)",
-    "boardBorderColor": "rgba(148, 163, 184, 0.28)",
-    "boardShadowColor": "rgba(8, 15, 32, 0.72)",
-    "cardBackBackgroundColor": "rgba(30, 41, 59, 0.85)",
-    "cardFaceBackgroundColor": "rgba(13, 19, 32, 0.68)",
-    "cardBorderColor": "rgba(148, 163, 184, 0.32)",
-    "cardMatchedBackgroundColor": "rgba(249, 115, 22, 0.18)",
-    "cardMatchedGlowColor": "rgba(249, 115, 22, 0.52)",
-    "cardShadowColor": "rgba(8, 15, 32, 0.82)",
-    "buttonBackgroundColor": "#f97316",
-    "buttonHoverBackgroundColor": "#fb923c",
-    "buttonTextColor": "#0b1120",
-    "cardFlipDurationMs": 620
-  },
-  "submissionEndpoint": "/api/games/flip-card/flip-001/results",
-  "cards": [
+  "game_id": "flip-001",
+  "game_template_name": "flip-card",
+  "name": "White Tiffin Flip & Match",
+  "merchant_id": "merchant-demo",
+  "game_background_image": "",
+  "game_logo_image": "",
+  "start_date": "2024-01-01T00:00:00.000Z",
+  "end_date": "2024-12-31T23:59:59.000Z",
+  "status": "created",
+  "is_active": true,
+  "hard_play_count_limit": 0,
+  "play_count": 0,
+  "prizes": {},
+  "is_quests_enabled": false,
+  "quests": [],
+  "leaderboard_id": null,
+  "prize_distribution_strategy": "cascade",
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "__v": 0,
+  "options": [
     {
-      "id": "mee-siam-with-prawns",
-      "type": "Mee Siam With Prawns",
-      "image": "/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png",
-      "altText": "White Tiffin Mee Siam With Prawns card artwork"
+      "input_name": "title",
+      "input_type": "string",
+      "value": "White Tiffin Flip & Match",
+      "required": true
     },
     {
-      "id": "local-trio",
-      "type": "Local Trio",
-      "image": "/images/matching-game-assets/white-tiffin-assets/local-trio.png",
-      "altText": "White Tiffin Local Trio card artwork"
+      "input_name": "description",
+      "input_type": "string",
+      "value": "Players flip cards to match pairs of dishes before they run out of moves.",
+      "required": true
     },
     {
-      "id": "nasi-lemak-beef",
-      "type": "Nasi Lemak Beef",
-      "image": "/images/matching-game-assets/white-tiffin-assets/nasi-lemak-beef.png",
-      "altText": "White Tiffin Nasi Lemak Beef card artwork"
+      "input_name": "moveLimit",
+      "input_type": "number",
+      "value": "5",
+      "required": true
     },
     {
-      "id": "chicken-curry",
-      "type": "Chicken Curry",
-      "image": "/images/matching-game-assets/white-tiffin-assets/chicken-curry.png",
-      "altText": "White Tiffin Chicken Curry card artwork"
+      "input_name": "initialRevealSeconds",
+      "input_type": "number",
+      "value": "3",
+      "required": true
     },
     {
-      "id": "trio-snack-platter",
-      "type": "Trio Snack Platter",
-      "image": "/images/matching-game-assets/white-tiffin-assets/trio-snack-platter.png",
-      "altText": "White Tiffin Trio Snack Platter card artwork"
+      "input_name": "cardUpflipSeconds",
+      "input_type": "number",
+      "value": "1",
+      "required": true
     },
     {
-      "id": "fish-maw-seafood-soup",
-      "type": "Fish Maw Seafood Soup",
-      "image": "/images/matching-game-assets/white-tiffin-assets/fish-maw-seafood-soup.png",
-      "altText": "White Tiffin Fish Maw Seafood Soup card artwork"
+      "input_name": "cardBackImage",
+      "input_type": "image",
+      "value": "/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png",
+      "required": true
+    },
+    {
+      "input_name": "theme",
+      "input_type": "string",
+      "value": "{\"backgroundColor\": \"#0b1220\", \"backgroundImage\": \"radial-gradient(circle at 12% -18%, rgba(249, 115, 22, 0.18), transparent 52%), radial-gradient(circle at 82% 0%, rgba(249, 115, 22, 0.14), transparent 48%), linear-gradient(140deg, #0b1220 0%, #111c32 55%, #0b1220 100%)\", \"backgroundOverlayColor\": \"rgba(7, 12, 24, 0.86)\", \"accentColor\": \"#f97316\", \"titleColor\": \"#f8fafc\", \"textColor\": \"#e2e8f0\", \"subtleTextColor\": \"rgba(226, 232, 240, 0.78)\", \"panelBackgroundColor\": \"rgba(11, 17, 32, 0.78)\", \"panelBorderColor\": \"rgba(148, 163, 184, 0.3)\", \"panelShadowColor\": \"rgba(8, 15, 32, 0.7)\", \"boardBackgroundColor\": \"rgba(11, 17, 32, 0.65)\", \"boardBorderColor\": \"rgba(148, 163, 184, 0.28)\", \"boardShadowColor\": \"rgba(8, 15, 32, 0.72)\", \"cardBackBackgroundColor\": \"rgba(30, 41, 59, 0.85)\", \"cardFaceBackgroundColor\": \"rgba(13, 19, 32, 0.68)\", \"cardBorderColor\": \"rgba(148, 163, 184, 0.32)\", \"cardMatchedBackgroundColor\": \"rgba(249, 115, 22, 0.18)\", \"cardMatchedGlowColor\": \"rgba(249, 115, 22, 0.52)\", \"cardShadowColor\": \"rgba(8, 15, 32, 0.82)\", \"buttonBackgroundColor\": \"#f97316\", \"buttonHoverBackgroundColor\": \"#fb923c\", \"buttonTextColor\": \"#0b1120\", \"cardFlipDurationMs\": 620}",
+      "required": true
+    },
+    {
+      "input_name": "submissionEndpoint",
+      "input_type": "string",
+      "value": "/api/games/flip-card/flip-001/results",
+      "required": true
+    },
+    {
+      "input_name": "cards",
+      "input_type": "string",
+      "value": "[{\"id\": \"mee-siam-with-prawns\", \"type\": \"Mee Siam With Prawns\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png\", \"altText\": \"White Tiffin Mee Siam With Prawns card artwork\"}, {\"id\": \"local-trio\", \"type\": \"Local Trio\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/local-trio.png\", \"altText\": \"White Tiffin Local Trio card artwork\"}, {\"id\": \"nasi-lemak-beef\", \"type\": \"Nasi Lemak Beef\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/nasi-lemak-beef.png\", \"altText\": \"White Tiffin Nasi Lemak Beef card artwork\"}, {\"id\": \"chicken-curry\", \"type\": \"Chicken Curry\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/chicken-curry.png\", \"altText\": \"White Tiffin Chicken Curry card artwork\"}, {\"id\": \"trio-snack-platter\", \"type\": \"Trio Snack Platter\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/trio-snack-platter.png\", \"altText\": \"White Tiffin Trio Snack Platter card artwork\"}, {\"id\": \"fish-maw-seafood-soup\", \"type\": \"Fish Maw Seafood Soup\", \"image\": \"/images/matching-game-assets/white-tiffin-assets/fish-maw-seafood-soup.png\", \"altText\": \"White Tiffin Fish Maw Seafood Soup card artwork\"}]",
+      "required": true
     }
   ]
 }

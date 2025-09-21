@@ -1,4 +1,5 @@
-import baseConfig from './base-config.json';
+import baseGameDocument from './base-config.json';
+import { buildGameConfigBase, cloneConfigValue } from '../../../utils/gameConfig';
 
 export const spinTheWheelFieldSchema = {
   admin: {
@@ -54,21 +55,43 @@ export const spinTheWheelFieldSchema = {
   }
 };
 
+const baseConfig = buildGameConfigBase(baseGameDocument);
+const { options } = baseConfig;
+
+const normalisedPrizeSegments =
+  Array.isArray(options.prizeSegments) ? cloneConfigValue(options.prizeSegments) : [];
+
 export const spinTheWheelApiContract = {
-  method: 'GET',
+  method: 'POST',
+  path: '/games/list',
+  requestBody: {
+    game_ids: [baseGameDocument.game_id],
+    merchant_id: baseGameDocument.merchant_id
+  },
   responseType: 'application/json',
-  collection: 'gameConfigs',
-  documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`,
-  notes: 'Backend should merge merchant overrides with the baseConfig before returning it to the frontend.'
+  notes:
+    'POST /games/list responds with immutable Game documents. Prize segments and other complex fields are returned as JSON-stringified values in the options array.',
+  sampleResponse: baseGameDocument
 };
 
 const spinTheWheelConfig = {
-  ...baseConfig,
-  prizeSegments: baseConfig.prizeSegments.map((segment) => ({ ...segment })),
+  gameId: baseConfig.gameId,
+  gameType: baseConfig.gameType,
+  title: baseConfig.title,
+  description: options.description ?? '',
+  wheelImage: options.wheelImage ?? '',
+  pointerImage: options.pointerImage ?? '',
+  backgroundImage: options.backgroundImage ?? '',
+  spinButtonImage: options.spinButtonImage ?? '',
+  maxSpinsPerUser: options.maxSpinsPerUser ?? 0,
+  spinCooldownSeconds: options.spinCooldownSeconds ?? 0,
+  submissionEndpoint: options.submissionEndpoint ?? '',
+  prizeSegments: normalisedPrizeSegments,
   fieldSchema: spinTheWheelFieldSchema,
-  apiContract: spinTheWheelApiContract
+  apiContract: spinTheWheelApiContract,
+  gameDocument: baseGameDocument
 };
 
-export const baseSpinTheWheelConfig = baseConfig;
+export const baseSpinTheWheelConfig = baseGameDocument;
 
 export default spinTheWheelConfig;

@@ -1,4 +1,5 @@
-import baseConfig from './base-config.json';
+import baseGameDocument from './base-config.json';
+import { buildGameConfigBase, cloneConfigValue } from '../../../utils/gameConfig';
 
 export const mysteryManorFieldSchema = {
   admin: {
@@ -55,24 +56,42 @@ export const mysteryManorFieldSchema = {
   }
 };
 
+const baseConfig = buildGameConfigBase(baseGameDocument);
+const { options } = baseConfig;
+
+const normalisedItems = Array.isArray(options.items) ? cloneConfigValue(options.items) : [];
+
 export const mysteryManorApiContract = {
-  method: 'GET',
+  method: 'POST',
+  path: '/games/list',
+  requestBody: {
+    game_ids: [baseGameDocument.game_id],
+    merchant_id: baseGameDocument.merchant_id
+  },
   responseType: 'application/json',
-  collection: 'gameConfigs',
-  documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`,
-  notes: 'The backend should serve the scene configuration and assets with URLs accessible by the client.'
+  notes:
+    'POST /games/list returns full Game documents for the requested IDs. Hidden object definitions are delivered as JSON-stringified values within the options array.',
+  sampleResponse: baseGameDocument
 };
 
 const mysteryManorConfig = {
-  ...baseConfig,
-  items: baseConfig.items.map((item) => ({
-    ...item,
-    hotspot: { ...item.hotspot }
-  })),
+  gameId: baseConfig.gameId,
+  gameType: baseConfig.gameType,
+  title: baseConfig.title,
+  subtitle: options.subtitle ?? '',
+  description: options.description ?? '',
+  backgroundImage: options.backgroundImage ?? '',
+  sceneImage: options.sceneImage ?? '',
+  hintIcon: options.hintIcon ?? '',
+  timerSeconds: options.timerSeconds ?? 0,
+  maxHints: options.maxHints ?? 0,
+  submissionEndpoint: options.submissionEndpoint ?? '',
+  items: normalisedItems,
   fieldSchema: mysteryManorFieldSchema,
-  apiContract: mysteryManorApiContract
+  apiContract: mysteryManorApiContract,
+  gameDocument: baseGameDocument
 };
 
-export const baseMysteryManorConfig = baseConfig;
+export const baseMysteryManorConfig = baseGameDocument;
 
 export default mysteryManorConfig;

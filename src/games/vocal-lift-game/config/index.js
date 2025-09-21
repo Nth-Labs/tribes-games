@@ -1,4 +1,5 @@
-import baseConfig from './base-config.json';
+import baseGameDocument from './base-config.json';
+import { buildGameConfigBase, cloneConfigValue } from '../../../utils/gameConfig';
 
 export const vocalLiftFieldSchema = {
   admin: {
@@ -56,21 +57,45 @@ export const vocalLiftFieldSchema = {
   }
 };
 
+const baseConfig = buildGameConfigBase(baseGameDocument);
+const { options } = baseConfig;
+
+const normalisedBallAsset =
+  options.ballAsset && typeof options.ballAsset === 'object' ? cloneConfigValue(options.ballAsset) : {};
+
 export const vocalLiftApiContract = {
-  method: 'GET',
+  method: 'POST',
+  path: '/games/list',
+  requestBody: {
+    game_ids: [baseGameDocument.game_id],
+    merchant_id: baseGameDocument.merchant_id
+  },
   responseType: 'application/json',
-  notes: 'The API should merge campaign overrides into the base configuration before returning the payload.',
-  collection: 'gameConfigs',
-  documentKey: `${baseConfig.gameType}:${baseConfig.gameId}`
+  notes:
+    'POST /games/list responds with Game documents that include all immutable metadata and the options array shown in this mock configuration.',
+  sampleResponse: baseGameDocument
 };
 
 const vocalLiftConfig = {
-  ...baseConfig,
-  ballAsset: { ...baseConfig.ballAsset },
+  gameId: baseConfig.gameId,
+  gameType: baseConfig.gameType,
+  title: baseConfig.title,
+  subtitle: options.subtitle ?? '',
+  description: options.description ?? '',
+  instructions: options.instructions ?? '',
+  targetSeconds: options.targetSeconds ?? 0,
+  soundThreshold: options.soundThreshold ?? 0,
+  silenceToleranceMs: options.silenceToleranceMs ?? 0,
+  ballAsset: normalisedBallAsset,
+  startButtonLabel: options.startButtonLabel ?? '',
+  stopButtonLabel: options.stopButtonLabel ?? '',
+  submissionEndpoint: options.submissionEndpoint ?? '',
+  notes: options.notes ?? '',
   fieldSchema: vocalLiftFieldSchema,
-  apiContract: vocalLiftApiContract
+  apiContract: vocalLiftApiContract,
+  gameDocument: baseGameDocument
 };
 
-export const baseVocalLiftConfig = baseConfig;
+export const baseVocalLiftConfig = baseGameDocument;
 
 export default vocalLiftConfig;
