@@ -1,97 +1,62 @@
 # Matching Game Module
 
-This folder contains everything required to run the flip-card matching mini-game.
-It includes the React components, a canonical template definition, and a preview
-configuration that mirrors the runtime payload served by the backend.
+This folder contains everything required to run the simplified flip-card matching game. The
+experience now boots from the same minimal JSON shape the new initialiser API returns, so the
+frontend can mirror the MVP payload without extra transformation.
 
 ## Folder contents
 
-- `matching-game.js`, `match-card.js`, `results-screen.js` – UI and game logic.
-- `matching-game-init.js` – Thin wrapper that fetches and supplies configuration to the game.
-- `config/template.json` – Canonical `GameTemplate` contract for admin and merchant tooling.
-- `config/index.js` – Builds preview-friendly config and a sample `/games/list` document from the template.
-- `unique-cards.js` – Convenience helper that exposes the default card list.
+- `matching-game.js`, `match-card.js`, `results-screen.js` – UI and core game logic.
+- `matching-game-init.js` – Thin wrapper that simulates fetching the API response.
+- `config/index.js` – Sample payload used during local development.
+- `matching-game-theme-preview.js` – Lightweight preview that surfaces the configured colours and
+  card art.
+- `unique-cards.js` – Fallback deck used when the payload does not specify images.
 
-## Template contract
+## Config payload
 
-`config/template.json` declares the fields that the dashboard should render. Each
-entry records the field name, input type, scope, validation rules, and any nested
-structures. Typed defaults are stored alongside the contract so complex values
-(like the card deck and theme) remain real JSON:
-
-```json
-{
-  "name": "cards",
-  "type": "array",
-  "scope": "admin",
-  "merchantEditableFields": ["type", "image", "altText"],
-  "item": {
-    "type": "object",
-    "fields": [
-      { "name": "id", "type": "string", "required": true },
-      { "name": "type", "type": "string", "required": true },
-      { "name": "image", "type": "image", "required": true }
-    ]
-  }
-}
-```
-
-These defaults power both the admin preview tools and the storefront fixtures.
-
-## Runtime payload
-
-During preview builds we serialise the template defaults into the shape returned
-by `/games/list`. `config/index.js` exports this sample response via
-`matchingGameConfig.gameDocument`:
+`config/index.js` exports the shape returned by the API. Every matching-card game now ships the
+following base fields:
 
 ```json
 {
-  "game_id": "flip-001",
-  "game_template_name": "flip-card",
-  "merchant_id": "merchant-demo",
-  "options": [
-    {
-      "input_name": "moveLimit",
-      "input_type": "number",
-      "required": true,
-      "value": "5"
-    },
-    {
-      "input_name": "cards",
-      "input_type": "array",
-      "required": true,
-      "value": "[{\"id\":\"mee-siam-with-prawns\",\"type\":\"Mee Siam With Prawns\"}]"
-    }
-  ]
+  "game_id": "f6c8f7c4-5ab7-41f2-9a1f-abc123xyz456",
+  "game_template_id": "flip-card-new-uuid",
+  "distribution_info": {
+    "type": "score_threshold",
+    "endpoint": "/api/games/flip-card/claim/score-threshold"
+  },
+  "title": "Azure Breeze Flip Challenge",
+  "subtitle": "Match the pairs before you run out of moves.",
+  "move_limit": 8,
+  "initial_reveal_seconds": 3,
+  "card_upflip_seconds": 1.2,
+  "primary_color": "#fdfaf5",
+  "secondary_color": "#7DD3FC",
+  "tertiary_color": "#FDE0AB",
+  "card_back_image": "/images/matching-game-assets/card-back.png",
+  "image_1": "/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png",
+  "image_2": "/images/matching-game-assets/white-tiffin-assets/local-trio.png",
+  "image_3": "/images/matching-game-assets/white-tiffin-assets/nasi-lemak-beef.png",
+  "image_4": "/images/matching-game-assets/white-tiffin-assets/chicken-curry.png",
+  "image_5": "/images/matching-game-assets/white-tiffin-assets/trio-snack-platter.png",
+  "image_6": "/images/matching-game-assets/white-tiffin-assets/fish-maw-seafood-soup.png",
+  "image_7": "/images/matching-game-assets/pokemon-assets/bulbasaur.png",
+  "image_8": "/images/matching-game-assets/pokemon-assets/arcanine.png"
 }
 ```
 
-The storefront still expects the server to respond with full `Game` documents,
-so downstream code should parse stringified JSON for complex fields.
+The UI consumes the snake_case fields directly. Card data is derived from the enumerated `image_n`
+entries, and defaults to the fallback deck if none are supplied.
 
-## Editable fields
+## Theming
 
-`template.fields` includes the scope information that used to live in the
-`fieldSchema` helper:
+MVP styling keeps to three colours. `primary_color`, `secondary_color`, and `tertiary_color`
+respectively drive the backdrop, accent, and support tones. The React components expand those values
+into a minimal theme so the game renders consistently even when the payload omits optional fields.
 
-- **Admin dashboard**: `moveLimit`, `initialRevealSeconds`, `cardUpflipSeconds`,
-  `cards`, `submissionEndpoint`.
-- **Merchant dashboard**: `cardBackImage`, `theme`, and card-level overrides for
-  `type`, `image`, and `altText`.
+## Assets
 
-The template can be consumed directly by dynamic form builders or access-control
-logic.
-
-## Image requirements
-
-- Card faces: transparent PNG, at least 512 × 512 px.
-- Card backs: transparent PNG, square ratio recommended.
-- Provide `altText` for accessibility – the frontend will pass it through to the
-  rendered `<img>` tags.
-
-## Storage notes
-
-Persist the template definition as-is in the template catalog. When a new
-campaign is created, clone `template.defaults`, collect overrides from the
-merchant, and publish the merged values. The helper in `config/index.js` shows
-how to serialise the result into the runtime `options` array.
+Card art should be transparent PNGs. The example payload references the sample assets stored under
+`public/images/matching-game-assets/`. Update those paths (or the files themselves) to match the
+campaign you are shipping.
