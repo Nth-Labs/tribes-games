@@ -1,130 +1,87 @@
-import template from './template.json';
-
-const previewMetadata = {
-  gameId: 'gacha-001',
-  merchantId: 'merchant-demo'
-};
-
-const previewOptions = {
-  ...template.defaults
-};
-
-const templateFields = Array.isArray(template.fields) ? template.fields : [];
-
-const serialiseOptionValue = (field, value) => {
-  if (value === null) {
-    return null;
+const gachaponPrizes = [
+  {
+    id: 'luminous-orb',
+    name: 'Luminous Orb',
+    rarity: 'common',
+    rarityLabel: 'Common',
+    description: 'A softly glowing orb that keeps your camp lit through the night.',
+    weight: 45,
+    capsuleColor: '#E5E7EB',
+    flairText: 'The orb hums gently as it rolls into your hands.'
+  },
+  {
+    id: 'ember-charm',
+    name: 'Ember Charm',
+    rarity: 'uncommon',
+    rarityLabel: 'Uncommon',
+    description: 'A flickering charm that warms nearby allies by a few cozy degrees.',
+    weight: 30,
+    capsuleColor: '#86EFAC',
+    flairText: 'Sparks of emberlight trace the capsule as it opens.'
+  },
+  {
+    id: 'aurora-cape',
+    name: 'Aurora Cape',
+    rarity: 'rare',
+    rarityLabel: 'Rare',
+    description: 'Shimmers with the northern lights and lets you glide short distances.',
+    weight: 18,
+    capsuleColor: '#93C5FD',
+    flairText: 'The cape unfurls with a cascade of aurora hues.'
+  },
+  {
+    id: 'celestial-compass',
+    name: 'Celestial Compass',
+    rarity: 'epic',
+    rarityLabel: 'Epic',
+    description: 'Always points toward the nearest secret, no matter where you roam.',
+    weight: 6,
+    capsuleColor: '#C4B5FD',
+    flairText: 'Starlit runes ignite as the compass clicks into place.'
+  },
+  {
+    id: 'dragon-heartfire',
+    name: 'Dragon Heartfire',
+    rarity: 'legendary',
+    rarityLabel: 'Legendary',
+    description: "A fragment of dragon flame that grants a surge of courage to its bearer.",
+    weight: 1,
+    capsuleColor: '#FDE68A',
+    flairText: "A plume of golden flame roars from the capsule's core."
   }
-
-  if (typeof value === 'undefined') {
-    return '';
-  }
-
-  const fieldType = field?.type;
-
-  if (fieldType === 'number' && typeof value === 'number') {
-    return value.toString();
-  }
-
-  if (fieldType === 'boolean' && typeof value === 'boolean') {
-    return value ? 'true' : 'false';
-  }
-
-  if (fieldType === 'array' || fieldType === 'object' || fieldType === 'json') {
-    return JSON.stringify(value);
-  }
-
-  if (Array.isArray(value) || typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  return String(value);
-};
-
-const buildOptionEntry = (field) => {
-  const optionName = field?.name;
-
-  if (!optionName) {
-    return null;
-  }
-
-  const hasCustomValue = Object.prototype.hasOwnProperty.call(previewOptions, optionName);
-  const optionValue = hasCustomValue ? previewOptions[optionName] : field?.default;
-
-  if (typeof optionValue === 'undefined') {
-    return null;
-  }
-
-  return {
-    input_name: optionName,
-    input_type: field?.type ?? 'string',
-    required: Boolean(field?.required),
-    value: serialiseOptionValue(field, optionValue)
-  };
-};
-
-const previewGameDocument = {
-  game_id: previewMetadata.gameId,
-  game_template_name: template.gameType,
-  merchant_id: previewMetadata.merchantId,
-  name: previewOptions.title ?? template.metadata?.name ?? '',
-  status: 'draft',
-  is_active: true,
-  hard_play_count_limit: 0,
-  play_count: 0,
-  prize_distribution_strategy: 'cascade',
-  options: templateFields.map((field) => buildOptionEntry(field)).filter(Boolean)
-};
+];
 
 const gachaponConfig = {
-  gameId: previewMetadata.gameId,
-  gameType: template.gameType,
-  title: previewOptions.title,
-  tagline: previewOptions.tagline,
-  description: previewOptions.description,
-  ctaLabel: previewOptions.ctaLabel,
-  preparingLabel: previewOptions.preparingLabel,
-  resultModalTitle: previewOptions.resultModalTitle,
-  capsuleMachineLabel: previewOptions.capsuleMachineLabel,
-  capsuleStatusIdleLabel: previewOptions.capsuleStatusIdleLabel,
-  capsuleStatusPreparingLabel: previewOptions.capsuleStatusPreparingLabel,
-  capsuleStatusShakingLabel: previewOptions.capsuleStatusShakingLabel,
-  capsuleStatusOpeningLabel: previewOptions.capsuleStatusOpeningLabel,
-  capsuleStatusResultLabel: previewOptions.capsuleStatusResultLabel,
-  capsuleDescription: previewOptions.capsuleDescription,
-  prizeShowcaseTitle: previewOptions.prizeShowcaseTitle,
-  prizeShowcaseDescription: previewOptions.prizeShowcaseDescription,
-  prizeListLoadingText: previewOptions.prizeListLoadingText,
-  prizeListErrorText: previewOptions.prizeListErrorText,
-  attemptErrorText: previewOptions.attemptErrorText,
-  defaultFlairText: previewOptions.defaultFlairText,
-  defaultCapsuleColor: previewOptions.defaultCapsuleColor,
-  submissionEndpoint: previewOptions.submissionEndpoint,
-  shakeDurationMs: previewOptions.shakeDurationMs,
-  explosionDurationMs: previewOptions.explosionDurationMs,
-  prizes: previewOptions.prizes,
-  template,
-  templateVersion: template.version,
-  previewOptions,
-  previewMetadata,
-  fields: templateFields,
-  apiContract: {
-    method: 'POST',
-    path: '/games/list',
-    requestBody: {
-      game_ids: [previewMetadata.gameId],
-      merchant_id: previewMetadata.merchantId
-    },
-    responseType: 'application/json',
-    notes:
-      'POST /games/list returns Game documents with option values serialised as strings. Structured defaults are stringified during publishing.',
-    sampleResponse: previewGameDocument
-  },
-  gameDocument: previewGameDocument
+  game_id: 'gacha-001',
+  game_template_id: 'gachapon',
+  title: 'Celestial Capsule Gachapon',
+  tagline: 'Arcade Feature',
+  description:
+    'Pull the lever to see what treasure is sealed within the capsule. Every attempt draws from the same prize pool, and your luck determines the rarity of your reward.',
+  ctaLabel: 'Start Gachapon',
+  preparingLabel: 'Dispensing…',
+  resultModalTitle: 'Gachapon Result',
+  capsuleMachineLabel: 'Capsule Machine',
+  capsuleStatusIdleLabel: 'Ready',
+  capsuleStatusPreparingLabel: 'Priming capsule…',
+  capsuleStatusShakingLabel: 'Shaking…',
+  capsuleStatusOpeningLabel: 'Opening…',
+  capsuleStatusResultLabel: 'Capsule opened!',
+  capsuleDescription:
+    'Every shake builds anticipation before the capsule bursts open to reveal your prize. Hold tight and watch the glow change as the machine prepares your reward.',
+  prizeShowcaseTitle: 'Prize Showcase',
+  prizeShowcaseDescription: 'Browse every prize currently loaded into the capsule.',
+  prizeListLoadingText: 'Loading prize lineup…',
+  prizeListErrorText: 'We could not load the prize list. Please refresh to try again.',
+  attemptErrorText: 'Something interrupted the gachapon attempt. Please try again.',
+  defaultFlairText: 'The capsule cracks open in a burst of light! 🎉',
+  defaultCapsuleColor: '#38bdf8',
+  submissionEndpoint: '/api/games/gachapon/gacha-001/results',
+  shakeDurationMs: 1200,
+  explosionDurationMs: 650,
+  prizes: gachaponPrizes
 };
 
-export const gachaponTemplate = template;
-export const gachaponPreviewOptions = previewOptions;
-export const gachaponPreviewGameDocument = previewGameDocument;
+export { gachaponPrizes };
 
 export default gachaponConfig;

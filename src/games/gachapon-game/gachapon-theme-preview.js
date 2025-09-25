@@ -1,22 +1,24 @@
 import React, { useMemo } from 'react';
-import { gachaponPreviewOptions } from './config';
+import gachaponConfig, { gachaponPrizes } from './config';
 
-const DEFAULT_OPTIONS = gachaponPreviewOptions ?? {};
-const DEFAULT_PRIZES = Array.isArray(DEFAULT_OPTIONS.prizes) ? DEFAULT_OPTIONS.prizes : [];
-const DEFAULT_CAPSULE_COLOR = DEFAULT_OPTIONS.defaultCapsuleColor ?? '#38bdf8';
-const DEFAULT_FLAIR =
-  DEFAULT_OPTIONS.defaultFlairText ?? 'The capsule cracks open in a burst of light! 🎉';
+const DEFAULT_CONFIG = gachaponConfig;
+const DEFAULT_PRIZES = gachaponPrizes;
+const DEFAULT_CAPSULE_COLOR = DEFAULT_CONFIG.defaultCapsuleColor ?? '#38bdf8';
+const DEFAULT_FLAIR = DEFAULT_CONFIG.defaultFlairText ?? 'The capsule cracks open in a burst of light! 🎉';
 
 const toCleanString = (value) => (typeof value === 'string' ? value.trim() : '');
-const getColor = (value, fallback, fallbackAlt) => {
+
+const pickColor = (value, fallback, fallbackAlt) => {
   const trimmed = toCleanString(value);
   if (trimmed) {
     return trimmed;
   }
+
   const fallbackTrimmed = toCleanString(fallback);
   if (fallbackTrimmed) {
     return fallbackTrimmed;
   }
+
   return fallbackAlt;
 };
 
@@ -45,29 +47,26 @@ const CapsuleColorSwatch = ({ label, value, isCustom }) => {
   );
 };
 
-const GachaponThemePreview = ({ defaultCapsuleColor, prizes, defaultFlairText }) => {
-  const capsuleColor = getColor(defaultCapsuleColor, DEFAULT_CAPSULE_COLOR, '#38bdf8');
-  const fallbackPrizes = DEFAULT_PRIZES;
-  const providedPrizes = Array.isArray(prizes) ? prizes : [];
-  const heroFlair = toCleanString(defaultFlairText) || DEFAULT_FLAIR;
+const GachaponThemePreview = ({ config }) => {
+  const data = config ?? DEFAULT_CONFIG;
+  const capsuleColor = pickColor(data?.defaultCapsuleColor, DEFAULT_CAPSULE_COLOR, '#38bdf8');
+  const heroFlair = toCleanString(data?.defaultFlairText) || DEFAULT_FLAIR;
+  const isDefaultConfig = data === DEFAULT_CONFIG;
 
   const previewPrizes = useMemo(() => {
-    const source = providedPrizes.length ? providedPrizes : fallbackPrizes;
+    const source = Array.isArray(data?.prizes) && data.prizes.length ? data.prizes : DEFAULT_PRIZES;
+
     return source.slice(0, 4).map((prize, index) => {
-      const fallback = fallbackPrizes[index] ?? {};
-      const color = getColor(prize?.capsuleColor, fallback.capsuleColor, capsuleColor);
+      const fallback = DEFAULT_PRIZES[index] ?? {};
+      const color = pickColor(prize?.capsuleColor, fallback.capsuleColor, capsuleColor);
       const label =
         toCleanString(prize?.rarityLabel) ||
         toCleanString(prize?.name) ||
         toCleanString(fallback.rarityLabel) ||
         toCleanString(fallback.name) ||
         `Prize ${index + 1}`;
-      const flair =
-        toCleanString(prize?.flairText) ||
-        toCleanString(fallback.flairText) ||
-        toCleanString(defaultFlairText) ||
-        DEFAULT_FLAIR;
-      const isCustom = Boolean(providedPrizes.length && toCleanString(providedPrizes[index]?.capsuleColor));
+      const flair = toCleanString(prize?.flairText) || toCleanString(fallback.flairText) || heroFlair;
+      const isCustom = !isDefaultConfig && Boolean(toCleanString(prize?.capsuleColor));
 
       return {
         id: prize?.id ?? fallback.id ?? `gachapon-prize-${index}`,
@@ -77,14 +76,14 @@ const GachaponThemePreview = ({ defaultCapsuleColor, prizes, defaultFlairText })
         isCustom
       };
     });
-  }, [providedPrizes, fallbackPrizes, capsuleColor, defaultFlairText]);
+  }, [capsuleColor, data, heroFlair, isDefaultConfig]);
 
   const swatchEntries = useMemo(() => {
     const entries = [
       {
         label: 'Default capsule',
         value: capsuleColor,
-        isCustom: Boolean(toCleanString(defaultCapsuleColor))
+        isCustom: !isDefaultConfig && Boolean(toCleanString(data?.defaultCapsuleColor))
       }
     ];
 
@@ -98,7 +97,7 @@ const GachaponThemePreview = ({ defaultCapsuleColor, prizes, defaultFlairText })
     });
 
     return entries;
-  }, [capsuleColor, defaultCapsuleColor, previewPrizes]);
+  }, [capsuleColor, data, isDefaultConfig, previewPrizes]);
 
   return (
     <div className="space-y-6">
@@ -121,9 +120,7 @@ const GachaponThemePreview = ({ defaultCapsuleColor, prizes, defaultFlairText })
               <p className="max-w-xs text-sm text-slate-400">{heroFlair}</p>
             </div>
             <div className="space-y-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">
-                Prize capsule accents
-              </p>
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-slate-400">Prize capsule accents</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 {previewPrizes.map((prize) => (
                   <div
@@ -147,9 +144,7 @@ const GachaponThemePreview = ({ defaultCapsuleColor, prizes, defaultFlairText })
                     <p className="mt-3 line-clamp-2 text-xs text-slate-400">{prize.flair}</p>
                     <span
                       className={`mt-3 inline-flex w-fit rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide ${
-                        prize.isCustom
-                          ? 'bg-emerald-500/10 text-emerald-300'
-                          : 'bg-slate-800 text-slate-400'
+                        prize.isCustom ? 'bg-emerald-500/10 text-emerald-300' : 'bg-slate-800 text-slate-400'
                       }`}
                     >
                       {prize.isCustom ? 'Custom colour' : 'Default colour'}
