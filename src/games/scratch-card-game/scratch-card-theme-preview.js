@@ -1,22 +1,25 @@
 import React, { useMemo } from 'react';
-import { scratchCardPreviewOptions } from './config';
+import scratchCardConfig, { scratchCardPrizes } from './config';
 
-const DEFAULT_OPTIONS = scratchCardPreviewOptions ?? {};
-const DEFAULT_PRIZES = Array.isArray(DEFAULT_OPTIONS.prizes) ? DEFAULT_OPTIONS.prizes : [];
-const DEFAULT_TITLE = DEFAULT_OPTIONS.title ?? 'Scratch & Reveal';
+const DEFAULT_CONFIG = scratchCardConfig;
+const DEFAULT_PRIZES = scratchCardPrizes;
+const DEFAULT_TITLE = DEFAULT_CONFIG.title ?? 'Scratch & Reveal';
 const DEFAULT_DESCRIPTION =
-  DEFAULT_OPTIONS.description ?? 'Peel back the foil to uncover prizes and a glowing palette.';
+  DEFAULT_CONFIG.description ?? 'Peel back the foil to uncover prizes and a glowing palette.';
 
 const toCleanString = (value) => (typeof value === 'string' ? value.trim() : '');
-const getColor = (value, fallback, fallbackAlt) => {
+
+const pickColor = (value, fallback, fallbackAlt) => {
   const trimmed = toCleanString(value);
   if (trimmed) {
     return trimmed;
   }
+
   const fallbackTrimmed = toCleanString(fallback);
   if (fallbackTrimmed) {
     return fallbackTrimmed;
   }
+
   return fallbackAlt;
 };
 
@@ -49,27 +52,28 @@ const ScratchGradientSwatch = ({ label, foil, glow, isCustom }) => {
   );
 };
 
-const ScratchCardThemePreview = ({ prizes, title, description }) => {
-  const providedPrizes = Array.isArray(prizes) ? prizes : [];
-  const heading = toCleanString(title) || DEFAULT_TITLE;
-  const body = toCleanString(description) || DEFAULT_DESCRIPTION;
+const ScratchCardThemePreview = ({ config }) => {
+  const data = config ?? DEFAULT_CONFIG;
+  const heading = toCleanString(data?.title) || DEFAULT_TITLE;
+  const body = toCleanString(data?.description) || DEFAULT_DESCRIPTION;
+  const isDefaultConfig = data === DEFAULT_CONFIG;
 
   const previewPrizes = useMemo(() => {
-    const source = providedPrizes.length ? providedPrizes : DEFAULT_PRIZES;
+    const source = Array.isArray(data?.prizes) && data.prizes.length ? data.prizes : DEFAULT_PRIZES;
+
     return source.slice(0, 5).map((prize, index) => {
       const fallback = DEFAULT_PRIZES[index] ?? {};
-      const foil = getColor(prize?.foilColor, fallback.foilColor, '#cbd5f5');
-      const glow = getColor(prize?.glowColor, fallback.glowColor, 'rgba(148, 163, 184, 0.45)');
+      const foil = pickColor(prize?.foilColor, fallback.foilColor, '#cbd5f5');
+      const glow = pickColor(prize?.glowColor, fallback.glowColor, 'rgba(148, 163, 184, 0.45)');
       const label =
         toCleanString(prize?.rarityLabel) ||
         toCleanString(prize?.name) ||
         toCleanString(fallback.rarityLabel) ||
         toCleanString(fallback.name) ||
         `Prize ${index + 1}`;
-      const isCustom = Boolean(
-        providedPrizes.length &&
-          (toCleanString(providedPrizes[index]?.foilColor) || toCleanString(providedPrizes[index]?.glowColor))
-      );
+      const isCustom =
+        !isDefaultConfig &&
+        Boolean(toCleanString(prize?.foilColor) || toCleanString(prize?.glowColor));
 
       return {
         id: prize?.id ?? fallback.id ?? `scratch-prize-${index}`,
@@ -79,7 +83,7 @@ const ScratchCardThemePreview = ({ prizes, title, description }) => {
         isCustom
       };
     });
-  }, [providedPrizes]);
+  }, [data, isDefaultConfig]);
 
   const heroPrize = previewPrizes[0] ?? {
     label: 'Prize reveal',
