@@ -19,31 +19,127 @@ const formatDuration = (seconds) => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
+const hexToRgba = (hex, alpha) => {
+  if (typeof hex !== 'string') {
+    return null;
+  }
+
+  const cleaned = hex.replace('#', '').trim();
+  if (cleaned.length !== 3 && cleaned.length !== 6) {
+    return null;
+  }
+
+  const expanded = cleaned.length === 3 ? cleaned.split('').map((char) => char + char).join('') : cleaned;
+  const numeric = Number.parseInt(expanded, 16);
+
+  if (Number.isNaN(numeric)) {
+    return null;
+  }
+
+  const r = (numeric >> 16) & 255;
+  const g = (numeric >> 8) & 255;
+  const b = numeric & 255;
+  const safeAlpha = typeof alpha === 'number' ? Math.min(Math.max(alpha, 0), 1) : 1;
+
+  return `rgba(${r}, ${g}, ${b}, ${safeAlpha})`;
+};
+
+const pickColor = (value, fallback) => {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed) {
+      return trimmed;
+    }
+  }
+  return fallback;
+};
+
 const defaultTheme = {
-  backgroundColor: '#020617',
-  backgroundImage:
-    'radial-gradient(circle at 20% -10%, rgba(59, 130, 246, 0.18), transparent 45%), radial-gradient(circle at 85% 5%, rgba(250, 204, 21, 0.22), transparent 48%), linear-gradient(140deg, #020617 0%, #0f172a 55%, #020617 100%)',
-  backgroundOverlayColor: 'rgba(4, 7, 15, 0.82)',
-  accentColor: '#facc15',
-  titleColor: '#f8fafc',
-  textColor: '#e2e8f0',
-  subtleTextColor: 'rgba(226, 232, 240, 0.78)',
-  panelBackgroundColor: 'rgba(8, 15, 32, 0.68)',
-  panelBorderColor: 'rgba(148, 163, 184, 0.32)',
-  panelShadowColor: 'rgba(8, 15, 32, 0.7)',
-  boardBackgroundColor: 'rgba(8, 15, 32, 0.6)',
-  boardBorderColor: 'rgba(148, 163, 184, 0.28)',
-  boardShadowColor: 'rgba(8, 15, 32, 0.68)',
-  cardBackBackgroundColor: 'rgba(30, 41, 59, 0.88)',
-  cardFaceBackgroundColor: 'rgba(15, 23, 42, 0.65)',
-  cardBorderColor: 'rgba(148, 163, 184, 0.28)',
-  cardMatchedBackgroundColor: 'rgba(34, 197, 94, 0.16)',
-  cardMatchedGlowColor: 'rgba(34, 197, 94, 0.55)',
-  cardShadowColor: 'rgba(8, 15, 32, 0.75)',
-  buttonBackgroundColor: '#facc15',
-  buttonHoverBackgroundColor: '#fbbf24',
+  backgroundColor: '#fdfaf5',
+  backgroundImage: '',
+  backgroundOverlayColor: 'rgba(255, 255, 255, 0.92)',
+  accentColor: '#38bdf8',
+  titleColor: '#0f172a',
+  textColor: '#1f2937',
+  subtleTextColor: 'rgba(100, 116, 139, 0.75)',
+  panelBackgroundColor: '#ffffff',
+  panelBorderColor: 'rgba(148, 163, 184, 0.25)',
+  panelShadowColor: 'rgba(15, 23, 42, 0.08)',
+  boardBackgroundColor: '#ffffff',
+  boardBorderColor: 'rgba(148, 163, 184, 0.25)',
+  boardShadowColor: 'rgba(15, 23, 42, 0.08)',
+  cardBackBackgroundColor: '#FDE0AB',
+  cardFaceBackgroundColor: '#ffffff',
+  cardBorderColor: 'rgba(148, 163, 184, 0.3)',
+  cardMatchedBackgroundColor: 'rgba(125, 211, 252, 0.25)',
+  cardMatchedGlowColor: 'rgba(125, 211, 252, 0.55)',
+  cardShadowColor: 'rgba(15, 23, 42, 0.08)',
+  buttonBackgroundColor: '#38bdf8',
+  buttonHoverBackgroundColor: '#0ea5e9',
   buttonTextColor: '#0f172a',
-  cardFlipDurationMs: 550
+  cardFlipDurationMs: 480
+};
+
+const createThemeFromConfig = (config) => {
+  if (!config) {
+    return defaultTheme;
+  }
+
+  const background = pickColor(config.primary_color, defaultTheme.backgroundColor);
+  const accent = pickColor(config.secondary_color, defaultTheme.accentColor);
+  const support = pickColor(config.tertiary_color, defaultTheme.cardBackBackgroundColor);
+  const accentSoft = hexToRgba(accent, 0.2) || defaultTheme.cardMatchedBackgroundColor;
+  const accentGlow = hexToRgba(accent, 0.55) || defaultTheme.cardMatchedGlowColor;
+  const borderTint = hexToRgba(accent, 0.35) || defaultTheme.cardBorderColor;
+
+  return {
+    ...defaultTheme,
+    backgroundColor: background,
+    accentColor: accent,
+    cardBackBackgroundColor: support,
+    cardMatchedBackgroundColor: accentSoft,
+    cardMatchedGlowColor: accentGlow,
+    buttonBackgroundColor: accent,
+    buttonHoverBackgroundColor: accent,
+    boardBorderColor: borderTint,
+    cardBorderColor: borderTint
+  };
+};
+
+const getNumberOption = (value, fallback) => {
+  const parsed = Number(value);
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+  return fallback;
+};
+
+const buildCardsFromConfig = (config) => {
+  if (!config) {
+    return [];
+  }
+
+  if (Array.isArray(config.cards) && config.cards.length > 0) {
+    return config.cards
+      .map((card, index) => ({
+        id: card?.id ?? `config-card-${index + 1}`,
+        type: card?.type ?? `Card ${index + 1}`,
+        image: typeof card?.image === 'string' ? card.image : null,
+        altText: card?.altText ?? card?.type ?? `Card ${index + 1}`
+      }))
+      .filter((card) => typeof card.image === 'string' && card.image.trim().length > 0);
+  }
+
+  const imageEntries = Object.entries(config)
+    .filter(([key, value]) => key.startsWith('image_') && typeof value === 'string' && value.trim().length > 0)
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB, undefined, { numeric: true }));
+
+  return imageEntries.map(([_, value], index) => ({
+    id: `config-card-${index + 1}`,
+    type: `Card ${index + 1}`,
+    image: value,
+    altText: `Card ${index + 1}`
+  }));
 };
 
 const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmitting, theme }) => {
@@ -128,18 +224,25 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
 };
 
 const MatchingGame = ({ config }) => {
-  const cardsFromConfig = useMemo(() => config?.cards || uniqueCardsArray, [config?.cards]);
+  const cardsFromConfig = useMemo(() => {
+    const derived = buildCardsFromConfig(config);
+    if (derived.length > 0) {
+      return derived;
+    }
+    return uniqueCardsArray;
+  }, [config]);
   const [cards] = useState(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)));
   const totalPairs = cards.length / 2;
-  const moveLimit = config?.moveLimit || 5;
-  const initialRevealDuration = config?.initialRevealSeconds ?? 0;
-  const cardUpflipSecondsValue = Number(config?.cardUpflipSeconds);
-  const cardUpflipSeconds = Number.isFinite(cardUpflipSecondsValue) && cardUpflipSecondsValue >= 0
-    ? cardUpflipSecondsValue
-    : 1;
+  const moveLimitValue = getNumberOption(config?.move_limit ?? config?.moveLimit, 8);
+  const moveLimit = Number.isFinite(moveLimitValue) && moveLimitValue > 0 ? Math.round(moveLimitValue) : 5;
+  const initialRevealRaw = getNumberOption(config?.initial_reveal_seconds ?? config?.initialRevealSeconds, 0);
+  const initialRevealDuration = Math.max(0, initialRevealRaw);
+  const cardUpflipSecondsValue = getNumberOption(config?.card_upflip_seconds ?? config?.cardUpflipSeconds, 1);
+  const cardUpflipSeconds = cardUpflipSecondsValue >= 0 ? cardUpflipSecondsValue : 1;
   const cardUpflipDurationMs = cardUpflipSeconds * 1000;
   const evaluationDelayMs = Math.min(cardUpflipDurationMs, 500);
   const flipBackDelayMs = Math.max(cardUpflipDurationMs - evaluationDelayMs, 0);
+  const cardBackImage = config?.card_back_image ?? config?.cardBackImage;
 
   const [openCards, setOpenCards] = useState([]);
   const [clearedCards, setClearedCards] = useState({});
@@ -166,10 +269,7 @@ const MatchingGame = ({ config }) => {
 
   const movesLeft = Math.max(moveLimit - moves, 0);
 
-  const theme = useMemo(() => ({
-    ...defaultTheme,
-    ...(config?.theme || {})
-  }), [config?.theme]);
+  const theme = useMemo(() => createThemeFromConfig(config), [config]);
 
   const flipDurationMs = useMemo(() => {
     const parsed = Number(theme?.cardFlipDurationMs);
@@ -240,7 +340,7 @@ const MatchingGame = ({ config }) => {
     const backgroundImageSource = theme.backgroundImage;
     const imageSources = [
       ...cardsFromConfig.map((card) => card?.image).filter(Boolean),
-      config?.cardBackImage,
+      cardBackImage,
       isCssGradient(backgroundImageSource) ? null : backgroundImageSource,
     ].filter(Boolean);
 
@@ -281,7 +381,7 @@ const MatchingGame = ({ config }) => {
     return () => {
       isCancelled = true;
     };
-  }, [assetsLoaded, cardsFromConfig, config?.cardBackImage, theme.backgroundImage]);
+  }, [assetsLoaded, cardsFromConfig, cardBackImage, theme.backgroundImage]);
 
   useEffect(() => {
     if (initialRevealTimeoutRef.current) {
@@ -473,14 +573,18 @@ const MatchingGame = ({ config }) => {
 
     setIsSubmitting(true);
     const finalElapsedTime = elapsedTime || Math.floor((Date.now() - gameStartTimeRef.current) / 1000);
+    const templateId = typeof config?.game_template_id === 'string' && config.game_template_id
+      ? config.game_template_id
+      : 'matching-game';
     const payload = {
-      gameId: config?.gameId,
-      gameType: config?.gameType,
+      gameId: config?.game_id,
+      gameTemplateId: templateId,
+      distribution: config?.distribution_info,
       outcome: gameStatus === 'won' ? 'Won' : 'Lost',
       movesLeft,
-      timeElapsed: finalElapsedTime,
+      timeElapsed: finalElapsedTime
     };
-    const url = `/api/${config?.gameType}/${config?.gameId}`;
+    const url = `/api/games/${templateId}/results`;
 
     mockSubmitResults(url, payload)
       .then((response) => {
@@ -558,12 +662,12 @@ const MatchingGame = ({ config }) => {
                 >
                   {config?.title || 'Matching Game'}
                 </h1>
-                {config?.description && (
+                {config?.subtitle && (
                   <p
                     className="text-sm leading-relaxed sm:text-base"
                     style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}
                   >
-                    {config.description}
+                    {config.subtitle}
                   </p>
                 )}
               </div>
@@ -728,7 +832,7 @@ const MatchingGame = ({ config }) => {
                     isInactive={checkIsInactive(card)}
                     isFlipped={checkIsFlipped(index)}
                     onClick={handleCardClick}
-                    cardBackImage={config?.cardBackImage}
+                    cardBackImage={cardBackImage}
                     theme={theme}
                     flipDurationMs={flipDurationMs}
                   />
