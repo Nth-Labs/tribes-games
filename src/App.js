@@ -2,7 +2,7 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import MatchingGameInit from './games/matching-game/matching-game-init';
-import FlipCardNewGameInit from './games/flip-card-new/flip-card-new-init';
+import FlipCardNewGameInit from './games/flip-card-new';
 import HomeNav from './components/home/home-nav';
 import StwGame from './games/stw-game/stw-game';
 import MysteryManorGame from './games/mystery-manor-game/mystery-manor-game';
