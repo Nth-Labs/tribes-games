@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FlipCard from './flip-card';
 import uniqueCardsArray from './unique-cards';
 import ResultsScreen from '../matching-game/results-screen';
-
-const isCssGradient = (value) => typeof value === 'string' && value.trim().includes('gradient(');
+import { createThemeFromConfig, defaultTheme, isCssGradient } from './theme';
+import { deriveCardsFromData } from './config';
 
 const formatDuration = (seconds) => {
   const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
@@ -17,32 +17,73 @@ const formatDuration = (seconds) => {
   return `${minutes}m ${remainingSeconds}s`;
 };
 
-const defaultTheme = {
-  backgroundColor: '#fdfaf5',
-  backgroundImage:
-    'radial-gradient(circle at 10% 0%, rgba(125, 211, 252, 0.45), transparent 55%), radial-gradient(circle at 90% -20%, rgba(253, 224, 171, 0.6), transparent 52%), linear-gradient(160deg, #fdfaf5 0%, #e8f3ff 55%, #fdfaf5 100%)',
-  backgroundOverlayColor: 'rgba(255, 255, 255, 0.82)',
-  accentColor: '#60a5fa',
-  titleColor: '#0f172a',
-  textColor: '#1f2937',
-  subtleTextColor: 'rgba(71, 85, 105, 0.75)',
-  panelBackgroundColor: 'rgba(255, 255, 255, 0.88)',
-  panelBorderColor: 'rgba(148, 163, 184, 0.32)',
-  panelShadowColor: 'rgba(148, 163, 184, 0.26)',
-  boardBackgroundColor: 'rgba(255, 255, 255, 0.92)',
-  boardBorderColor: 'rgba(191, 219, 254, 0.7)',
-  boardShadowColor: 'rgba(100, 116, 139, 0.24)',
-  cardBackBackgroundColor: 'rgba(226, 232, 240, 0.85)',
-  cardFaceBackgroundColor: 'rgba(239, 246, 255, 0.92)',
-  cardBorderColor: 'rgba(191, 219, 254, 0.9)',
-  cardMatchedBackgroundColor: 'rgba(191, 227, 255, 0.65)',
-  cardMatchedGlowColor: 'rgba(96, 165, 250, 0.58)',
-  cardShadowColor: 'rgba(148, 163, 184, 0.4)',
-  buttonBackgroundColor: '#3b82f6',
-  buttonHoverBackgroundColor: '#2563eb',
-  buttonTextColor: '#f8fafc',
-  cardFlipDurationMs: 520
+const unwrapMongoValue = (value) => {
+  if (value && typeof value === 'object') {
+    if (value.$numberInt !== undefined) {
+      return unwrapMongoValue(value.$numberInt);
+    }
+    if (value.$numberDouble !== undefined) {
+      return unwrapMongoValue(value.$numberDouble);
+    }
+    if (value.$numberLong !== undefined) {
+      return unwrapMongoValue(value.$numberLong);
+    }
+    if (value.$numberDecimal !== undefined) {
+      return unwrapMongoValue(value.$numberDecimal);
+    }
+    if (value.$oid !== undefined) {
+      return unwrapMongoValue(value.$oid);
+    }
+    if (value.$date !== undefined) {
+      return unwrapMongoValue(value.$date);
+    }
+    if (value.value !== undefined) {
+      return unwrapMongoValue(value.value);
+    }
+  }
+
+  return value;
 };
+
+const coerceNumber = (value) => {
+  const unwrapped = unwrapMongoValue(value);
+
+  if (typeof unwrapped === 'number') {
+    return Number.isFinite(unwrapped) ? unwrapped : NaN;
+  }
+
+  if (typeof unwrapped === 'string') {
+    const trimmed = unwrapped.trim();
+    if (!trimmed) {
+      return NaN;
+    }
+
+    const parsed = Number(trimmed);
+    return Number.isFinite(parsed) ? parsed : NaN;
+  }
+
+  return NaN;
+};
+
+const getNumberOption = (value, fallback) => {
+  const parsed = coerceNumber(value);
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+  return fallback;
+};
+
+const toCleanString = (value) => {
+  const unwrapped = unwrapMongoValue(value);
+  if (typeof unwrapped === 'string') {
+    return unwrapped.trim();
+  }
+  if (typeof unwrapped === 'number' && Number.isFinite(unwrapped)) {
+    return `${unwrapped}`;
+  }
+  return '';
+};
+
 
 const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmitting, theme }) => {
   const isWin = status === 'won';
@@ -128,15 +169,20 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
 };
 
 const FlipCardNewGame = ({ config }) => {
-  const cardsFromConfig = useMemo(() => config?.cards || uniqueCardsArray, [config?.cards]);
+  const cardsFromConfig = useMemo(() => {
+    const derivedCards = deriveCardsFromData(config);
+    if (derivedCards.length > 0) {
+      return derivedCards;
+    }
+    return uniqueCardsArray;
+  }, [config]);
+
   const [cards] = useState(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)));
   const totalPairs = cards.length / 2;
-  const moveLimit = config?.moveLimit || 8;
-  const initialRevealDuration = config?.initialRevealSeconds ?? 0;
-  const cardUpflipSecondsValue = Number(config?.cardUpflipSeconds);
-  const cardUpflipSeconds = Number.isFinite(cardUpflipSecondsValue) && cardUpflipSecondsValue >= 0
-    ? cardUpflipSecondsValue
-    : 1;
+  const moveLimit = Math.max(0, getNumberOption(config?.move_limit ?? config?.moveLimit, 8));
+  const initialRevealDuration = Math.max(0, getNumberOption(config?.initial_reveal_seconds ?? config?.initialRevealSeconds, 0));
+  const cardUpflipSecondsRaw = getNumberOption(config?.card_upflip_seconds ?? config?.cardUpflipSeconds, 1);
+  const cardUpflipSeconds = cardUpflipSecondsRaw >= 0 ? cardUpflipSecondsRaw : 1;
   const cardUpflipDurationMs = cardUpflipSeconds * 1000;
   const evaluationDelayMs = Math.min(cardUpflipDurationMs, 500);
   const flipBackDelayMs = Math.max(cardUpflipDurationMs - evaluationDelayMs, 0);
@@ -166,13 +212,40 @@ const FlipCardNewGame = ({ config }) => {
 
   const movesLeft = Math.max(moveLimit - moves, 0);
 
-  const theme = useMemo(
-    () => ({
-      ...defaultTheme,
-      ...(config?.theme || {})
-    }),
-    [config?.theme]
-  );
+  const cardBackImage = useMemo(() => {
+    const camel = toCleanString(config?.cardBackImage);
+    if (camel) {
+      return camel;
+    }
+    const snake = toCleanString(config?.card_back_image);
+    if (snake) {
+      return snake;
+    }
+    return '/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png';
+  }, [config?.cardBackImage, config?.card_back_image]);
+
+  const theme = useMemo(() => createThemeFromConfig(config || {}), [config]);
+
+  const headerSubtitle = useMemo(() => {
+    const description = toCleanString(config?.description);
+    if (description) {
+      return description;
+    }
+
+    const subtitle = toCleanString(config?.subtitle);
+    if (subtitle) {
+      return subtitle;
+    }
+
+    return '';
+  }, [config]);
+
+  const headerTitle = toCleanString(config?.title) || toCleanString(config?.name) || 'Flip Card New';
+
+  const gameId = toCleanString(config?.gameId) || toCleanString(config?.game_id) || 'flip-new-001';
+  const gameType = toCleanString(config?.gameType) || toCleanString(config?.game_type) || 'flip-card-new';
+  const submissionEndpoint =
+    toCleanString(config?.submissionEndpoint) || toCleanString(config?.submission_endpoint);
 
   const flipDurationMs = useMemo(() => {
     const parsed = Number(theme?.cardFlipDurationMs);
@@ -187,12 +260,12 @@ const FlipCardNewGame = ({ config }) => {
       backgroundColor: theme.backgroundColor || defaultTheme.backgroundColor
     };
 
-    if (theme.backgroundImage) {
-      const trimmed = theme.backgroundImage.trim();
-      if (isCssGradient(trimmed)) {
-        style.backgroundImage = trimmed;
+    const backgroundImage = toCleanString(theme.backgroundImage);
+    if (backgroundImage) {
+      if (isCssGradient(backgroundImage)) {
+        style.backgroundImage = backgroundImage;
       } else {
-        style.backgroundImage = `url(${trimmed})`;
+        style.backgroundImage = `url(${backgroundImage})`;
         style.backgroundSize = 'cover';
         style.backgroundPosition = 'center';
         style.backgroundRepeat = 'no-repeat';
@@ -241,10 +314,10 @@ const FlipCardNewGame = ({ config }) => {
   }, [gameStatus]);
 
   useEffect(() => {
-    const backgroundImageSource = theme.backgroundImage;
+    const backgroundImageSource = toCleanString(theme.backgroundImage);
     const imageSources = [
       ...cardsFromConfig.map((card) => card?.image).filter(Boolean),
-      config?.cardBackImage,
+      cardBackImage,
       isCssGradient(backgroundImageSource) ? null : backgroundImageSource
     ].filter(Boolean);
 
@@ -283,7 +356,7 @@ const FlipCardNewGame = ({ config }) => {
     return () => {
       isCancelled = true;
     };
-  }, [assetsLoaded, cardsFromConfig, config?.cardBackImage, theme.backgroundImage]);
+  }, [assetsLoaded, cardBackImage, cardsFromConfig, theme.backgroundImage]);
 
   useEffect(() => {
     if (initialRevealTimeoutRef.current) {
@@ -472,13 +545,13 @@ const FlipCardNewGame = ({ config }) => {
     setIsSubmitting(true);
     const finalElapsedTime = elapsedTime || Math.floor((Date.now() - gameStartTimeRef.current) / 1000);
     const payload = {
-      gameId: config?.gameId,
-      gameType: config?.gameType,
+      gameId,
+      gameType,
       outcome: gameStatus === 'won' ? 'Won' : 'Lost',
       movesLeft,
       timeElapsed: finalElapsedTime
     };
-    const url = config?.submissionEndpoint || `/api/${config?.gameType}/${config?.gameId}`;
+    const url = submissionEndpoint || `/api/${gameType}/${gameId}`;
 
     mockSubmitResults(url, payload)
       .then((response) => {
@@ -540,11 +613,11 @@ const FlipCardNewGame = ({ config }) => {
               Flip & Match
             </span>
             <h1 className="text-2xl font-semibold leading-snug" style={{ color: theme.titleColor || defaultTheme.titleColor }}>
-              {config?.title || 'Flip Card New'}
+              {headerTitle}
             </h1>
-            {config?.description && (
+            {headerSubtitle && (
               <p className="text-sm leading-relaxed" style={{ color: theme.subtleTextColor || defaultTheme.subtleTextColor }}>
-                {config.description}
+                {headerSubtitle}
               </p>
             )}
           </div>
@@ -641,7 +714,7 @@ const FlipCardNewGame = ({ config }) => {
                 isInactive={checkIsInactive(card)}
                 isFlipped={checkIsFlipped(index)}
                 onClick={handleCardClick}
-                cardBackImage={config?.cardBackImage}
+                cardBackImage={cardBackImage}
                 theme={theme}
                 flipDurationMs={flipDurationMs}
               />

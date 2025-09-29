@@ -1,25 +1,9 @@
 import React, { useMemo } from 'react';
-import { flipCardNewPreviewOptions } from './config';
+import flipCardNewConfig from './config';
+import { createThemeFromConfig, defaultTheme as baseTheme, isCssGradient } from './theme';
 
-const DEFAULT_OPTIONS = flipCardNewPreviewOptions ?? {};
-const DEFAULT_THEME = DEFAULT_OPTIONS.theme ?? {};
-const DEFAULT_TITLE = DEFAULT_OPTIONS.title ?? 'Flip Card Challenge';
-const DEFAULT_DESCRIPTION =
-  DEFAULT_OPTIONS.description ?? 'Preview how the refreshed flip-card experience responds to theme changes.';
-
-const toCleanString = (value) => (typeof value === 'string' ? value.trim() : '');
-const isCssGradient = (value) => typeof value === 'string' && value.includes('gradient(');
-const getColor = (value, fallback, fallbackAlt) => {
-  const trimmed = toCleanString(value);
-  if (trimmed) {
-    return trimmed;
-  }
-  const fallbackTrimmed = toCleanString(fallback);
-  if (fallbackTrimmed) {
-    return fallbackTrimmed;
-  }
-  return fallbackAlt;
-};
+const DEFAULT_CONFIG = flipCardNewConfig;
+const DEFAULT_THEME = createThemeFromConfig(DEFAULT_CONFIG);
 
 const COLOR_SECTIONS = [
   {
@@ -65,6 +49,64 @@ const COLOR_SECTIONS = [
   }
 ];
 
+const unwrapMongoValue = (value) => {
+  if (value && typeof value === 'object') {
+    if (value.$numberInt !== undefined) {
+      return unwrapMongoValue(value.$numberInt);
+    }
+    if (value.$numberDouble !== undefined) {
+      return unwrapMongoValue(value.$numberDouble);
+    }
+    if (value.$numberLong !== undefined) {
+      return unwrapMongoValue(value.$numberLong);
+    }
+    if (value.$numberDecimal !== undefined) {
+      return unwrapMongoValue(value.$numberDecimal);
+    }
+    if (value.$oid !== undefined) {
+      return unwrapMongoValue(value.$oid);
+    }
+    if (value.$date !== undefined) {
+      return unwrapMongoValue(value.$date);
+    }
+    if (value.value !== undefined) {
+      return unwrapMongoValue(value.value);
+    }
+  }
+
+  return value;
+};
+
+const toCleanString = (value) => {
+  const unwrapped = unwrapMongoValue(value);
+  if (typeof unwrapped === 'string') {
+    return unwrapped.trim();
+  }
+  if (typeof unwrapped === 'number' && Number.isFinite(unwrapped)) {
+    return `${unwrapped}`;
+  }
+  return '';
+};
+
+const buildThemeMeta = (theme) => {
+  const keys = new Set(
+    COLOR_SECTIONS.flatMap((section) => section.fields.map((field) => field.key))
+  );
+
+  const meta = {};
+
+  keys.forEach((key) => {
+    const value = toCleanString(theme?.[key]);
+    const defaultValue = toCleanString(DEFAULT_THEME?.[key] ?? baseTheme?.[key]);
+    meta[key] = {
+      value: value || defaultValue,
+      isCustom: Boolean(value && value !== defaultValue)
+    };
+  });
+
+  return meta;
+};
+
 const ColorSwatch = ({ label, value, isCustom }) => {
   const displayValue = toCleanString(value);
   return (
@@ -90,17 +132,35 @@ const ColorSwatch = ({ label, value, isCustom }) => {
   );
 };
 
-const FlipCardNewThemePreview = ({ theme, title, description }) => {
-  const mergedTheme = useMemo(() => ({ ...DEFAULT_THEME, ...(theme || {}) }), [theme]);
-  const heading = toCleanString(title) || DEFAULT_TITLE;
-  const body = toCleanString(description) || DEFAULT_DESCRIPTION;
+const FlipCardNewThemePreview = ({ config }) => {
+  const data = config ?? DEFAULT_CONFIG;
+  const mergedTheme = useMemo(() => createThemeFromConfig(data), [data]);
+  const themeMeta = useMemo(() => buildThemeMeta(mergedTheme), [mergedTheme]);
+
+  const title =
+    toCleanString(data?.title) ||
+    toCleanString(data?.name) ||
+    toCleanString(DEFAULT_CONFIG?.title) ||
+    toCleanString(DEFAULT_CONFIG?.name) ||
+    'Flip Card Challenge';
+
+  const description =
+    toCleanString(data?.description) ||
+    toCleanString(data?.subtitle) ||
+    toCleanString(DEFAULT_CONFIG?.description) ||
+    toCleanString(DEFAULT_CONFIG?.subtitle) ||
+    'Preview how the refreshed flip-card experience responds to theme changes.';
 
   const backgroundStyle = useMemo(() => {
     const style = {
-      backgroundColor: getColor(mergedTheme.backgroundColor, DEFAULT_THEME.backgroundColor, '#fdfaf5')
+      backgroundColor: themeMeta.backgroundColor?.value || baseTheme.backgroundColor
     };
+
     const backgroundImage =
-      toCleanString(mergedTheme.backgroundImage) || toCleanString(DEFAULT_THEME.backgroundImage);
+      toCleanString(mergedTheme.backgroundImage) ||
+      toCleanString(DEFAULT_THEME.backgroundImage) ||
+      toCleanString(baseTheme.backgroundImage);
+
     if (backgroundImage) {
       if (isCssGradient(backgroundImage)) {
         style.backgroundImage = backgroundImage;
@@ -111,102 +171,36 @@ const FlipCardNewThemePreview = ({ theme, title, description }) => {
         style.backgroundRepeat = 'no-repeat';
       }
     }
-    return style;
-  }, [mergedTheme]);
 
-  const overlayColor = getColor(
-    mergedTheme.backgroundOverlayColor,
-    DEFAULT_THEME.backgroundOverlayColor,
-    'rgba(255,255,255,0.82)'
-  );
-  const accentColor = getColor(mergedTheme.accentColor, DEFAULT_THEME.accentColor, '#60a5fa');
-  const subtleTextColor = getColor(
-    mergedTheme.subtleTextColor,
-    DEFAULT_THEME.subtleTextColor,
-    'rgba(100,116,139,0.75)'
-  );
-  const titleColor = getColor(mergedTheme.titleColor, DEFAULT_THEME.titleColor, '#0f172a');
-  const textColor = getColor(mergedTheme.textColor, DEFAULT_THEME.textColor, '#1f2937');
-  const buttonBackground = getColor(
-    mergedTheme.buttonBackgroundColor,
-    DEFAULT_THEME.buttonBackgroundColor,
-    accentColor
-  );
-  const buttonHoverBackground = getColor(
-    mergedTheme.buttonHoverBackgroundColor,
-    DEFAULT_THEME.buttonHoverBackgroundColor,
-    accentColor
-  );
-  const buttonTextColor = getColor(mergedTheme.buttonTextColor, DEFAULT_THEME.buttonTextColor, '#ffffff');
-  const panelShadow = getColor(
-    mergedTheme.panelShadowColor,
-    DEFAULT_THEME.panelShadowColor,
-    'rgba(148,163,184,0.26)'
-  );
-  const boardShadow = getColor(
-    mergedTheme.boardShadowColor,
-    DEFAULT_THEME.boardShadowColor,
-    'rgba(100,116,139,0.24)'
-  );
-  const cardShadow = getColor(
-    mergedTheme.cardShadowColor,
-    DEFAULT_THEME.cardShadowColor,
-    'rgba(148,163,184,0.4)'
-  );
-  const matchedGlow = getColor(
-    mergedTheme.cardMatchedGlowColor,
-    DEFAULT_THEME.cardMatchedGlowColor,
-    accentColor
-  );
+    return style;
+  }, [mergedTheme.backgroundImage, themeMeta.backgroundColor?.value]);
+
+  const overlayColor = themeMeta.backgroundOverlayColor?.value || baseTheme.backgroundOverlayColor;
+  const accentColor = themeMeta.accentColor?.value || baseTheme.accentColor;
+  const subtleTextColor = themeMeta.subtleTextColor?.value || baseTheme.subtleTextColor;
+  const titleColor = themeMeta.titleColor?.value || baseTheme.titleColor;
+  const textColor = themeMeta.textColor?.value || baseTheme.textColor;
+  const panelShadow = themeMeta.panelShadowColor?.value || baseTheme.panelShadowColor;
+  const boardShadow = themeMeta.boardShadowColor?.value || baseTheme.boardShadowColor;
+  const cardShadow = themeMeta.cardShadowColor?.value || baseTheme.cardShadowColor;
+  const matchedGlow = themeMeta.cardMatchedGlowColor?.value || baseTheme.cardMatchedGlowColor;
 
   const panelStyle = {
-    background: getColor(
-      mergedTheme.panelBackgroundColor,
-      DEFAULT_THEME.panelBackgroundColor,
-      'rgba(255,255,255,0.88)'
-    ),
-    borderColor: getColor(
-      mergedTheme.panelBorderColor,
-      DEFAULT_THEME.panelBorderColor,
-      'rgba(148,163,184,0.32)'
-    ),
+    background: themeMeta.panelBackgroundColor?.value || baseTheme.panelBackgroundColor,
+    borderColor: themeMeta.panelBorderColor?.value || baseTheme.panelBorderColor,
     boxShadow: panelShadow ? `0 34px 80px -45px ${panelShadow}` : undefined
   };
 
   const boardStyle = {
-    background: getColor(
-      mergedTheme.boardBackgroundColor,
-      DEFAULT_THEME.boardBackgroundColor,
-      'rgba(255,255,255,0.92)'
-    ),
-    borderColor: getColor(
-      mergedTheme.boardBorderColor,
-      DEFAULT_THEME.boardBorderColor,
-      'rgba(191,219,254,0.7)'
-    ),
+    background: themeMeta.boardBackgroundColor?.value || baseTheme.boardBackgroundColor,
+    borderColor: themeMeta.boardBorderColor?.value || baseTheme.boardBorderColor,
     boxShadow: boardShadow ? `0 45px 120px -65px ${boardShadow}` : undefined
   };
 
-  const cardBorderColor = getColor(
-    mergedTheme.cardBorderColor,
-    DEFAULT_THEME.cardBorderColor,
-    'rgba(191,219,254,0.9)'
-  );
-  const cardBackBackground = getColor(
-    mergedTheme.cardBackBackgroundColor,
-    DEFAULT_THEME.cardBackBackgroundColor,
-    'rgba(226,232,240,0.85)'
-  );
-  const cardFaceBackground = getColor(
-    mergedTheme.cardFaceBackgroundColor,
-    DEFAULT_THEME.cardFaceBackgroundColor,
-    'rgba(239,246,255,0.92)'
-  );
-  const matchedBackground = getColor(
-    mergedTheme.cardMatchedBackgroundColor,
-    DEFAULT_THEME.cardMatchedBackgroundColor,
-    'rgba(191,227,255,0.65)'
-  );
+  const cardBorderColor = themeMeta.cardBorderColor?.value || baseTheme.cardBorderColor;
+  const cardBackBackground = themeMeta.cardBackBackgroundColor?.value || baseTheme.cardBackBackgroundColor;
+  const cardFaceBackground = themeMeta.cardFaceBackgroundColor?.value || baseTheme.cardFaceBackgroundColor;
+  const matchedBackground = themeMeta.cardMatchedBackgroundColor?.value || baseTheme.cardMatchedBackgroundColor;
 
   const cardBaseStyle = {
     borderColor: cardBorderColor,
@@ -234,12 +228,16 @@ const FlipCardNewThemePreview = ({ theme, title, description }) => {
       : cardBaseStyle.boxShadow
   };
 
+  const buttonBackground = themeMeta.buttonBackgroundColor?.value || accentColor;
+  const buttonHoverBackground = themeMeta.buttonHoverBackgroundColor?.value || accentColor;
+  const buttonTextColor = themeMeta.buttonTextColor?.value || baseTheme.buttonTextColor;
+
   const swatchSections = COLOR_SECTIONS.map((section) => ({
     ...section,
     fields: section.fields.map((field) => ({
       ...field,
-      value: mergedTheme[field.key],
-      isCustom: Boolean(theme && toCleanString(theme[field.key]))
+      value: themeMeta[field.key]?.value,
+      isCustom: Boolean(themeMeta[field.key]?.isCustom)
     }))
   }));
 
@@ -258,10 +256,10 @@ const FlipCardNewThemePreview = ({ theme, title, description }) => {
                 Flip card preview
               </p>
               <h2 className="text-2xl font-semibold tracking-tight" style={{ color: titleColor }}>
-                {heading}
+                {title}
               </h2>
               <p className="text-sm leading-relaxed" style={{ color: textColor }}>
-                {body}
+                {description}
               </p>
             </div>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
