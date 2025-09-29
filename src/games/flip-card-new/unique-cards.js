@@ -1,42 +1,42 @@
-const defaultCards = [
+const placeholderCards = [
   {
-    id: 'mee-siam-with-prawns',
-    type: 'Mee Siam With Prawns',
-    image: '/images/matching-game-assets/white-tiffin-assets/mee-siam-with-prawns.png',
-    altText: 'Mee Siam With Prawns card artwork'
+    id: 'placeholder-pair-1',
+    type: 'Placeholder Pair 1',
+    image: 'https://placehold.co/600x400/0F172A/FFFFFF?text=Pair+1',
+    altText: 'Placeholder Pair 1 card artwork'
   },
   {
-    id: 'local-trio',
-    type: 'Local Trio',
-    image: '/images/matching-game-assets/white-tiffin-assets/local-trio.png',
-    altText: 'Local Trio card artwork'
+    id: 'placeholder-pair-2',
+    type: 'Placeholder Pair 2',
+    image: 'https://placehold.co/620x420/0369A1/F1F5F9?text=Pair+2',
+    altText: 'Placeholder Pair 2 card artwork'
   },
   {
-    id: 'nasi-lemak-beef',
-    type: 'Nasi Lemak Beef',
-    image: '/images/matching-game-assets/white-tiffin-assets/nasi-lemak-beef.png',
-    altText: 'Nasi Lemak Beef card artwork'
+    id: 'placeholder-pair-3',
+    type: 'Placeholder Pair 3',
+    image: 'https://placehold.co/640x440/0EA5E9/0B1120?text=Pair+3',
+    altText: 'Placeholder Pair 3 card artwork'
   },
   {
-    id: 'chicken-curry',
-    type: 'Chicken Curry',
-    image: '/images/matching-game-assets/white-tiffin-assets/chicken-curry.png',
-    altText: 'Chicken Curry card artwork'
+    id: 'placeholder-pair-4',
+    type: 'Placeholder Pair 4',
+    image: 'https://placehold.co/660x460/1D4ED8/F8FAFC?text=Pair+4',
+    altText: 'Placeholder Pair 4 card artwork'
   },
   {
-    id: 'trio-snack-platter',
-    type: 'Trio Snack Platter',
-    image: '/images/matching-game-assets/white-tiffin-assets/trio-snack-platter.png',
-    altText: 'Trio Snack Platter card artwork'
+    id: 'placeholder-pair-5',
+    type: 'Placeholder Pair 5',
+    image: 'https://placehold.co/680x480/4338CA/EFF6FF?text=Pair+5',
+    altText: 'Placeholder Pair 5 card artwork'
   },
   {
-    id: 'fish-maw-seafood-soup',
-    type: 'Fish Maw Seafood Soup',
-    image: '/images/matching-game-assets/white-tiffin-assets/fish-maw-seafood-soup.png',
-    altText: 'Fish Maw Seafood Soup card artwork'
+    id: 'placeholder-pair-6',
+    type: 'Placeholder Pair 6',
+    image: 'https://placehold.co/700x500/7C3AED/FDF4FF?text=Pair+6',
+    altText: 'Placeholder Pair 6 card artwork'
   }
 ];
 
-const uniqueCardsArray = defaultCards.map((card) => ({ ...card }));
+const uniqueCardsArray = placeholderCards.map((card) => ({ ...card }));
 
 export default uniqueCardsArray;
