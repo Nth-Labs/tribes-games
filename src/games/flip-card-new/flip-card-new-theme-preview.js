@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import sampleFlipCardNewGameDocument from './sample-game-document';
+import flipCardNewConfig from './config';
 import { createThemeFromConfig, defaultTheme as baseTheme, isCssGradient } from './theme';
 
-const DEFAULT_CONFIG = sampleFlipCardNewGameDocument;
+const DEFAULT_CONFIG = flipCardNewConfig;
 const DEFAULT_THEME = createThemeFromConfig(DEFAULT_CONFIG);
 
 const COLOR_SECTIONS = [
