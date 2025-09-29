@@ -4,6 +4,8 @@ import ResultsScreen from '../matching-game/results-screen';
 import { createThemeFromConfig, defaultTheme, isCssGradient } from './theme';
 import { deriveCardsFromData } from './config';
 
+
+
 const formatDuration = (seconds) => {
   const safeSeconds = Number.isFinite(seconds) ? Math.max(0, Math.round(seconds)) : 0;
   const minutes = Math.floor(safeSeconds / 60);
@@ -258,6 +260,28 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
     </div>
   );
 };
+
+const swap = (array, i, j) => {
+  const temp = array[i];
+  array[i] = array[j];
+  array[j] = temp;
+};
+
+const shuffleCards = (array) => {
+  const length = array.length;
+  for (let i = length; i > 0; i--) {
+    const randomIndex = Math.floor(Math.random() * i);
+    const currIndex = i - 1;
+    swap(array, currIndex, randomIndex);
+  }
+  return array;
+};
+
+const mockSubmitResults = (url, payload) => new Promise((resolve) => {
+  setTimeout(() => {
+    resolve(payload);
+  }, 800);
+});
 
 const FlipCardNewGame = ({ config }) => {
   const normalizationResult = useMemo(() => {
@@ -811,27 +835,5 @@ const FlipCardNewGame = ({ config }) => {
     </div>
   );
 };
-
-const swap = (array, i, j) => {
-  const temp = array[i];
-  array[i] = array[j];
-  array[j] = temp;
-};
-
-const shuffleCards = (array) => {
-  const length = array.length;
-  for (let i = length; i > 0; i--) {
-    const randomIndex = Math.floor(Math.random() * i);
-    const currIndex = i - 1;
-    swap(array, currIndex, randomIndex);
-  }
-  return array;
-};
-
-const mockSubmitResults = (url, payload) => new Promise((resolve) => {
-  setTimeout(() => {
-    resolve(payload);
-  }, 800);
-});
 
 export default FlipCardNewGame;
