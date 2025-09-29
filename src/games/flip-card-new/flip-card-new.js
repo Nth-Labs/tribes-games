@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FlipCard from './flip-card';
-import uniqueCardsArray from './unique-cards';
 import ResultsScreen from '../matching-game/results-screen';
 import { createThemeFromConfig, defaultTheme, isCssGradient } from './theme';
 import { deriveCardsFromData } from './config';
@@ -65,14 +64,6 @@ const coerceNumber = (value) => {
   return NaN;
 };
 
-const getNumberOption = (value, fallback) => {
-  const parsed = coerceNumber(value);
-  if (Number.isFinite(parsed)) {
-    return parsed;
-  }
-  return fallback;
-};
-
 const toCleanString = (value) => {
   const unwrapped = unwrapMongoValue(value);
   if (typeof unwrapped === 'string') {
@@ -84,6 +75,106 @@ const toCleanString = (value) => {
   return '';
 };
 
+const normalizeFlipCardConfig = (data) => {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Game configuration is missing.');
+  }
+
+  const derivedCards = deriveCardsFromData(data);
+  if (!Array.isArray(derivedCards) || derivedCards.length === 0) {
+    throw new Error('Game configuration is missing card images.');
+  }
+  if (derivedCards.length < 2) {
+    throw new Error('Game configuration must provide at least two card images.');
+  }
+
+  const sanitizedCards = derivedCards.map((card, index) => {
+    const image = toCleanString(card?.image);
+    if (!image) {
+      throw new Error('Game configuration contains a card without an image.');
+    }
+
+    const id = toCleanString(card?.id) || `card-${index + 1}`;
+    const type = toCleanString(card?.type) || `Card ${index + 1}`;
+    const altText = toCleanString(card?.altText) || `${type} card artwork`;
+
+    return {
+      id,
+      type,
+      image,
+      altText
+    };
+  });
+
+  const seenIds = new Set();
+  sanitizedCards.forEach((card) => {
+    if (seenIds.has(card.id)) {
+      throw new Error('Game configuration contains duplicate card identifiers.');
+    }
+    seenIds.add(card.id);
+  });
+
+  const cardBackImage = toCleanString(data?.cardBackImage) || toCleanString(data?.card_back_image);
+  if (!cardBackImage) {
+    throw new Error('Game configuration is missing a card back image.');
+  }
+
+  const moveLimitRaw = coerceNumber(data?.move_limit ?? data?.moveLimit);
+  if (!Number.isFinite(moveLimitRaw) || moveLimitRaw <= 0 || !Number.isInteger(moveLimitRaw)) {
+    throw new Error('Game configuration is missing a valid move limit.');
+  }
+
+  const initialRevealRaw = coerceNumber(data?.initial_reveal_seconds ?? data?.initialRevealSeconds);
+  if (!Number.isFinite(initialRevealRaw) || initialRevealRaw < 0) {
+    throw new Error('Game configuration is missing a valid initial reveal duration.');
+  }
+
+  const cardUpflipRaw = coerceNumber(data?.card_upflip_seconds ?? data?.cardUpflipSeconds);
+  if (!Number.isFinite(cardUpflipRaw) || cardUpflipRaw <= 0) {
+    throw new Error('Game configuration is missing a valid card flip duration.');
+  }
+
+  const title = toCleanString(data?.title) || toCleanString(data?.name);
+  if (!title) {
+    throw new Error('Game configuration is missing a title.');
+  }
+
+  const subtitle = toCleanString(data?.description) || toCleanString(data?.subtitle);
+
+  const gameId = toCleanString(data?.game_id) || toCleanString(data?.gameId);
+  if (!gameId) {
+    throw new Error('Game configuration is missing a game identifier.');
+  }
+
+  const gameType = toCleanString(data?.game_type) || toCleanString(data?.gameType);
+  if (!gameType) {
+    throw new Error('Game configuration is missing a game type.');
+  }
+
+  const submissionEndpoint =
+    toCleanString(data?.submission_endpoint) || toCleanString(data?.submissionEndpoint);
+
+  return {
+    rawConfig: data,
+    cards: sanitizedCards,
+    cardBackImage,
+    moveLimit: moveLimitRaw,
+    initialRevealSeconds: initialRevealRaw,
+    cardUpflipSeconds: cardUpflipRaw,
+    title,
+    subtitle,
+    gameId,
+    gameType,
+    submissionEndpoint
+  };
+};
+
+const ConfigurationError = ({ message }) => (
+  <div className="p-6 text-center">
+    <h3 className="text-xl font-semibold text-slate-900">Game failed to load</h3>
+    <p className="mt-1 text-slate-600">{message}</p>
+  </div>
+);
 
 const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmitting, theme }) => {
   const isWin = status === 'won';
@@ -169,20 +260,29 @@ const GameStatusModal = ({ status, movesLeft, timeElapsed, onSubmit, isSubmittin
 };
 
 const FlipCardNewGame = ({ config }) => {
-  const cardsFromConfig = useMemo(() => {
-    const derivedCards = deriveCardsFromData(config);
-    if (derivedCards.length > 0) {
-      return derivedCards;
+  const normalizationResult = useMemo(() => {
+    try {
+      return { normalized: normalizeFlipCardConfig(config), error: null };
+    } catch (error) {
+      return {
+        normalized: null,
+        error: error instanceof Error ? error.message : 'Game configuration is invalid.'
+      };
     }
-    return uniqueCardsArray;
   }, [config]);
 
-  const [cards] = useState(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)));
+  if (normalizationResult.error) {
+    return <ConfigurationError message={normalizationResult.error} />;
+  }
+
+  const normalized = normalizationResult.normalized;
+  const cardsFromConfig = normalized.cards;
+
+  const cards = useMemo(() => shuffleCards(cardsFromConfig.concat(cardsFromConfig)), [cardsFromConfig]);
   const totalPairs = cards.length / 2;
-  const moveLimit = Math.max(0, getNumberOption(config?.move_limit ?? config?.moveLimit, 8));
-  const initialRevealDuration = Math.max(0, getNumberOption(config?.initial_reveal_seconds ?? config?.initialRevealSeconds, 0));
-  const cardUpflipSecondsRaw = getNumberOption(config?.card_upflip_seconds ?? config?.cardUpflipSeconds, 1);
-  const cardUpflipSeconds = cardUpflipSecondsRaw >= 0 ? cardUpflipSecondsRaw : 1;
+  const moveLimit = normalized.moveLimit;
+  const initialRevealDuration = normalized.initialRevealSeconds;
+  const cardUpflipSeconds = normalized.cardUpflipSeconds;
   const cardUpflipDurationMs = cardUpflipSeconds * 1000;
   const evaluationDelayMs = Math.min(cardUpflipDurationMs, 500);
   const flipBackDelayMs = Math.max(cardUpflipDurationMs - evaluationDelayMs, 0);
@@ -212,40 +312,16 @@ const FlipCardNewGame = ({ config }) => {
 
   const movesLeft = Math.max(moveLimit - moves, 0);
 
-  const cardBackImage = useMemo(() => {
-    const camel = toCleanString(config?.cardBackImage);
-    if (camel) {
-      return camel;
-    }
-    const snake = toCleanString(config?.card_back_image);
-    if (snake) {
-      return snake;
-    }
-    return '/images/matching-game-assets/white-tiffin-assets/white-tiffin-logo.png';
-  }, [config?.cardBackImage, config?.card_back_image]);
+  const cardBackImage = normalized.cardBackImage;
 
-  const theme = useMemo(() => createThemeFromConfig(config || {}), [config]);
+  const theme = useMemo(() => createThemeFromConfig(normalized.rawConfig || {}), [normalized.rawConfig]);
 
-  const headerSubtitle = useMemo(() => {
-    const description = toCleanString(config?.description);
-    if (description) {
-      return description;
-    }
+  const headerSubtitle = normalized.subtitle;
+  const headerTitle = normalized.title;
 
-    const subtitle = toCleanString(config?.subtitle);
-    if (subtitle) {
-      return subtitle;
-    }
-
-    return '';
-  }, [config]);
-
-  const headerTitle = toCleanString(config?.title) || toCleanString(config?.name) || 'Flip Card New';
-
-  const gameId = toCleanString(config?.gameId) || toCleanString(config?.game_id) || 'flip-new-001';
-  const gameType = toCleanString(config?.gameType) || toCleanString(config?.game_type) || 'flip-card-new';
-  const submissionEndpoint =
-    toCleanString(config?.submissionEndpoint) || toCleanString(config?.submission_endpoint);
+  const gameId = normalized.gameId;
+  const gameType = normalized.gameType;
+  const submissionEndpoint = normalized.submissionEndpoint;
 
   const flipDurationMs = useMemo(() => {
     const parsed = Number(theme?.cardFlipDurationMs);
