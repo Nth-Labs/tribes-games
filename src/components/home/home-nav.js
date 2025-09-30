@@ -76,6 +76,16 @@ const HomeNav = () => {
             <p>Radiant Scratch Card</p>
           </div>
         </Link>
+        <Link to="/scratch-classic">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/scratch-card-game-thumb.svg"
+              alt="Scratch Card Classic Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Scratch Card Classic</p>
+          </div>
+        </Link>
         <Link to="/game8">
           <div className="flex flex-col items-center justify-center">
             <img
@@ -84,6 +94,16 @@ const HomeNav = () => {
               className="h-48 w-48 rounded-md object-contain"
             />
             <p>Flip Card (New)</p>
+          </div>
+        </Link>
+        <Link to="/gachapon-classic">
+          <div className="flex flex-col items-center justify-center">
+            <img
+              src="/images/gachapon-game-thumb.svg"
+              alt="Gachapon Classic Thumbnail"
+              className="h-48 w-48 rounded-md object-contain"
+            />
+            <p>Gachapon Classic</p>
           </div>
         </Link>
           <Link to="/game9">
