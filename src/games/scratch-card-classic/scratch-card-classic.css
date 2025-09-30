@@ -384,6 +384,7 @@
   font-weight: 600;
   letter-spacing: 0.04em;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
 .scratch-classic-foil__message--visible {
