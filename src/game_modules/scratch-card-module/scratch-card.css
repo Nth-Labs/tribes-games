@@ -9,11 +9,12 @@
 }
 
 .scratch-card {
-  width: min(640px, 100%);
+  width: min(660px, 100%);
   border-radius: 1.5rem;
-  padding: 2.25rem;
+  padding: clamp(1.75rem, 2.5vw + 1rem, 2.5rem);
   backdrop-filter: blur(12px);
   box-shadow: 0 30px 80px rgba(15, 23, 42, 0.45);
+  overflow: hidden;
 }
 
 .scratch-header {
@@ -39,6 +40,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: clamp(1.5rem, 3vw + 1rem, 2.25rem);
 }
 
 .scratch-overlay {
@@ -72,10 +74,11 @@
 .scratch-content {
   position: relative;
   z-index: 1;
-  padding: 2rem;
+  padding: clamp(1.5rem, 3vw + 1rem, 2.25rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  pointer-events: none;
 }
 
 .scratch-content h2 {
@@ -113,6 +116,93 @@
 .scratch-button:not(:disabled):hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 30px rgba(244, 114, 182, 0.35);
+}
+
+.scratch-prizes {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.scratch-prizes__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.scratch-prizes__header h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+}
+
+.scratch-prizes__status {
+  font-size: 0.95rem;
+  opacity: 0.85;
+}
+
+.scratch-prizes__status--error {
+  color: #fecaca;
+}
+
+.scratch-prize-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.scratch-prize-card {
+  border-radius: 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  backdrop-filter: blur(10px);
+}
+
+.scratch-prize-card__media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 0.9rem;
+  overflow: hidden;
+}
+
+.scratch-prize-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.scratch-prize-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.scratch-prize-card__content h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.scratch-prize-card__content p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.scratch-prize-card__meta {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.75;
+}
+
+.scratch-prizes__footnote {
+  margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.75;
 }
 
 .results-container {
@@ -194,8 +284,47 @@
 }
 
 @media (max-width: 640px) {
+  .scratch-root {
+    align-items: stretch;
+    padding: 1.5rem 1rem;
+  }
+
   .scratch-card,
   .results-panel {
     padding: 1.75rem;
+    border-radius: 1.25rem;
+  }
+
+  .scratch-area {
+    min-height: 220px;
+    padding: 1.5rem;
+  }
+
+  .scratch-content {
+    padding: 1.5rem;
+  }
+
+  .scratch-prize-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .scratch-card {
+    padding: 1.5rem;
+  }
+
+  .scratch-content {
+    padding: 1.25rem;
+    text-align: left;
+  }
+
+  .scratch-prizes__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scratch-prize-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ScratchCardResultsScreen from './scratch-card-results-screen';
 import { buildTheme } from './theme';
 import './scratch-card.css';
+import { buildDisplayPrizes, retrieveLuckdrawPrizes } from '../luckdraw-prizes';
 
 const buildMockRevealResult = (config) => ({
   resultId: `mock-${Date.now()}`,
@@ -56,6 +57,30 @@ const revealScratchCard = async ({ config }) => {
   };
 };
 
+const PrizeCard = ({ prize, theme }) => (
+  <article
+    className="scratch-prize-card"
+    style={{
+      background: `${theme.primaryColor}bb`,
+      borderColor: `${theme.tertiaryColor}40`,
+    }}
+  >
+    <div className="scratch-prize-card__media">
+      <img src={prize.image} alt={prize.title} />
+    </div>
+    <div className="scratch-prize-card__content">
+      <h3>{prize.title}</h3>
+      <p>{prize.description}</p>
+      {prize.voucherBatchId && (
+        <p className="scratch-prize-card__meta">Batch: {prize.voucherBatchId}</p>
+      )}
+      {prize.probability && (
+        <p className="scratch-prize-card__meta">{prize.probability}</p>
+      )}
+    </div>
+  </article>
+);
+
 const ScratchCardGame = ({ config = {}, onBack }) => {
   const theme = useMemo(() => buildTheme(config), [config]);
   const [result, setResult] = useState(null);
@@ -65,6 +90,12 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   const [isScratching, setIsScratching] = useState(false);
   const canvasRef = useRef(null);
   const strokeCounterRef = useRef(0);
+  const [prizesState, setPrizesState] = useState(() => ({
+    items: buildDisplayPrizes(config.prizes),
+    includeProbability: false,
+    isLoading: true,
+    error: null,
+  }));
 
   const overlayImage =
     config.overlay_pattern ||
@@ -106,6 +137,54 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     setScratchProgress(0);
     strokeCounterRef.current = 0;
   }, []);
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadPrizes = async () => {
+      setPrizesState((previous) => ({
+        ...previous,
+        isLoading: true,
+        error: null,
+      }));
+
+      try {
+        const response = await retrieveLuckdrawPrizes({
+          config,
+          endpoint: config.prizes_endpoint,
+          fallbackPrizes: config.prizes,
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        setPrizesState({
+          items: response.prizes,
+          includeProbability: response.includeProbability,
+          isLoading: false,
+          error: null,
+        });
+      } catch (prizeError) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error('[ScratchCard] Failed to load luck draw prizes', prizeError);
+        setPrizesState((previous) => ({
+          ...previous,
+          isLoading: false,
+          error: prizeError.message || 'Unable to load the prize list.',
+        }));
+      }
+    };
+
+    loadPrizes();
+
+    return () => {
+      isActive = false;
+    };
+  }, [config]);
 
   useEffect(() => {
     if (result) {
@@ -333,6 +412,27 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           {error && <p style={{ color: theme.tertiaryColor }}>{error}</p>}
           {isRevealing && <p style={{ color: theme.tertiaryColor }}>Unsealing your reward…</p>}
         </div>
+
+        <section className="scratch-prizes">
+          <div className="scratch-prizes__header">
+            <h2>Available prizes</h2>
+            {prizesState.isLoading && <span className="scratch-prizes__status">Loading…</span>}
+          </div>
+          {prizesState.error ? (
+            <p className="scratch-prizes__status scratch-prizes__status--error">
+              {prizesState.error}
+            </p>
+          ) : (
+            <div className="scratch-prize-grid">
+              {prizesState.items.map((prize) => (
+                <PrizeCard key={prize.id} prize={prize} theme={theme} />
+              ))}
+            </div>
+          )}
+          {prizesState.includeProbability && !prizesState.error && !prizesState.isLoading && (
+            <p className="scratch-prizes__footnote">Probabilities are supplied by the live API.</p>
+          )}
+        </section>
       </div>
     </div>
   );
