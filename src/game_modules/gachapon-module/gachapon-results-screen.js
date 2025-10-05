@@ -53,6 +53,20 @@ const buildResultsUrl = (endpoint, resultPayload) => {
   }
 };
 
+const mockFetchResults = (config, resultPayload) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        ...resultPayload,
+        message:
+          'Mocked rewards preview. Connect the live API endpoint to display real-time results.',
+        voucherItems: fallbackVoucherItems,
+        updatedAt: new Date().toISOString(),
+        theme: config?.theme,
+      });
+    }, 400);
+  });
+
 const VoucherItem = ({ item, theme }) => (
   <li
     className="voucher-item"
@@ -89,28 +103,31 @@ const GachaponResultsScreen = ({
   onBack,
 }) => {
   const theme = useMemo(() => buildTheme(config), [config]);
-  const [isLoading, setIsLoading] = useState(() => Boolean(config?.results_endpoint));
+  const shouldUseLiveEndpoint =
+    Boolean(config?.results_endpoint) && process.env.NODE_ENV === 'production';
+  const [isLoading, setIsLoading] = useState(() => shouldUseLiveEndpoint);
   const [error, setError] = useState(null);
   const [details, setDetails] = useState(() => ({ ...result }));
 
   useEffect(() => {
-    const url = buildResultsUrl(config?.results_endpoint, result);
-    if (!url) {
-      setIsLoading(false);
-      return;
-    }
+    const shouldMock = !config?.results_endpoint || process.env.NODE_ENV !== 'production';
 
     let cancelled = false;
     setIsLoading(true);
     setError(null);
 
-    fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Results request failed with status ${response.status}`);
-        }
-        return response.json();
-      })
+    const liveUrl = shouldMock ? null : buildResultsUrl(config?.results_endpoint, result);
+
+    const resolver = shouldMock || !liveUrl
+      ? mockFetchResults(config, result)
+      : fetch(liveUrl).then((response) => {
+          if (!response.ok) {
+            throw new Error(`Results request failed with status ${response.status}`);
+          }
+          return response.json();
+        });
+
+    resolver
       .then((payload) => {
         if (cancelled) {
           return;
@@ -141,7 +158,7 @@ const GachaponResultsScreen = ({
     return () => {
       cancelled = true;
     };
-  }, [config?.results_endpoint, result]);
+  }, [config, result]);
 
   const voucherItems = details?.voucherItems || fallbackVoucherItems;
 

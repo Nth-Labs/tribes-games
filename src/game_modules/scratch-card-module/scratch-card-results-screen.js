@@ -37,28 +37,43 @@ const buildResultsUrl = (endpoint, resultPayload) => {
   }
 };
 
+const mockFetchResults = (config, resultPayload) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve({
+        ...resultPayload,
+        message: 'Mocked scratch card rewards. Connect the live endpoint for production data.',
+        voucherItems: fallbackVouchers,
+        theme: config?.theme,
+      });
+    }, 350);
+  });
+
 const ScratchCardResultsScreen = ({ config, result, onPlayAgain, onBack }) => {
   const theme = useMemo(() => buildTheme(config), [config]);
   const [details, setDetails] = useState(() => ({ ...result }));
-  const [isLoading, setIsLoading] = useState(() => Boolean(config?.results_endpoint));
+  const [isLoading, setIsLoading] = useState(
+    () => Boolean(config?.results_endpoint) && process.env.NODE_ENV === 'production',
+  );
 
   useEffect(() => {
-    const url = buildResultsUrl(config?.results_endpoint, result);
-    if (!url) {
-      setIsLoading(false);
-      return;
-    }
+    const shouldMock = !config?.results_endpoint || process.env.NODE_ENV !== 'production';
 
     let cancelled = false;
     setIsLoading(true);
 
-    fetch(url)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Results request failed with status ${response.status}`);
-        }
-        return response.json();
-      })
+    const liveUrl = shouldMock ? null : buildResultsUrl(config?.results_endpoint, result);
+
+    const resolver = shouldMock || !liveUrl
+      ? mockFetchResults(config, result)
+      : fetch(liveUrl).then((response) => {
+          if (!response.ok) {
+            throw new Error(`Results request failed with status ${response.status}`);
+          }
+          return response.json();
+        });
+
+    resolver
       .then((payload) => {
         if (cancelled) {
           return;
@@ -88,7 +103,7 @@ const ScratchCardResultsScreen = ({ config, result, onPlayAgain, onBack }) => {
     return () => {
       cancelled = true;
     };
-  }, [config?.results_endpoint, result]);
+  }, [config, result]);
 
   const voucherItems = details?.voucherItems || fallbackVouchers;
 
