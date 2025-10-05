@@ -327,6 +327,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     );
   }
 
+  const progressPercent = Math.round(scratchProgress);
+
   return (
     <div
       className="scratch-root"
@@ -343,11 +345,13 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
         }}
       >
         <header className="scratch-header">
-          <p style={{ color: theme.tertiaryColor, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          <p className="scratch-header__eyebrow" style={{ color: theme.tertiaryColor }}>
             {config.subtitle || 'Digital scratch experience'}
           </p>
           <h1>{config.title || config.name}</h1>
-          <p style={{ color: theme.mutedTextColor }}>{config.prize}</p>
+          <p className="scratch-header__description" style={{ color: theme.mutedTextColor }}>
+            {config.prize}
+          </p>
         </header>
 
         <div
@@ -387,11 +391,22 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
             />
           </div>
           <div className="scratch-content">
-            <h2>Scratch here</h2>
-            <p>
-              Reveal progress: {Math.round(scratchProgress)}%. Keep scratching to uncover your
-              reward.
-            </p>
+            <span className="scratch-content__badge">Interactive reveal</span>
+            <h2>Scratch to discover</h2>
+            <p>Drag across the foil to unveil the surprise we have lined up for you.</p>
+            <div className="scratch-progress" aria-label={`Reveal progress ${progressPercent} percent`}>
+              <div className="scratch-progress__track">
+                <div
+                  className="scratch-progress__fill"
+                  style={{
+                    width: `${progressPercent}%`,
+                    background: theme.tertiaryColor,
+                    boxShadow: `0 6px 16px ${theme.tertiaryColor}45`,
+                  }}
+                />
+              </div>
+              <span className="scratch-progress__label">{progressPercent}% revealed</span>
+            </div>
           </div>
         </div>
 
