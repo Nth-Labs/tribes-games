@@ -1,6 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import GachaponResultsScreen from './gachapon-results-screen';
 import { buildConfig } from './config';
+import { buildDisplayPrizes, retrieveLuckdrawPrizes } from '../luckdraw-prizes';
 import { buildTheme } from './theme';
 import './gachapon.css';
 
@@ -67,13 +68,19 @@ const PrizeCard = ({ prize, theme }) => (
     className="prize-card"
     style={{
       background: `${theme.primaryColor}cc`,
-      borderColor: `${theme.tertiaryColor}55`,
+      borderColor: `${theme.tertiaryColor}33`,
     }}
   >
-    <img src={prize.image} alt={prize.name} />
-    <div>
-      <h4>{prize.name}</h4>
+    <div className="prize-card__media">
+      <img src={prize.image} alt={prize.title} />
+    </div>
+    <div className="prize-card__content">
+      <h4>{prize.title}</h4>
       <p>{prize.description}</p>
+      {prize.voucherBatchId && (
+        <p className="prize-card__meta">Batch: {prize.voucherBatchId}</p>
+      )}
+      {prize.probability && <p className="prize-card__meta">{prize.probability}</p>}
     </div>
   </article>
 );
@@ -84,6 +91,60 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
+  const [prizesState, setPrizesState] = useState(() => ({
+    items: buildDisplayPrizes(config.prizes),
+    includeProbability: false,
+    isLoading: true,
+    error: null,
+  }));
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadPrizes = async () => {
+      setPrizesState((previous) => ({
+        ...previous,
+        isLoading: true,
+        error: null,
+      }));
+
+      try {
+        const prizesResponse = await retrieveLuckdrawPrizes({
+          config,
+          endpoint: config.prizes_endpoint,
+          fallbackPrizes: config.prizes,
+        });
+
+        if (!isActive) {
+          return;
+        }
+
+        setPrizesState({
+          items: prizesResponse.prizes,
+          includeProbability: prizesResponse.includeProbability,
+          isLoading: false,
+          error: null,
+        });
+      } catch (prizeError) {
+        if (!isActive) {
+          return;
+        }
+
+        console.error('[Gachapon] Failed to load luck draw prizes', prizeError);
+        setPrizesState((previous) => ({
+          ...previous,
+          isLoading: false,
+          error: prizeError.message || 'Unable to load the prize list.',
+        }));
+      }
+    };
+
+    loadPrizes();
+
+    return () => {
+      isActive = false;
+    };
+  }, [config]);
 
   const handlePlay = async () => {
     if (isPlaying) {
@@ -185,13 +246,25 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
           </div>
         </div>
 
-        <section>
-          <h2 style={{ marginTop: '2.5rem', marginBottom: '1rem' }}>Featured rewards</h2>
-          <div className="prize-gallery">
-            {config.prizes.map((prize) => (
-              <PrizeCard key={prize.id} prize={prize} theme={theme} />
-            ))}
+        <section className="prizes-section">
+          <div className="prizes-section__header">
+            <h2>Available prizes</h2>
+            {prizesState.isLoading && <span className="prizes-section__status">Loading…</span>}
           </div>
+          {prizesState.error ? (
+            <p className="prizes-section__status prizes-section__status--error">
+              {prizesState.error}
+            </p>
+          ) : (
+            <div className="prize-gallery">
+              {prizesState.items.map((prize) => (
+                <PrizeCard key={prize.id} prize={prize} theme={theme} />
+              ))}
+            </div>
+          )}
+          {prizesState.includeProbability && !prizesState.error && !prizesState.isLoading && (
+            <p className="prizes-section__footnote">Probabilities shown are provided by the backend.</p>
+          )}
         </section>
       </div>
     </div>
