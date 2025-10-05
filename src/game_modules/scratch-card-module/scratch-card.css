@@ -1,490 +1,373 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-.scratch-root {
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+}
+
+.scratch-module-root {
   min-height: 100vh;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(1.5rem, 2vw + 1rem, 3rem);
+  padding: clamp(2rem, 3vw + 1.5rem, 4rem);
   background-size: cover;
   background-position: center;
-  font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
-  background-blend-mode: luminosity;
+  background-repeat: no-repeat;
+  position: relative;
+  overflow: hidden;
+}
+
+.scratch-module-root::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(148, 163, 184, 0.12), transparent 55%),
+    radial-gradient(circle at bottom, rgba(56, 189, 248, 0.15), transparent 65%);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.scratch-module-surface {
+  position: relative;
+  width: min(1080px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.75rem, 3vw + 1rem, 2.5rem);
+  z-index: 1;
+}
+
+.scratch-card-stage {
+  perspective: 1200px;
+  position: relative;
+}
+
+.scratch-card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
 }
 
 .scratch-card {
-  width: min(660px, 100%);
-  border-radius: 1.5rem;
-  padding: clamp(1.75rem, 2.5vw + 1rem, 2.65rem);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 40px 90px rgba(15, 23, 42, 0.38);
-  overflow: hidden;
   position: relative;
-  animation: scratch-card-float 12s ease-in-out infinite;
+  width: 320px;
+  height: 220px;
+  border-radius: 28px;
+  padding: 16px;
+  background: linear-gradient(150deg, rgba(79, 70, 229, 0.32), rgba(236, 72, 153, 0.28));
+  box-shadow: 0 30px 60px rgba(15, 23, 42, 0.6);
+  transform-style: preserve-3d;
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
 }
 
 .scratch-card::before {
   content: '';
   position: absolute;
-  inset: 1rem;
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  pointer-events: none;
-}
-
-.scratch-card::after {
-  content: '';
-  position: absolute;
   inset: 0;
-  background: linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 55%);
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.18), rgba(125, 211, 252, 0));
   mix-blend-mode: screen;
   pointer-events: none;
 }
 
-.scratch-header {
-  text-align: center;
-  margin-bottom: 2rem;
+.scratch-card--scratching {
+  animation: scratch-card-wiggle 0.18s ease-in-out infinite;
+}
+
+.scratch-card--revealed {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 36px 80px rgba(129, 140, 248, 0.5);
+}
+
+@keyframes scratch-card-wiggle {
+  0% {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+  25% {
+    transform: rotate(-1.6deg) translate3d(-5px, 2px, 0);
+  }
+  50% {
+    transform: rotate(1.6deg) translate3d(4px, -3px, 0);
+  }
+  75% {
+    transform: rotate(-1.2deg) translate3d(-3px, -2px, 0);
+  }
+  100% {
+    transform: rotate(0deg) translate3d(0, 0, 0);
+  }
+}
+
+.scratch-card__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.85));
+  box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.18);
+}
+
+.scratch-card__reward {
+  position: absolute;
+  inset: 12px;
+  border-radius: 18px;
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
-}
-
-.scratch-header h1 {
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  font-family: 'Playfair Display', 'Times New Roman', serif;
-  letter-spacing: -0.01em;
-  margin: 0;
-}
-
-.scratch-header p {
-  margin: 0.25rem 0;
-}
-
-.scratch-header__eyebrow {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.24em;
-  font-weight: 600;
-  opacity: 0.85;
-}
-
-.scratch-header__description {
-  font-size: 1.05rem;
-  letter-spacing: 0.01em;
-  max-width: 32ch;
-  margin: 0 auto;
-}
-
-.scratch-area {
-  position: relative;
-  border-radius: 1.25rem;
-  overflow: hidden;
-  min-height: 260px;
-  display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: clamp(1.5rem, 3vw + 1rem, 2.25rem);
-  isolation: isolate;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 0 25px 45px rgba(15, 23, 42, 0.35);
-  animation: scratch-area-float 8s ease-in-out infinite;
+  color: #e2e8f0;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(148, 163, 184, 0.35), rgba(51, 65, 85, 0.92));
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.5);
+  opacity: 0.4;
+  transform: scale(0.96);
+  transition: opacity 0.45s ease, transform 0.45s ease, box-shadow 0.45s ease;
 }
 
-.scratch-overlay {
+.scratch-card--revealed .scratch-card__reward {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.scratch-card__reward-glow {
   position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
+  inset: -35%;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(129, 140, 248, 0.45) 0%, rgba(15, 23, 42, 0) 75%);
+  filter: blur(26px);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.scratch-card--revealed .scratch-card__reward-glow {
+  opacity: 1;
+}
+
+.scratch-card__reward-content {
+  position: relative;
+  z-index: 1;
   display: flex;
-  filter: saturate(0.6);
-  mix-blend-mode: multiply;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.scratch-overlay::after {
-  content: '';
+.scratch-card__reward-rarity {
+  font-size: 0.74rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.7);
+}
+
+.scratch-card__reward-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #f8fafc;
+}
+
+.scratch-card__reward-helper {
+  font-size: 0.75rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(226, 232, 240, 0.55);
+}
+
+.scratch-card__foil {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(160deg, rgba(15, 23, 42, 0.35), transparent 55%, rgba(255, 255, 255, 0.45));
-  mix-blend-mode: screen;
+  inset: 12px;
+  border-radius: 18px;
+  overflow: hidden;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.scratch-card__foil--interactive {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.scratch-card__foil--cleared {
+  opacity: 0;
+  transform: scale(1.03);
   pointer-events: none;
 }
 
-.scratch-canvas {
+.scratch-card__foil-canvas {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  flex: 1;
-  cursor: grab;
+  border-radius: inherit;
+  cursor: crosshair;
   touch-action: none;
-  transition: opacity 220ms ease, transform 220ms ease;
-  background: linear-gradient(135deg, rgba(148, 163, 184, 0.8), rgba(226, 232, 240, 0.85));
-  border: none;
+  transition: opacity 0.4s ease;
 }
 
-.scratch-canvas.is-scratching {
-  cursor: grabbing;
-  transform: scale(1.02);
-}
-
-.scratch-canvas.is-complete {
+.scratch-card__foil-canvas--inactive {
   opacity: 0;
   pointer-events: none;
 }
 
-.scratch-content {
-  position: relative;
-  z-index: 1;
-  padding: clamp(1.5rem, 3vw + 1rem, 2.25rem);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+.scratch-card__foil-canvas--cleared {
+  opacity: 0;
   pointer-events: none;
 }
 
-.scratch-content__badge {
-  align-self: center;
-  font-size: 0.75rem;
-  letter-spacing: 0.28em;
-  text-transform: uppercase;
-  font-weight: 600;
-  padding: 0.35rem 0.75rem;
+.scratch-card__foil-noise {
+  position: absolute;
+  inset: -25%;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.22),
+    rgba(79, 70, 229, 0.25),
+    rgba(236, 72, 153, 0.22),
+    rgba(255, 255, 255, 0.22)
+  );
+  mix-blend-mode: screen;
+  opacity: 0.55;
+  animation: scratch-card-foil-spin 7s linear infinite;
+  pointer-events: none;
+}
+
+.scratch-card__foil-shine {
+  position: absolute;
+  inset: -35%;
+  background: radial-gradient(circle at 20% -10%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0));
+  opacity: 0.7;
+  animation: scratch-card-foil-shimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scratch-card-foil-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes scratch-card-foil-shimmer {
+  0%,
+  100% {
+    transform: translateY(-6%);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translateY(6%);
+    opacity: 0.85;
+  }
+}
+
+.scratch-card__foil-message {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  right: 18px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.18);
-  color: rgba(15, 23, 42, 0.82);
-}
-
-.scratch-content h2 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-family: 'Playfair Display', 'Times New Roman', serif;
-  letter-spacing: -0.01em;
-}
-
-.scratch-content p {
-  margin: 0;
-  line-height: 1.6;
-  font-size: 1rem;
-  color: rgba(15, 23, 42, 0.85);
-}
-
-.scratch-progress {
+  padding: 10px 16px;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 4px;
+  color: rgba(226, 232, 240, 0.85);
+  background: rgba(15, 23, 42, 0.65);
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
   pointer-events: none;
 }
 
-.scratch-progress__track {
+.scratch-card__foil-message--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scratch-card__foil-detail {
+  font-size: 0.6rem;
+  letter-spacing: 0.18em;
+  color: rgba(226, 232, 240, 0.6);
+}
+
+.scratch-card__status-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.18);
+}
+
+.scratch-card__status-badge {
+  padding: 6px 18px;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  background: rgba(30, 64, 175, 0.35);
+  color: rgba(191, 219, 254, 0.9);
+}
+
+.scratch-card__progress {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.scratch-card__progress-track {
+  width: 100%;
   height: 6px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.35);
+  background: rgba(30, 64, 175, 0.35);
   overflow: hidden;
-  position: relative;
 }
 
-.scratch-progress__fill {
+.scratch-card__progress-fill {
   height: 100%;
   border-radius: inherit;
-  transition: width 300ms ease;
+  background: linear-gradient(90deg, rgba(94, 234, 212, 0.9), rgba(129, 140, 248, 0.9));
+  box-shadow: 0 8px 18px rgba(14, 165, 233, 0.45);
 }
 
-.scratch-progress__label {
+.scratch-card__progress-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(191, 219, 254, 0.7);
+  text-align: center;
+}
+
+.scratch-card__status-detail {
   font-size: 0.82rem;
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: rgba(15, 23, 42, 0.74);
-  align-self: center;
+  text-align: center;
+  color: rgba(224, 231, 255, 0.85);
 }
 
-.scratch-actions {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.scratch-button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.85rem 1.5rem;
-  font-size: 1rem;
+.scratch-card__status-detail span {
+  color: rgba(129, 140, 248, 0.95);
   font-weight: 600;
-  cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
 }
 
-.scratch-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.scratch-card-error {
+  font-size: 0.78rem;
+  text-align: center;
+  color: #fda4af;
 }
 
-.scratch-button:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(244, 114, 182, 0.35);
-}
-
-.scratch-button:not(:disabled):focus-visible {
-  outline: 3px solid rgba(255, 255, 255, 0.6);
-  outline-offset: 2px;
-}
-
-.scratch-prizes {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.scratch-prizes__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.scratch-prizes__header h2 {
-  margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.75rem);
-}
-
-.scratch-prizes__status {
-  font-size: 0.95rem;
-  opacity: 0.85;
-}
-
-.scratch-prizes__status--error {
-  color: #fecaca;
-}
-
-.scratch-prize-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-
-.scratch-prize-card {
-  border-radius: 1.25rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.15);
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
-.scratch-prize-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.25);
-}
-
-.scratch-prize-card__media {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 0.9rem;
-  overflow: hidden;
-}
-
-.scratch-prize-card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.scratch-prize-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.scratch-prize-card__content h3 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.scratch-prize-card__content p {
-  margin: 0;
-  line-height: 1.5;
-  font-size: 0.95rem;
-}
-
-.scratch-prize-card__meta {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  opacity: 0.75;
-}
-
-@keyframes scratch-card-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes scratch-area-float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-6px);
-  }
-}
-
-@media (max-width: 640px) {
-  .scratch-card {
-    border-radius: 1.25rem;
-    padding: 1.75rem 1.5rem;
-  }
-
-  .scratch-card::before {
-    inset: 0.75rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .scratch-card,
-  .scratch-area,
-  .scratch-canvas,
-  .scratch-prize-card,
-  .scratch-button,
-  .scratch-progress__fill {
-    animation: none !important;
-    transition: none !important;
-    transform: none !important;
-  }
-}
-
-.scratch-prizes__footnote {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.75;
-}
-
-.results-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2.5rem 1.5rem;
-  color: inherit;
-}
-
-.results-panel {
-  width: min(640px, 100%);
-  border-radius: 1.5rem;
-  padding: 2.5rem;
-  background: rgba(15, 23, 42, 0.65);
-  border: 1px solid rgba(248, 250, 252, 0.15);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.results-panel header h2 {
-  margin: 0.35rem 0;
-  font-size: clamp(2rem, 3vw, 2.75rem);
-}
-
-.results-panel header p {
-  margin: 0.25rem 0;
-  opacity: 0.85;
-}
-
-.voucher-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1rem;
-}
-
-.voucher-card {
-  border-radius: 1.1rem;
-  padding: 1.25rem;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid rgba(248, 250, 252, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.voucher-card h3 {
-  margin: 0;
-  font-size: 1.25rem;
-}
-
-.voucher-card p {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.results-footer {
-  display: flex;
-  gap: 0.75rem;
-  justify-content: flex-end;
-  flex-wrap: wrap;
-}
-
-.results-footer button {
-  border: none;
-  border-radius: 999px;
-  padding: 0.85rem 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.results-footer button.secondary {
-  background: transparent;
-  color: inherit;
-  text-decoration: underline;
-}
-
-@media (max-width: 640px) {
-  .scratch-root {
-    align-items: stretch;
-    padding: 1.5rem 1rem;
-  }
-
-  .scratch-card,
-  .results-panel {
-    padding: 1.75rem;
-    border-radius: 1.25rem;
-  }
-
-  .scratch-area {
-    min-height: 220px;
-    padding: 1.5rem;
-  }
-
-  .scratch-content {
-    padding: 1.5rem;
-  }
-
-  .scratch-prize-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-}
-
-@media (max-width: 480px) {
-  .scratch-card {
-    padding: 1.5rem;
-  }
-
-  .scratch-content {
-    padding: 1.25rem;
-    text-align: left;
-  }
-
-  .scratch-prizes__header {
-    flex-direction: column;
+@media (min-width: 768px) {
+  .scratch-card-container {
+    flex-direction: row;
     align-items: flex-start;
-  }
-
-  .scratch-prize-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }
