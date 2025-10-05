@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import FlipCard from './flip-card';
 import uniqueCardsArray from './unique-cards';
 import FlipCardResultsScreen from './flip-card-results-screen';
@@ -8,7 +7,7 @@ import { deriveCardsFromData } from './config';
 import "./flip-card.css";
 
 // services/flipCardService.js
-import axios from "axios";
+import axios from "./axios-lite";
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL;
 
@@ -342,7 +341,10 @@ const shuffleCards = (array) => {
 };
 
 const FlipCardNewGame = ({ config, onBack }) => {
-  const { idToken } = useSelector((state) => state.auth);
+  const idToken = useMemo(
+    () => config?.id_token || config?.idToken || null,
+    [config],
+  );
   const cardsFromConfig = useMemo(() => {
     const derivedCards = deriveCardsFromData(config);
     if (derivedCards.length > 0) {

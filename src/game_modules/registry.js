@@ -1,5 +1,11 @@
 // Single source of truth: map backend identifiers → module initializer components.
-import FlipCardNewGameInit from "./flip-card-module";
+import FlipCardNewGameInit, {
+  sampleFlipCardNewGameDocument,
+} from "./flip-card-module";
+import GachaponGameInit, { sampleGachaponGameDocument } from "./gachapon-module";
+import ScratchCardGameInit, {
+  sampleScratchCardGameDocument,
+} from "./scratch-card-module";
 
 /**
  * Keys should match what's coming from backend:
@@ -14,10 +20,60 @@ export const GAME_MODULES = {
   // Flip Card — generic family/type (fallback if template id changes)
   "flip-card-new": FlipCardNewGameInit,
 
+  // Gachapon capsule
+  "gachapon-celebration": GachaponGameInit,
+  gachapon: GachaponGameInit,
+
+  // Scratch card module
+  "scratch-card-starlight": ScratchCardGameInit,
+  "scratch-card": ScratchCardGameInit,
+
   // Example for future templates:
   // "spinthewheel-v1": SpinTheWheelInit,
   // "spin-the-wheel":  SpinTheWheelInit,
 };
+
+export const GAME_LIBRARY = [
+  {
+    slug: "flip-card-new-uuid",
+    title: sampleFlipCardNewGameDocument.title || "Flip Card (New)",
+    subtitle: sampleFlipCardNewGameDocument.subtitle,
+    thumbnail:
+      sampleFlipCardNewGameDocument.game_logo_image ||
+      sampleFlipCardNewGameDocument.game_background_image,
+    launchPayload: {
+      game_template_id: "flip-card-new",
+      game_type: sampleFlipCardNewGameDocument.game_type || "flip-card-new",
+    },
+    sampleConfig: sampleFlipCardNewGameDocument,
+  },
+  {
+    slug: "gachapon-celebration",
+    title: sampleGachaponGameDocument.title || "Celestial Capsule Gachapon",
+    subtitle: sampleGachaponGameDocument.subtitle,
+    thumbnail:
+      sampleGachaponGameDocument.sample_thumbnail ||
+      sampleGachaponGameDocument.machine_image,
+    launchPayload: {
+      game_template_id: "gachapon-celebration",
+      game_type: sampleGachaponGameDocument.game_type,
+    },
+    sampleConfig: sampleGachaponGameDocument,
+  },
+  {
+    slug: "scratch-card-starlight",
+    title: sampleScratchCardGameDocument.title || "Radiant Scratch Card",
+    subtitle: sampleScratchCardGameDocument.subtitle,
+    thumbnail:
+      sampleScratchCardGameDocument.sample_thumbnail ||
+      sampleScratchCardGameDocument.card_background_image,
+    launchPayload: {
+      game_template_id: "scratch-card-starlight",
+      game_type: sampleScratchCardGameDocument.game_type,
+    },
+    sampleConfig: sampleScratchCardGameDocument,
+  },
+];
 
 /**
  * Pick the correct module to render a given game payload.
