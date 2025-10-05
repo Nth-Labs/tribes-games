@@ -1,486 +1,207 @@
-.gachapon-root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 1.5rem;
-  background-size: cover;
-  background-position: center;
+.gachapon-stage {
+  perspective: 1200px;
 }
 
-.gachapon-card {
-  width: min(720px, 100%);
-  border-radius: 1.5rem;
-  padding: clamp(1.75rem, 2.5vw + 1rem, 2.75rem);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.45);
-  overflow: hidden;
-}
-
-.gachapon-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.gachapon-header h1 {
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  margin-bottom: 0.5rem;
-}
-
-.gachapon-header p {
-  margin: 0.35rem 0;
-}
-
-.machine-wrapper {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.machine-visual {
+.gachapon-box {
   position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 240px;
+  height: 260px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, #312e81, #1f2937);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.45);
+  overflow: hidden;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform-style: preserve-3d;
 }
 
-.machine-image {
-  width: 100%;
-  border-radius: 1.25rem;
-  object-fit: cover;
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.35);
-}
-
-.machine-visual--playing .machine-image {
-  animation: machineShake 0.45s ease-in-out infinite;
-}
-
-.gachapon-ball-track {
+.gachapon-box::before,
+.gachapon-box::after {
+  content: '';
   position: absolute;
-  left: clamp(1rem, 6vw, 3rem);
-  right: clamp(1rem, 6vw, 3rem);
-  bottom: clamp(0.5rem, 4vw, 1.75rem);
-  height: clamp(48px, 12vw, 72px);
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
+  mix-blend-mode: screen;
   pointer-events: none;
 }
 
-.gachapon-ball {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: clamp(36px, 9vw, 64px);
-  aspect-ratio: 1;
-  border-radius: 50%;
+.gachapon-box::after {
+  inset: 12px;
+  border-radius: 20px;
+  background: linear-gradient(225deg, rgba(59, 130, 246, 0.15), rgba(14, 116, 144, 0));
+}
+
+.gachapon-box--shake {
+  animation: gachapon-shake 0.12s ease-in-out infinite;
+}
+
+.gachapon-box--hidden {
   opacity: 0;
-  transform: translateX(-15%);
-  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85), rgba(59, 130, 246, 0.95) 55%, rgba(30, 64, 175, 0.95));
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.45);
+  transform: scale(0.85) rotateX(12deg);
 }
 
-.gachapon-ball-shadow {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: clamp(36px, 9vw, 64px);
-  height: clamp(10px, 2.5vw, 16px);
-  border-radius: 999px;
-  opacity: 0;
-  transform: translateX(-15%);
-  background: rgba(15, 23, 42, 0.35);
-  filter: blur(12px);
-  transform-origin: center;
-}
-
-.machine-visual--playing .gachapon-ball {
-  opacity: 1;
-  animation: gachaponBallRoll 1.4s ease-in-out infinite;
-}
-
-.machine-visual--playing .gachapon-ball-shadow {
-  opacity: 0.45;
-  animation: gachaponBallShadow 1.4s ease-in-out infinite;
-}
-
-@keyframes machineShake {
+@keyframes gachapon-shake {
   0% {
     transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-  20% {
-    transform: translate3d(-3px, 2px, 0) rotate(-1deg);
-  }
-  40% {
-    transform: translate3d(3px, -2px, 0) rotate(1.2deg);
-  }
-  60% {
-    transform: translate3d(-2px, 3px, 0) rotate(-0.8deg);
-  }
-  80% {
-    transform: translate3d(2px, -3px, 0) rotate(0.6deg);
-  }
-  100% {
-    transform: translate3d(0, 0, 0) rotate(0deg);
-  }
-}
-
-@keyframes gachaponBallRoll {
-  0% {
-    transform: translateX(-20%) rotate(0deg);
   }
   25% {
-    transform: translateX(30%) rotate(120deg);
+    transform: translate3d(-5px, 3px, 0) rotate(-1.6deg);
   }
   50% {
-    transform: translateX(85%) rotate(240deg);
+    transform: translate3d(4px, -4px, 0) rotate(1.4deg);
   }
   75% {
-    transform: translateX(140%) rotate(320deg);
+    transform: translate3d(-4px, -2px, 0) rotate(-1deg);
   }
   100% {
-    transform: translateX(190%) rotate(400deg);
+    transform: translate3d(0, 0, 0) rotate(0deg);
   }
 }
 
-@keyframes gachaponBallShadow {
+.gachapon-explosion {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(250, 204, 21, 0.9) 0%, rgba(249, 115, 22, 0.6) 55%, rgba(0, 0, 0, 0) 70%);
+  animation: gachapon-explosion-burst 0.6s forwards ease-out;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+@keyframes gachapon-explosion-burst {
   0% {
-    transform: translateX(-20%) scaleX(0.7);
-    opacity: 0.3;
+    transform: scale(0.35);
+    opacity: 0.9;
   }
   50% {
-    transform: translateX(90%) scaleX(1);
-    opacity: 0.45;
+    transform: scale(1.9);
+    opacity: 1;
   }
   100% {
-    transform: translateX(190%) scaleX(0.7);
-    opacity: 0.3;
+    transform: scale(3.8);
+    opacity: 0;
   }
 }
 
-.machine-panel {
-  border-radius: 1.25rem;
-  padding: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+.gachapon-capsule {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  border-radius: 50% 50% 60% 60%;
+  box-shadow: 0 12px 20px rgba(15, 23, 42, 0.35);
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
-.machine-panel h3 {
-  font-size: 1.25rem;
-  margin: 0;
+.gachapon-capsule::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%);
+  mix-blend-mode: screen;
 }
 
-.machine-panel p {
-  margin: 0;
-  line-height: 1.6;
+.gachapon-capsule--hidden {
+  transform: translate(-50%, -50%) scale(0.6) rotateX(22deg);
+  opacity: 0;
 }
 
-.gachapon-button {
-  padding: 0.85rem 1.25rem;
-  border: none;
-  border-radius: 999px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 120ms ease, box-shadow 120ms ease;
-}
-
-.gachapon-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.gachapon-button:not(:disabled):hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(56, 189, 248, 0.35);
-}
-
-.gachapon-error {
-  margin: 0;
-  font-size: 0.95rem;
-  opacity: 0.85;
-}
-
-.prizes-section {
-  margin-top: 2.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-}
-
-.prizes-section__header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.prizes-section__header h2 {
-  margin: 0;
-  font-size: clamp(1.35rem, 2vw, 1.75rem);
-}
-
-.prizes-section__status {
-  font-size: 0.95rem;
-  opacity: 0.85;
-}
-
-.prizes-section__status--error {
-  color: #fecaca;
-}
-
-.prize-gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-}
-
-.prize-card {
-  padding: 1rem;
-  border-radius: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-}
-
-.prize-card__media {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 0.85rem;
+.gachapon-capsule-display {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  border-radius: 50% 50% 60% 60%;
+  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.35);
   overflow: hidden;
 }
 
-.prize-card__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.gachapon-capsule-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%);
+  mix-blend-mode: screen;
 }
 
-.prize-card__content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.prize-card__content h4 {
-  margin: 0;
-  font-size: 1.1rem;
-}
-
-.prize-card__content p {
-  margin: 0;
-  line-height: 1.5;
-  font-size: 0.95rem;
-}
-
-.prize-card__meta {
-  font-size: 0.8rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  opacity: 0.75;
-}
-
-.prizes-section__footnote {
-  margin: 0;
-  font-size: 0.85rem;
-  opacity: 0.75;
-}
-
-.gachapon-results {
-  min-height: 100vh;
-  display: flex;
+.gachapon-start-button {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 2.5rem 1.5rem;
-}
-
-.results-card {
-  width: min(680px, 100%);
-  border-radius: 1.5rem;
-  padding: clamp(1.75rem, 2.5vw + 1rem, 2.5rem);
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.results-title {
-  font-size: clamp(2rem, 3vw, 2.75rem);
-  margin: 0.35rem 0;
-}
-
-.results-subtitle,
-.results-message,
-.results-error {
-  margin: 0;
-  opacity: 0.85;
-}
-
-.results-error {
-  color: #fca5a5;
-}
-
-.prize-preview {
-  display: grid;
-  grid-template-columns: minmax(120px, 150px) 1fr;
-  gap: 1.25rem;
-  padding: 1.25rem;
-  border-radius: 1.25rem;
-  background: rgba(15, 23, 42, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-.prize-image {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  border-radius: 1rem;
-}
-
-.prize-rarity {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.75rem;
-  opacity: 0.75;
-}
-
-.prize-name {
-  margin: 0.35rem 0;
-  font-size: 1.35rem;
-}
-
-.prize-description {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.6;
-}
-
-.section-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.2rem;
-}
-
-.voucher-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
-}
-
-.voucher-item {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 1rem 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.voucher-name {
-  margin: 0;
-  font-weight: 600;
-}
-
-.voucher-code,
-.voucher-expiry {
-  margin: 0;
-  font-size: 0.9rem;
-  opacity: 0.85;
-}
-
-.results-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  justify-content: flex-end;
-}
-
-.results-button {
+  padding: 1.1rem 3.5rem;
   border: none;
-  border-radius: 999px;
-  padding: 0.8rem 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.results-link {
-  border: none;
+  border-radius: 9999px;
   background: transparent;
-  color: inherit;
+  color: #fff7ed;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  line-height: 1;
   cursor: pointer;
-  text-decoration: underline;
-  font-weight: 500;
+  box-shadow: 0 18px 0 #9a3412, 0 28px 45px rgba(249, 115, 22, 0.55);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
 }
 
-.loading-text {
-  margin: 0;
-  opacity: 0.8;
+.gachapon-start-button::before {
+  content: '';
+  position: absolute;
+  inset: -18px -28px -40px;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.35), rgba(249, 115, 22, 0));
+  z-index: 0;
 }
 
-@media (max-width: 768px) {
-  .gachapon-root {
-    justify-content: flex-start;
-    padding: 1.5rem 1rem;
-  }
-
-  .gachapon-card {
-    border-radius: 1.25rem;
-    padding: clamp(1.5rem, 3vw + 1rem, 2rem);
-  }
-
-  .machine-wrapper {
-    grid-template-columns: 1fr;
-  }
-
-  .prize-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  }
-
-  .prize-preview {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .prize-image {
-    height: 160px;
-    margin: 0 auto;
-  }
-
-  .voucher-item {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.gachapon-start-button::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 20%, #fde68a 0%, #fb923c 45%, #f97316 70%, #ea580c 100%);
+  box-shadow: inset 0 -10px 0 rgba(124, 45, 18, 0.6), inset 0 8px 18px rgba(255, 255, 255, 0.25);
+  z-index: 1;
+  transition: inherit;
 }
 
-@media (max-width: 480px) {
-  .gachapon-card {
-    padding: 1.5rem;
-  }
+.gachapon-start-button span {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 4px 12px rgba(120, 53, 15, 0.6);
+}
 
-  .machine-panel {
-    padding: 1.25rem;
-  }
+.gachapon-start-button:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 0 #b45309, 0 34px 55px rgba(249, 115, 22, 0.6);
+}
 
-  .prizes-section__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+.gachapon-start-button:hover:not(:disabled)::after {
+  filter: brightness(1.05);
+}
 
-  .prize-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  }
+.gachapon-start-button:active:not(:disabled) {
+  transform: translateY(6px);
+  box-shadow: 0 10px 0 #9a3412, 0 18px 32px rgba(153, 27, 27, 0.45);
+}
 
-  .results-card {
-    padding: 1.75rem;
-  }
+.gachapon-start-button:active:not(:disabled)::after {
+  box-shadow: inset 0 -4px 0 rgba(124, 45, 18, 0.6), inset 0 4px 12px rgba(255, 255, 255, 0.25);
+}
+
+.gachapon-start-button:disabled {
+  cursor: not-allowed;
+  filter: grayscale(0.3) brightness(0.92);
+  box-shadow: 0 14px 0 #9a3412, 0 20px 32px rgba(15, 23, 42, 0.45);
+}
+
+.gachapon-start-button:disabled::after {
+  background: radial-gradient(circle at 50% 30%, #fcd34d 0%, #fb923c 55%, #f97316 90%);
+}
+
+.gachapon-start-button:focus-visible {
+  outline: 4px solid rgba(253, 224, 71, 0.7);
+  outline-offset: 6px;
 }
