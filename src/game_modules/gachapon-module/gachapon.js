@@ -206,7 +206,13 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
         </header>
 
         <div className="machine-wrapper">
-          <img src={machineImage} alt="Gachapon machine" className="machine-image" />
+          <div className={`machine-visual ${isPlaying ? 'machine-visual--playing' : ''}`}>
+            <img src={machineImage} alt="Gachapon machine" className="machine-image" />
+            <div className="gachapon-ball-track" aria-hidden="true">
+              <div className="gachapon-ball" />
+              <div className="gachapon-ball-shadow" />
+            </div>
+          </div>
 
           <div
             className="machine-panel"
