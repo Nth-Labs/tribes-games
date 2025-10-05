@@ -4,9 +4,10 @@ import { buildConfig } from './config';
 import { buildTheme } from './theme';
 import './gachapon.css';
 
-const mockPlay = (config) => {
+const buildMockResult = (config) => {
   const prizes = config.prizes || [];
   const prize = prizes[Math.floor(Math.random() * prizes.length)];
+
   return {
     resultId: `mock-${Date.now()}`,
     outcome: prize ? `You won ${prize.name}` : 'Better luck next time',
@@ -23,8 +24,17 @@ const mockPlay = (config) => {
   };
 };
 
+const mockPlay = (config) =>
+  new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(buildMockResult(config));
+    }, 450);
+  });
+
 const playGachapon = async ({ config }) => {
-  if (!config?.play_endpoint) {
+  const shouldMock = !config?.play_endpoint || process.env.NODE_ENV !== 'production';
+
+  if (shouldMock) {
     return mockPlay(config);
   }
 
@@ -47,7 +57,7 @@ const playGachapon = async ({ config }) => {
 
   const data = await response.json();
   return {
-    ...mockPlay(config),
+    ...buildMockResult(config),
     ...data,
   };
 };
