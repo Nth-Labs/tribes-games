@@ -1,121 +1,31 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { GAME_LIBRARY } from '../../game_modules/registry';
 
 const HomeNav = () => {
   return (
     <div className="flex flex-col items-center justify-center">
       <h2 className="p-10 text-3xl">NthLabs' Game Library</h2>
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-4">
-        <Link to="/game1">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/matching-game-assets/matching-game-thumb.png"
-              alt="Matching Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Matching Game</p>
-          </div>
-        </Link>
-        <Link to="/game2">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/stw-game-thumb.png"
-              alt="STW Game Thumbnail"
-              className="h-48 w-48 rounded-md object-cover"
-            />
-            <p>Spin The Wheel</p>
-          </div>
-        </Link>
-        <Link to="/game3">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/mystery-manor-game-thumb.png"
-              alt="Mystery Manor Game Thumbnail"
-              className="h-48 w-48 rounded-md object-cover"
-            />
-            <p>Mystery Manor</p>
-          </div>
-        </Link>
-        <Link to="/game4">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/precision-timer-game-thumb.svg"
-              alt="Precision Timer Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Precision Timer</p>
-          </div>
-        </Link>
-        <Link to="/game5">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/shake-off-game-thumb.svg"
-              alt="Shake Off Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Shake Off Challenge</p>
-          </div>
-        </Link>
-        <Link to="/game6">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/gachapon-game-thumb.svg"
-              alt="Gachapon Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Celestial Capsule Gachapon</p>
-          </div>
-        </Link>
-        <Link to="/game7">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/scratch-card-game-thumb.svg"
-              alt="Scratch Card Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Radiant Scratch Card</p>
-          </div>
-        </Link>
-        <Link to="/scratch-classic">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/scratch-card-game-thumb.svg"
-              alt="Scratch Card Classic Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Scratch Card Classic</p>
-          </div>
-        </Link>
-        <Link to="/game8">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/flip-card-new-thumb.svg"
-              alt="Flip Card New Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Flip Card (New)</p>
-          </div>
-        </Link>
-        <Link to="/gachapon-classic">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/gachapon-game-thumb.svg"
-              alt="Gachapon Classic Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Gachapon Classic</p>
-          </div>
-        </Link>
-          <Link to="/game9">
-          <div className="flex flex-col items-center justify-center">
-            <img
-              src="/images/vocal-lift-game-thumb.svg"
-              alt="Vocal Lift Game Thumbnail"
-              className="h-48 w-48 rounded-md object-contain"
-            />
-            <p>Vocal Lift Challenge</p>
-          </div>
-        </Link>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {GAME_LIBRARY.map((game) => (
+          <Link key={game.slug} to={`/games/${game.slug}`} className="group">
+            <div className="flex h-full flex-col items-center gap-4 rounded-2xl bg-white/80 p-6 text-center shadow transition hover:-translate-y-1 hover:shadow-lg">
+              <div className="flex h-48 w-48 items-center justify-center overflow-hidden rounded-xl bg-slate-100">
+                <img
+                  src={game.thumbnail}
+                  alt={`${game.title} Thumbnail`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-lg font-semibold text-slate-900">{game.title}</p>
+                {game.subtitle && (
+                  <p className="mt-1 text-sm text-slate-500">{game.subtitle}</p>
+                )}
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );

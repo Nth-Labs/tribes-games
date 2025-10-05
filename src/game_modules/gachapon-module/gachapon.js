@@ -1,0 +1,191 @@
+import React, { useMemo, useState } from 'react';
+import GachaponResultsScreen from './gachapon-results-screen';
+import { buildConfig } from './config';
+import { buildTheme } from './theme';
+import './gachapon.css';
+
+const mockPlay = (config) => {
+  const prizes = config.prizes || [];
+  const prize = prizes[Math.floor(Math.random() * prizes.length)];
+  return {
+    resultId: `mock-${Date.now()}`,
+    outcome: prize ? `You won ${prize.name}` : 'Better luck next time',
+    message: 'This is a mocked result. Connect to the backend to receive live data.',
+    prize,
+    voucherItems: [
+      {
+        id: 'voucher-fallback',
+        label: 'Launch Voucher',
+        code: 'DEMO-12345',
+        expiresAt: '2024-12-31T23:59:59.000Z',
+      },
+    ],
+  };
+};
+
+const playGachapon = async ({ config }) => {
+  if (!config?.play_endpoint) {
+    return mockPlay(config);
+  }
+
+  const payload = {
+    game_id: config.game_id,
+    game_template_id: config.game_template_id,
+  };
+
+  const response = await fetch(config.play_endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Play request failed with status ${response.status}`);
+  }
+
+  const data = await response.json();
+  return {
+    ...mockPlay(config),
+    ...data,
+  };
+};
+
+const PrizeCard = ({ prize, theme }) => (
+  <article
+    className="prize-card"
+    style={{
+      background: `${theme.primaryColor}cc`,
+      borderColor: `${theme.tertiaryColor}55`,
+    }}
+  >
+    <img src={prize.image} alt={prize.name} />
+    <div>
+      <h4>{prize.name}</h4>
+      <p>{prize.description}</p>
+    </div>
+  </article>
+);
+
+const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
+  const config = useMemo(() => buildConfig(rawConfig), [rawConfig]);
+  const theme = useMemo(() => buildTheme(config), [config]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [error, setError] = useState(null);
+  const [result, setResult] = useState(null);
+
+  const handlePlay = async () => {
+    if (isPlaying) {
+      return;
+    }
+    setIsPlaying(true);
+    setError(null);
+
+    try {
+      const payload = await playGachapon({ config });
+      setResult(payload);
+    } catch (playError) {
+      console.error('[Gachapon] Failed to play', playError);
+      setError(playError.message || 'Something went wrong. Please try again.');
+    } finally {
+      setIsPlaying(false);
+    }
+  };
+
+  const machineImage =
+    config.machine_image ||
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80';
+  const backgroundImage =
+    config.background_image ||
+    'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=80';
+
+  if (result) {
+    return (
+      <GachaponResultsScreen
+        config={config}
+        result={{ ...result, gameId: config.game_id }}
+        onPlayAgain={() => setResult(null)}
+        onBack={onBack}
+      />
+    );
+  }
+
+  return (
+    <div
+      className="gachapon-root"
+      style={{
+        backgroundImage: `linear-gradient(135deg, ${theme.primaryColor}cc, ${theme.secondaryColor}aa), url(${backgroundImage})`,
+        color: theme.textColor,
+      }}
+    >
+      <div
+        className="gachapon-card"
+        style={{
+          background: `${theme.primaryColor}cc`,
+          border: `1px solid ${theme.borderColor}`,
+        }}
+      >
+        <header className="gachapon-header">
+          <p style={{ color: theme.tertiaryColor, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+            {config.subtitle || 'Instant Prize Capsule'}
+          </p>
+          <h1>{config.title || config.name}</h1>
+          <p style={{ color: theme.mutedTextColor }}>{config.instructions}</p>
+        </header>
+
+        <div className="machine-wrapper">
+          <img src={machineImage} alt="Gachapon machine" className="machine-image" />
+
+          <div
+            className="machine-panel"
+            style={{
+              background: `${theme.primaryColor}88`,
+              border: `1px solid ${theme.borderColor}`,
+            }}
+          >
+            <h3>Launch a capsule</h3>
+            <p>Each play dispenses a capsule containing one of the featured rewards below.</p>
+            <button
+              type="button"
+              onClick={handlePlay}
+              disabled={isPlaying}
+              className="gachapon-button"
+              style={{
+                background: theme.secondaryColor,
+                color: theme.primaryColor,
+              }}
+            >
+              {isPlaying ? 'Rolling…' : 'Play now'}
+            </button>
+            {error && <p className="gachapon-error">{error}</p>}
+            <button
+              type="button"
+              onClick={onBack}
+              className="gachapon-button"
+              style={{
+                background: 'transparent',
+                border: `1px solid ${theme.borderColor}`,
+                color: theme.textColor,
+                boxShadow: 'none',
+              }}
+            >
+              Back
+            </button>
+          </div>
+        </div>
+
+        <section>
+          <h2 style={{ marginTop: '2.5rem', marginBottom: '1rem' }}>Featured rewards</h2>
+          <div className="prize-gallery">
+            {config.prizes.map((prize) => (
+              <PrizeCard key={prize.id} prize={prize} theme={theme} />
+            ))}
+          </div>
+        </section>
+      </div>
+    </div>
+  );
+};
+
+export default GachaponGame;

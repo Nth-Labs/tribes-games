@@ -1,36 +1,21 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import FlipCardNewGame from './flip-card-new';
-import sampleFlipCardNewGameDocument from './sample-game-document';
-import { toCleanString } from './config';
+import ScratchCardGame from './scratch-card';
+import sampleScratchCardGameDocument from './sample-game-document';
 
-const mockFetchFlipCardNewConfig = () =>
+const mockFetchScratchCardConfig = () =>
   new Promise((resolve, reject) => {
     try {
       setTimeout(() => {
         if (typeof structuredClone === 'function') {
-          resolve(structuredClone(sampleFlipCardNewGameDocument));
+          resolve(structuredClone(sampleScratchCardGameDocument));
           return;
         }
-
-        resolve(JSON.parse(JSON.stringify(sampleFlipCardNewGameDocument)));
-      }, 400);
+        resolve(JSON.parse(JSON.stringify(sampleScratchCardGameDocument)));
+      }, 250);
     } catch (error) {
       reject(error);
     }
   });
-
-const getGameIdentifier = (data) => {
-  if (!data || typeof data !== 'object') {
-    return '';
-  }
-
-  const snakeCaseId = toCleanString(data.game_id);
-  if (snakeCaseId) {
-    return snakeCaseId;
-  }
-
-  return toCleanString(data.gameId);
-};
 
 const ErrorState = ({ message, onBack }) => (
   <div className="p-6 text-center">
@@ -52,12 +37,16 @@ const LoadingState = () => (
   <div className="flex items-center justify-center p-10 text-slate-600">Loading…</div>
 );
 
-export default function FlipCardNewGameInit({ config: externalConfig, onBack, fetchConfig = mockFetchFlipCardNewConfig }) {
+export default function ScratchCardGameInit({
+  config: externalConfig,
+  onBack,
+  fetchConfig = mockFetchScratchCardConfig,
+}) {
   const [config, setConfig] = useState(() => externalConfig || null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(() => !externalConfig);
   const loadConfig = useMemo(
-    () => (typeof fetchConfig === 'function' ? fetchConfig : mockFetchFlipCardNewConfig),
+    () => (typeof fetchConfig === 'function' ? fetchConfig : mockFetchScratchCardConfig),
     [fetchConfig],
   );
 
@@ -68,7 +57,6 @@ export default function FlipCardNewGameInit({ config: externalConfig, onBack, fe
       setConfig(externalConfig);
       setError(null);
       setIsLoading(false);
-
       return () => {
         cancelled = true;
       };
@@ -95,8 +83,8 @@ export default function FlipCardNewGameInit({ config: externalConfig, onBack, fe
         }
         const message =
           fetchError instanceof Error
-            ? fetchError.message || 'Failed to load the Flip Card New configuration.'
-            : 'Failed to load the Flip Card New configuration.';
+            ? fetchError.message || 'Failed to load the Scratch Card configuration.'
+            : 'Failed to load the Scratch Card configuration.';
         setError(message);
         setIsLoading(false);
       });
@@ -106,8 +94,6 @@ export default function FlipCardNewGameInit({ config: externalConfig, onBack, fe
     };
   }, [externalConfig, loadConfig]);
 
-  const hasValidConfig = useMemo(() => Boolean(getGameIdentifier(config)), [config]);
-
   if (error) {
     return <ErrorState message={error} onBack={onBack} />;
   }
@@ -116,7 +102,7 @@ export default function FlipCardNewGameInit({ config: externalConfig, onBack, fe
     return <LoadingState />;
   }
 
-  if (!hasValidConfig) {
+  if (!config?.game_template_id) {
     return (
       <ErrorState
         message="This game no longer exists or its configuration is missing."
@@ -125,8 +111,7 @@ export default function FlipCardNewGameInit({ config: externalConfig, onBack, fe
     );
   }
 
-  return <FlipCardNewGame config={config} onBack={onBack} />;
+  return <ScratchCardGame config={config} onBack={onBack} />;
 }
 
-export { deriveCardsFromData } from './config';
-export { default as sampleFlipCardNewGameDocument } from './sample-game-document';
+export { default as sampleScratchCardGameDocument } from './sample-game-document';
