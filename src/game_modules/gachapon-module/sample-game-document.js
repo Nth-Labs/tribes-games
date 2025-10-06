@@ -1,6 +1,7 @@
 const sampleGachaponGameDocument = {
-  game_id: 'gachapon-capsule-carnival',
-  game_template_id: 'gachapon-celebration',
+  _id: '68e3e1127fa2f060ddf4a2b5',
+  game_id: 'capsule-carnival-boba-fiesta',
+  game_template_id: 'gachapon',
   game_type: 'gachapon',
   merchant_id: 'merchant-boba-123',
   name: 'Capsule Carnival Gachapon',
@@ -9,31 +10,15 @@ const sampleGachaponGameDocument = {
   tagline: 'Every shake is a new surprise!',
   instructions:
     'Pull the virtual handle to shake the machine. When the capsule drops, tap to open it and reveal your prize.',
-  description:
-    'Celebrate the Boba Fiesta season with a luckdraw capsule machine filled with exclusive vouchers, collectibles, and drink upgrades.',
+  capsule_description:
+    'Each capsule is filled with seasonal delights. Play daily to collect every fiesta reward before they are gone.',
   primary_color: '#25164D',
   secondary_color: '#FF4D6D',
   tertiary_color: '#2BCDFB',
   contrast_color: '#FFF7FF',
-  background_image:
-    'https://images.unsplash.com/photo-1520971340542-ef72f47f4a6a?auto=format&fit=crop&w=1600&q=80',
-  machine_image:
-    'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80',
-  capsule_image:
-    'https://images.unsplash.com/photo-1529603992250-00952fe5e1b6?auto=format&fit=crop&w=800&q=80',
-  sample_thumbnail:
-    'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=400&q=80',
-  start_date: '2024-07-01T00:00:00.000Z',
-  end_date: '2024-08-31T23:59:59.000Z',
-  status: 'published',
-  is_active: true,
-  hard_play_count_limit: 0,
-  play_count: 0,
-  distribution_type: 'luckdraw',
-  play_endpoint: '/api/luckdraw/gachapon/gachapon-capsule-carnival/play',
-  submission_endpoint: '/api/luckdraw/gachapon/gachapon-capsule-carnival/results',
-  prizes_endpoint: '/api/luckdraw/gachapon/gachapon-capsule-carnival/prizes',
-  results_endpoint: '/api/luckdraw/gachapon/gachapon-capsule-carnival/rewards',
+  background_image: 'https://example.com/gachapon/background.jpg',
+  machine_image: 'https://example.com/gachapon/machine.png',
+  capsule_image: 'https://example.com/gachapon/capsule.png',
   default_flair_text: 'The capsule cracks open in a burst of sparkling tea pearls! 🎉',
   default_capsule_color: '#FF9ECD',
   shake_duration_ms: 1200,
@@ -44,14 +29,21 @@ const sampleGachaponGameDocument = {
   capsule_status_shaking_label: 'Shaking!',
   capsule_status_opening_label: 'Capsule Opening…',
   capsule_status_result_label: 'Prize Unlocked!',
-  capsule_description:
-    'Each capsule is filled with seasonal delights. Play daily to collect every fiesta reward before they are gone.',
   prize_showcase_title: 'Fiesta Capsule Rewards',
   prize_showcase_description:
     'This lineup displays all prizes currently loaded into the carnival machine with their drop rates.',
   prize_list_loading_text: 'Fetching capsule lineup…',
   prize_list_error_text: 'We could not load the capsule lineup. Pull to refresh and try again.',
   attempt_error_text: 'Something interrupted the gachapon attempt. Please try again.',
+  distribution_type: 'luckdraw',
+  submission_endpoint: '/api/luckdraw',
+  prizes_endpoint: '/api/luckdraw-prizes/capsule-carnival-boba-fiesta',
+  start_date: '2024-07-01T00:00:00.000Z',
+  end_date: '2024-08-31T23:59:59.000Z',
+  status: 'published',
+  is_active: true,
+  hard_play_count_limit: 0,
+  play_count: 0,
   prizes: [
     {
       id: 'capsule-bobapearl',
@@ -62,8 +54,7 @@ const sampleGachaponGameDocument = {
       weight: 60,
       capsuleColor: '#FFD6E8',
       flairText: 'A soft pop echoes as fresh pearls tumble out.',
-      image:
-        'https://images.unsplash.com/photo-1528712306091-ed0763094c98?auto=format&fit=crop&w=800&q=80',
+      image: 'https://example.com/prizes/pearl-topping.png',
       probability: '60%',
     },
     {
@@ -75,8 +66,7 @@ const sampleGachaponGameDocument = {
       weight: 25,
       capsuleColor: '#F9A8D4',
       flairText: 'Glitter confetti swirls around the capsule as it opens.',
-      image:
-        'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=800&q=80',
+      image: 'https://example.com/prizes/sparkle-upgrade.png',
       probability: '25%',
     },
     {
@@ -88,8 +78,7 @@ const sampleGachaponGameDocument = {
       weight: 10,
       capsuleColor: '#93C5FD',
       flairText: 'Indigo sparks streak across the glass as the tea voucher appears.',
-      image:
-        'https://images.unsplash.com/photo-1514996937319-344454492b37?auto=format&fit=crop&w=800&q=80',
+      image: 'https://example.com/prizes/midnight-milk-tea.png',
       probability: '10%',
     },
     {
@@ -101,8 +90,7 @@ const sampleGachaponGameDocument = {
       weight: 4,
       capsuleColor: '#C4B5FD',
       flairText: 'A prism of light shimmers before revealing the fiesta kit.',
-      image:
-        'https://images.unsplash.com/photo-1526318896980-cf78c088247c?auto=format&fit=crop&w=800&q=80',
+      image: 'https://example.com/prizes/fiesta-celebration-kit.png',
       probability: '4%',
     },
     {
@@ -114,13 +102,12 @@ const sampleGachaponGameDocument = {
       weight: 1,
       capsuleColor: '#FDE68A',
       flairText: 'A golden burst erupts as the legendary BOGO pass is revealed.',
-      image:
-        'https://images.unsplash.com/photo-1541976076758-347942db1971?auto=format&fit=crop&w=800&q=80',
+      image: 'https://example.com/prizes/fiesta-bogo-pass.png',
       probability: '1%',
     },
   ],
-  createdAt: '2024-06-15T10:00:00.000Z',
-  updatedAt: '2024-06-20T08:30:00.000Z',
+  created_at: '2024-06-30T00:00:00.000Z',
+  updated_at: '2024-06-30T00:00:00.000Z',
 };
 
 export default sampleGachaponGameDocument;
