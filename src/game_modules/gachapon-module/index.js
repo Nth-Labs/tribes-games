@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import GachaponGame from './gachapon';
-import sampleGachaponGameDocument from './sample-game-document';
+import sampleGachaponGameDocument from './sample-game-document.json';
 
 const mockFetchGachaponConfig = () =>
   new Promise((resolve, reject) => {
@@ -114,4 +114,4 @@ export default function GachaponGameInit({
   return <GachaponGame config={config} onBack={onBack} />;
 }
 
-export { default as sampleGachaponGameDocument } from './sample-game-document';
+export { default as sampleGachaponGameDocument } from './sample-game-document.json';

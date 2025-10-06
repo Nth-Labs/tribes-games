@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import ScratchCardGame from './scratch-card';
-import sampleScratchCardGameDocument from './sample-game-document';
+import sampleScratchCardGameDocument from './sample-game-document.json';
 
 const mockFetchScratchCardConfig = () =>
   new Promise((resolve, reject) => {
@@ -114,4 +114,4 @@ export default function ScratchCardGameInit({
   return <ScratchCardGame config={config} onBack={onBack} />;
 }
 
-export { default as sampleScratchCardGameDocument } from './sample-game-document';
+export { default as sampleScratchCardGameDocument } from './sample-game-document.json';
