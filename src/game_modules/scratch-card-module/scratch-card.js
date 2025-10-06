@@ -859,19 +859,19 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       }}
     >
       <div className="scratch-module-surface">
-        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-7 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur">
-          <div className="flex flex-col gap-6">
+        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur sm:p-7">
+          <div className="flex flex-col gap-5 sm:gap-6">
             <div>
-              <p className="text-xs uppercase tracking-[0.4em] text-indigo-200/70">{normalisedConfig.tagline}</p>
-              <h1 className="mt-3 text-4xl font-semibold text-white">{normalisedConfig.title}</h1>
-              <p className="mt-4 text-base text-slate-300">{normalisedConfig.description}</p>
+              <p className="text-[0.68rem] uppercase tracking-[0.35em] text-indigo-200/70 sm:text-xs">{normalisedConfig.tagline}</p>
+              <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">{normalisedConfig.title}</h1>
+              <p className="mt-4 text-sm text-slate-300 sm:text-base">{normalisedConfig.description}</p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={handleAttempt}
                 disabled={buttonDisabled}
-                className="flex items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 px-6 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-6"
               >
                 {buttonLabel}
               </button>
@@ -884,8 +884,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           </div>
         </div>
 
-        <div className="scratch-card-stage rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-950/60 to-fuchsia-900/40 p-8 shadow-[0_35px_80px_rgba(59,7,100,0.45)]">
-          <div className="scratch-card-container">
+        <div className="scratch-card-stage rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-950/60 to-fuchsia-900/40 p-5 shadow-[0_35px_80px_rgba(59,7,100,0.45)] sm:p-8">
+          <div className="scratch-card-container w-full">
             <div className={cardClassName}>
               <div className="scratch-card__inner" ref={surfaceRef}>
                 <div className="scratch-card__reward" style={rewardStyle}>
@@ -951,10 +951,10 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-7 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur">
-          <div className="flex items-center justify-between gap-3">
+        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur sm:p-7">
+          <div className="flex flex-col items-start justify-between gap-3 text-center sm:flex-row sm:items-center sm:text-left">
             <div>
-              <h2 className="text-lg font-semibold text-white">{normalisedConfig.prizeLedgerTitle}</h2>
+              <h2 className="text-lg font-semibold text-white sm:text-xl">{normalisedConfig.prizeLedgerTitle}</h2>
               {normalisedConfig.prizeLedgerSubtitle ? (
                 <p className="mt-1 text-sm text-slate-400">{normalisedConfig.prizeLedgerSubtitle}</p>
               ) : null}
@@ -978,18 +978,18 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
+        <div className="flex w-full flex-col flex-wrap gap-3 sm:flex-row sm:justify-center">
           <button
             type="button"
             onClick={onBack}
-            className="rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white"
+            className="w-full rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white sm:w-auto"
           >
             Back to Store
           </button>
           {cardState === 'revealed' ? (
             <button
               type="button"
-              className="rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+              className="w-full rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
               onClick={handleAttempt}
             >
               {normalisedConfig.playAgainLabel}
@@ -1000,9 +1000,9 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
       {showResultModal && result ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-10 backdrop-blur">
-          <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-8 shadow-2xl shadow-indigo-900/50">
-            <p className="text-sm uppercase tracking-[0.25em] text-indigo-300">{normalisedConfig.resultModalTitle}</p>
-            <h3 className="mt-2 text-3xl font-semibold text-white">{result.prize.name}</h3>
+          <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-6 text-center shadow-2xl shadow-indigo-900/50 sm:p-8">
+            <p className="text-xs uppercase tracking-[0.25em] text-indigo-300 sm:text-sm">{normalisedConfig.resultModalTitle}</p>
+            <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{result.prize.name}</h3>
             <p className="mt-1 text-sm text-slate-400">{result.prize.rarityLabel}</p>
             <div className="mt-5 flex items-center justify-center">
               <div
@@ -1022,7 +1022,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white"
+                className="w-full rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white sm:w-auto"
                 onClick={() => {
                   closeModal();
                   handleAttempt();
@@ -1032,7 +1032,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
               </button>
               <button
                 type="button"
-                className="rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                className="w-full rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
                 onClick={() => {
                   closeModal();
                   onBack?.();
