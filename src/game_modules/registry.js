@@ -2,7 +2,10 @@
 import FlipCardNewGameInit, {
   sampleFlipCardNewGameDocument,
 } from "./flip-card-module";
-import GachaponGameInit, { sampleGachaponGameDocument } from "./gachapon-module";
+import GachaponGameInit, {
+  sampleGachaponGameDocument,
+  sampleGachaponGameDocuments,
+} from "./gachapon-module";
 import ScratchCardGameInit, {
   sampleScratchCardGameDocument,
 } from "./scratch-card-module";
@@ -22,6 +25,7 @@ export const GAME_MODULES = {
 
   // Gachapon capsule
   "gachapon-celebration": GachaponGameInit,
+  "gachapon-classic": GachaponGameInit,
   gachapon: GachaponGameInit,
 
   // Scratch card module
@@ -59,6 +63,21 @@ export const GAME_LIBRARY = [
       game_type: sampleGachaponGameDocument.game_type,
     },
     sampleConfig: sampleGachaponGameDocument,
+  },
+  {
+    slug: "gachapon-classic",
+    title:
+      sampleGachaponGameDocuments.sakuraSymphony.title ||
+      "Gachapon Classic",
+    subtitle: sampleGachaponGameDocuments.sakuraSymphony.subtitle,
+    thumbnail:
+      sampleGachaponGameDocuments.sakuraSymphony.sample_thumbnail ||
+      sampleGachaponGameDocuments.sakuraSymphony.machine_image,
+    launchPayload: {
+      game_template_id: "gachapon-classic",
+      game_type: sampleGachaponGameDocuments.sakuraSymphony.game_type,
+    },
+    sampleConfig: sampleGachaponGameDocuments.sakuraSymphony,
   },
   {
     slug: "scratch-card-starlight",
