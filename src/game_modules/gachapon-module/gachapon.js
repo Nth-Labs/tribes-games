@@ -254,7 +254,7 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
   const capsuleColor = result?.prize?.capsuleColor ?? config.defaultCapsuleColor;
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 py-12 text-white">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 py-10 text-white sm:py-12">
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-16 left-16 h-60 w-60 rounded-full bg-indigo-500/25 blur-3xl" />
         <div className="absolute top-1/3 right-12 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
@@ -264,9 +264,9 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
       <div className="relative mx-auto flex w-full max-w-5xl flex-col items-center px-4">
         <div className="text-center">
           {config.tagline ? (
-            <p className="text-sm uppercase tracking-[0.35em] text-indigo-300">{config.tagline}</p>
+            <p className="text-xs uppercase tracking-[0.35em] text-indigo-300 sm:text-sm">{config.tagline}</p>
           ) : null}
-          <h1 className="mt-2 text-4xl font-semibold text-white sm:text-5xl">
+          <h1 className="mt-2 text-3xl font-semibold text-white sm:text-5xl">
             {config.title ?? 'Gachapon Game'}
           </h1>
           {config.description ? (
@@ -274,12 +274,12 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
           ) : null}
         </div>
 
-        <div className="mt-10 w-full max-w-3xl overflow-hidden rounded-[2.5rem] border border-indigo-400/30 bg-slate-900/80 p-10 text-center shadow-2xl shadow-indigo-900/40 backdrop-blur">
-          <div className="flex flex-col items-center gap-8">
+        <div className="mt-10 w-full max-w-3xl overflow-hidden rounded-[2.5rem] border border-indigo-400/30 bg-slate-900/80 p-6 text-center shadow-2xl shadow-indigo-900/40 backdrop-blur sm:p-10">
+          <div className="flex flex-col items-center gap-6 sm:gap-8">
             {config.capsuleMachineLabel ? (
-              <p className="text-xs uppercase tracking-[0.35em] text-indigo-300">{config.capsuleMachineLabel}</p>
+              <p className="text-xs uppercase tracking-[0.35em] text-indigo-300 sm:text-sm">{config.capsuleMachineLabel}</p>
             ) : null}
-            <div className="gachapon-stage relative flex h-80 w-full max-w-md items-center justify-center rounded-[2rem] border border-indigo-400/30 bg-slate-950/70 p-8 shadow-[0_24px_45px_rgba(15,23,42,0.55)]">
+            <div className="gachapon-stage relative flex h-[19rem] w-full max-w-md items-center justify-center rounded-[2rem] border border-indigo-400/30 bg-slate-950/70 p-6 shadow-[0_24px_45px_rgba(15,23,42,0.55)] sm:h-80 sm:p-8">
               <div className="relative flex h-full w-full flex-col items-center justify-center">
                 <div
                   className={`gachapon-box ${animationPhase === 'shaking' ? 'gachapon-box--shake' : ''} ${animationPhase === 'explosion' ? 'gachapon-box--hidden' : ''}`}
@@ -290,7 +290,7 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
                     }`}
                     style={{ background: capsuleColor }}
                   />
-                  <div className="absolute inset-x-8 bottom-6 rounded-full bg-slate-800/80 py-3 text-xs uppercase tracking-[0.3em] text-slate-400">
+                  <div className="absolute inset-x-5 bottom-5 rounded-full bg-slate-800/80 py-2.5 text-[0.65rem] uppercase tracking-[0.25em] text-slate-400 sm:inset-x-8 sm:bottom-6 sm:py-3 sm:text-xs sm:tracking-[0.3em]">
                     {capsuleStatusLabel}
                   </div>
                 </div>
@@ -308,19 +308,19 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
           </div>
         </div>
 
-        <div className="mt-10 flex flex-col items-center gap-4">
+        <div className="mt-10 flex w-full flex-col items-center gap-4 sm:w-auto">
           <button
             type="button"
             onClick={handleAttempt}
             disabled={isAttempting || loadingPrizes}
-            className="gachapon-start-button"
+            className="gachapon-start-button w-full sm:w-auto"
           >
             <span>{buttonLabel}</span>
           </button>
           {onBack ? (
             <button
               type="button"
-              className="rounded-full border border-slate-700/70 px-6 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white"
+              className="w-full rounded-full border border-slate-700/70 px-6 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-500 hover:text-white sm:w-auto"
               onClick={onBack}
             >
               Back
@@ -328,8 +328,8 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
           ) : null}
         </div>
 
-        <div className="mt-12 w-full overflow-hidden rounded-[2.5rem] border border-slate-800/70 bg-slate-900/80 p-8 shadow-2xl shadow-indigo-900/30 backdrop-blur">
-          <div className="flex flex-col gap-6">
+        <div className="mt-12 w-full overflow-hidden rounded-[2.5rem] border border-slate-800/70 bg-slate-900/80 p-6 shadow-2xl shadow-indigo-900/30 backdrop-blur sm:p-8">
+          <div className="flex flex-col gap-5 sm:gap-6">
             <div className="flex flex-col items-center justify-between gap-3 text-center sm:flex-row sm:text-left">
               <div>
                 <h2 className="text-lg font-semibold text-white sm:text-xl">{config.prizeShowcaseTitle}</h2>
@@ -337,7 +337,7 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
                   <p className="mt-1 text-sm text-slate-400">{config.prizeShowcaseDescription}</p>
                 ) : null}
               </div>
-              <span className="rounded-full border border-slate-700/60 bg-slate-950/60 px-4 py-1 text-xs uppercase tracking-[0.3em] text-slate-300">
+              <span className="rounded-full border border-slate-700/60 bg-slate-950/60 px-3 py-1 text-xs uppercase tracking-[0.3em] text-slate-300 sm:px-4">
                 {prizes.length} Rewards
               </span>
             </div>
@@ -361,9 +361,9 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
 
       {showResultModal && result ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-10 backdrop-blur">
-          <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-8 shadow-2xl shadow-indigo-900/50">
-            <p className="text-sm uppercase tracking-[0.25em] text-indigo-300">{config.resultModalTitle}</p>
-            <h3 className="mt-2 text-3xl font-semibold text-white">{result.prize.name}</h3>
+          <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-6 text-center shadow-2xl shadow-indigo-900/50 sm:p-8">
+            <p className="text-xs uppercase tracking-[0.25em] text-indigo-300 sm:text-sm">{config.resultModalTitle}</p>
+            <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{result.prize.name}</h3>
             <p className="mt-1 text-sm text-slate-400">{result.prize.rarityLabel}</p>
             <div className="mt-5 flex items-center justify-center">
               <div className="gachapon-capsule-display" style={{ background: result.prize.capsuleColor }} />
@@ -373,7 +373,7 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white"
+                className="w-full rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white sm:w-auto"
                 onClick={closeModal}
               >
                 {config.ctaLabel}
@@ -381,7 +381,7 @@ const GachaponGame = ({ config: rawConfig = {}, onBack }) => {
               {onBack ? (
                 <button
                   type="button"
-                  className="rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400"
+                  className="w-full rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
                   onClick={onBack}
                 >
                   Back

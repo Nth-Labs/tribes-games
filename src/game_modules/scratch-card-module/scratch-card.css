@@ -55,8 +55,8 @@ body {
 
 .scratch-card {
   position: relative;
-  width: 320px;
-  height: 220px;
+  width: clamp(260px, 78vw, 320px);
+  height: clamp(180px, 52vw, 220px);
   border-radius: 28px;
   padding: 16px;
   background: linear-gradient(150deg, rgba(79, 70, 229, 0.32), rgba(236, 72, 153, 0.28));
@@ -114,7 +114,7 @@ body {
 
 .scratch-card__reward {
   position: absolute;
-  inset: 12px;
+  inset: clamp(10px, 3vw, 12px);
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -122,7 +122,7 @@ body {
   justify-content: center;
   text-align: center;
   color: #e2e8f0;
-  padding: 24px;
+  padding: clamp(18px, 6vw, 24px);
   background: linear-gradient(135deg, rgba(148, 163, 184, 0.35), rgba(51, 65, 85, 0.92));
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.5);
   opacity: 0.4;
@@ -158,21 +158,21 @@ body {
 }
 
 .scratch-card__reward-rarity {
-  font-size: 0.74rem;
+  font-size: clamp(0.68rem, 2.2vw, 0.74rem);
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: rgba(226, 232, 240, 0.7);
 }
 
 .scratch-card__reward-name {
-  font-size: 1.25rem;
+  font-size: clamp(1.05rem, 4.8vw, 1.25rem);
   font-weight: 600;
   letter-spacing: 0.06em;
   color: #f8fafc;
 }
 
 .scratch-card__reward-helper {
-  font-size: 0.75rem;
+  font-size: clamp(0.68rem, 2.2vw, 0.75rem);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: rgba(226, 232, 240, 0.55);
@@ -265,14 +265,14 @@ body {
 
 .scratch-card__foil-message {
   position: absolute;
-  bottom: 18px;
-  left: 18px;
-  right: 18px;
+  bottom: clamp(14px, 4vw, 18px);
+  left: clamp(12px, 4vw, 18px);
+  right: clamp(12px, 4vw, 18px);
   border-radius: 999px;
-  padding: 10px 16px;
-  font-size: 0.7rem;
+  padding: clamp(8px, 3vw, 10px) clamp(14px, 5vw, 16px);
+  font-size: clamp(0.62rem, 2.3vw, 0.7rem);
   text-transform: uppercase;
-  letter-spacing: 0.35em;
+  letter-spacing: clamp(0.22em, 2vw, 0.35em);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -291,8 +291,8 @@ body {
 }
 
 .scratch-card__foil-detail {
-  font-size: 0.6rem;
-  letter-spacing: 0.18em;
+  font-size: clamp(0.52rem, 1.8vw, 0.6rem);
+  letter-spacing: clamp(0.12em, 1.4vw, 0.18em);
   color: rgba(226, 232, 240, 0.6);
 }
 
@@ -301,7 +301,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  padding: 16px 24px;
+  padding: 16px clamp(18px, 6vw, 24px);
   border-radius: 20px;
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid rgba(99, 102, 241, 0.35);
@@ -309,10 +309,10 @@ body {
 }
 
 .scratch-card__status-badge {
-  padding: 6px 18px;
+  padding: 6px clamp(14px, 4vw, 18px);
   border-radius: 999px;
-  font-size: 0.65rem;
-  letter-spacing: 0.32em;
+  font-size: clamp(0.58rem, 2vw, 0.65rem);
+  letter-spacing: clamp(0.2em, 2vw, 0.32em);
   text-transform: uppercase;
   background: rgba(30, 64, 175, 0.35);
   color: rgba(191, 219, 254, 0.9);
@@ -341,15 +341,15 @@ body {
 }
 
 .scratch-card__progress-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.32em;
+  font-size: clamp(0.62rem, 2.4vw, 0.7rem);
+  letter-spacing: clamp(0.22em, 2vw, 0.32em);
   text-transform: uppercase;
   color: rgba(191, 219, 254, 0.7);
   text-align: center;
 }
 
 .scratch-card__status-detail {
-  font-size: 0.82rem;
+  font-size: clamp(0.75rem, 3vw, 0.82rem);
   text-align: center;
   color: rgba(224, 231, 255, 0.85);
 }
@@ -357,6 +357,27 @@ body {
 .scratch-card__status-detail span {
   color: rgba(129, 140, 248, 0.95);
   font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .scratch-module-root {
+    align-items: flex-start;
+    padding: clamp(1.5rem, 6vw + 1rem, 2.5rem);
+  }
+
+  .scratch-module-surface {
+    gap: clamp(1.25rem, 4vw, 1.75rem);
+  }
+
+  .scratch-card-container {
+    width: 100%;
+    gap: 22px;
+  }
+
+  .scratch-card__status-panel {
+    width: 100%;
+    max-width: 360px;
+  }
 }
 
 .scratch-card-error {
