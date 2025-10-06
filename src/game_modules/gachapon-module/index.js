@@ -114,4 +114,7 @@ export default function GachaponGameInit({
   return <GachaponGame config={config} onBack={onBack} />;
 }
 
-export { default as sampleGachaponGameDocument } from './sample-game-document';
+export {
+  default as sampleGachaponGameDocument,
+  sampleGachaponGameDocuments,
+} from './sample-game-document';
