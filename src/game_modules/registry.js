@@ -9,6 +9,9 @@ import ScratchCardGameInit, {
 import OverworldExplorerInit, {
   sampleOverworldGameDocument,
 } from "./overworld-module";
+import DinoJumpGameInit, {
+  sampleDinoJumpGameDocument,
+} from "./dino-jump-module";
 
 /**
  * Keys should match what's coming from backend:
@@ -34,6 +37,10 @@ export const GAME_MODULES = {
   // Overworld explorer prototype
   "overworld-adventure": OverworldExplorerInit,
   overworld: OverworldExplorerInit,
+
+  // Dino jump endless runner
+  "dino-jump-canyon-run": DinoJumpGameInit,
+  "dino-jump": DinoJumpGameInit,
 
   // Example for future templates:
   // "spinthewheel-v1": SpinTheWheelInit,
@@ -90,6 +97,19 @@ export const GAME_LIBRARY = [
       game_type: sampleOverworldGameDocument.game_type || "overworld",
     },
     sampleConfig: sampleOverworldGameDocument,
+  },
+  {
+    slug: "dino-jump-canyon-run",
+    title: sampleDinoJumpGameDocument.title || "Canyon Run: Dino Dash",
+    subtitle: sampleDinoJumpGameDocument.subtitle,
+    thumbnail:
+      sampleDinoJumpGameDocument.sample_thumbnail ||
+      sampleDinoJumpGameDocument.background_image,
+    launchPayload: {
+      game_template_id: "dino-jump-canyon-run",
+      game_type: sampleDinoJumpGameDocument.game_type || "dino-jump",
+    },
+    sampleConfig: sampleDinoJumpGameDocument,
   },
 ];
 
