@@ -6,6 +6,9 @@ import GachaponGameInit, { sampleGachaponGameDocument } from "./gachapon-module"
 import ScratchCardGameInit, {
   sampleScratchCardGameDocument,
 } from "./scratch-card-module";
+import DinoRunGameInit, {
+  sampleDinoRunGameDocument,
+} from "./dino-run-module";
 
 /**
  * Keys should match what's coming from backend:
@@ -27,6 +30,10 @@ export const GAME_MODULES = {
   // Scratch card module
   "scratch-card-starlight": ScratchCardGameInit,
   "scratch-card": ScratchCardGameInit,
+
+  // Dino runner
+  "dino-runner-demo": DinoRunGameInit,
+  "dino-runner": DinoRunGameInit,
 
   // Example for future templates:
   // "spinthewheel-v1": SpinTheWheelInit,
@@ -72,6 +79,19 @@ export const GAME_LIBRARY = [
       game_type: sampleScratchCardGameDocument.game_type,
     },
     sampleConfig: sampleScratchCardGameDocument,
+  },
+  {
+    slug: "dino-runner-demo",
+    title: sampleDinoRunGameDocument.title || "Blocky Runner",
+    subtitle: sampleDinoRunGameDocument.subtitle,
+    thumbnail:
+      sampleDinoRunGameDocument.sample_thumbnail ||
+      "https://dummyimage.com/400x400/2563eb/ffffff&text=Blocky+Runner",
+    launchPayload: {
+      game_template_id: "dino-runner-demo",
+      game_type: sampleDinoRunGameDocument.game_type || "dino-runner",
+    },
+    sampleConfig: sampleDinoRunGameDocument,
   },
 ];
 
