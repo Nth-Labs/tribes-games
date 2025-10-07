@@ -1,24 +1,46 @@
 .gachapon-stage {
-  perspective: none;
-  background: repeating-linear-gradient(135deg, #66d86f 0 12px, #5fc965 12px 24px);
-  border: 4px solid #2f6b3a;
-  border-radius: 18px;
-  box-shadow: inset 0 0 0 3px #b7f4b8, 0 18px 0 rgba(35, 92, 49, 0.45);
-  padding: clamp(1.5rem, 4vw, 2rem);
-  image-rendering: pixelated;
+  position: relative;
+  perspective: 1400px;
+  background: linear-gradient(155deg, rgba(252, 250, 255, 0.95) 0%, rgba(239, 246, 255, 0.95) 55%, rgba(255, 239, 250, 0.95) 100%);
+  border: 1px solid rgba(129, 124, 255, 0.32);
+  border-radius: 2.75rem;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.75), 0 32px 60px rgba(127, 114, 255, 0.22);
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  overflow: hidden;
+}
+
+.gachapon-stage::before,
+.gachapon-stage::after {
+  content: '';
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(0);
+}
+
+.gachapon-stage::before {
+  inset: auto 8% -35% -18%;
+  height: clamp(9rem, 32vw, 12rem);
+  background: radial-gradient(circle at center, rgba(124, 193, 255, 0.45) 0%, rgba(124, 193, 255, 0.05) 70%, transparent 100%);
+}
+
+.gachapon-stage::after {
+  inset: -25% -18% auto auto;
+  width: clamp(8rem, 30vw, 11rem);
+  height: clamp(8rem, 30vw, 11rem);
+  background: radial-gradient(circle at center, rgba(255, 159, 213, 0.4) 0%, rgba(255, 159, 213, 0.08) 68%, transparent 100%);
 }
 
 .gachapon-box {
   position: relative;
-  width: clamp(210px, 70vw, 240px);
-  height: clamp(220px, 76vw, 260px);
-  border-radius: 14px;
-  background: linear-gradient(180deg, #f9b05f 0 58%, #eb5b8b 58% 100%);
-  border: 4px solid #35153d;
-  box-shadow: 0 12px 0 #1f0b25, 0 20px 32px rgba(31, 11, 37, 0.45);
+  width: clamp(210px, 70vw, 250px);
+  height: clamp(220px, 76vw, 270px);
+  border-radius: 2.25rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 240, 255, 0.95) 55%, rgba(255, 226, 246, 0.95) 100%);
+  border: 2px solid rgba(136, 124, 255, 0.35);
+  box-shadow: 0 24px 45px rgba(124, 105, 255, 0.2), 0 8px 18px rgba(255, 255, 255, 0.8) inset;
   overflow: hidden;
   transition: transform 0.2s ease, opacity 0.2s ease;
-  image-rendering: pixelated;
 }
 
 .gachapon-box::before,
@@ -30,14 +52,15 @@
 }
 
 .gachapon-box::before {
-  background: repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0 6px, transparent 6px 12px);
-  mix-blend-mode: lighten;
+  background: linear-gradient(130deg, rgba(255, 255, 255, 0.75) 0%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 80%);
+  opacity: 0.9;
 }
 
 .gachapon-box::after {
-  inset: 14px;
-  border-radius: 6px;
-  border: 2px solid rgba(255, 236, 214, 0.7);
+  inset: 18px;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  box-shadow: 0 1px 12px rgba(124, 105, 255, 0.12) inset;
 }
 
 .gachapon-box--shake {
@@ -69,27 +92,26 @@
 
 .gachapon-explosion {
   position: absolute;
-  width: clamp(96px, 38vw, 120px);
-  height: clamp(96px, 38vw, 120px);
-  border-radius: 4px;
-  background: radial-gradient(circle, #ffe066 0 38%, #ff9b4b 38% 68%, rgba(0, 0, 0, 0) 70%);
-  animation: gachapon-explosion-burst 0.5s steps(6) forwards;
+  width: clamp(96px, 38vw, 128px);
+  height: clamp(96px, 38vw, 128px);
+  border-radius: 32% 68% 52% 48%;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.85) 0%, rgba(255, 226, 246, 0.7) 40%, rgba(127, 114, 255, 0.45) 70%, transparent 100%);
+  animation: gachapon-explosion-burst 0.55s ease-out forwards;
   pointer-events: none;
-  filter: contrast(1.1) saturate(1.15);
-  image-rendering: pixelated;
+  filter: drop-shadow(0 18px 25px rgba(124, 105, 255, 0.35));
 }
 
 @keyframes gachapon-explosion-burst {
   0% {
     transform: scale(0.4);
-    opacity: 0.9;
+    opacity: 0.8;
   }
   60% {
-    transform: scale(1.8);
+    transform: scale(1.9);
     opacity: 1;
   }
   100% {
-    transform: scale(3.2);
+    transform: scale(3.1);
     opacity: 0;
   }
 }
@@ -99,26 +121,25 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(96px, 36vw, 120px);
-  height: clamp(96px, 36vw, 120px);
+  width: clamp(96px, 36vw, 128px);
+  height: clamp(96px, 36vw, 128px);
   border-radius: 48% 48% 60% 60%;
-  border: 4px solid #35153d;
-  background: linear-gradient(180deg, #56d0c5 0 48%, #fbe8a6 48% 100%);
-  box-shadow: 0 8px 0 #1f0b25, 0 14px 22px rgba(31, 11, 37, 0.35);
+  border: 2px solid rgba(136, 124, 255, 0.35);
+  background: linear-gradient(185deg, rgba(132, 214, 255, 0.95) 0%, rgba(255, 225, 246, 0.95) 60%, rgba(255, 246, 255, 0.95) 100%);
+  box-shadow: 0 18px 40px rgba(124, 105, 255, 0.28);
   transition: transform 0.4s ease, opacity 0.4s ease;
-  image-rendering: pixelated;
 }
 
 .gachapon-capsule::before {
   content: '';
   position: absolute;
-  top: 16%;
-  left: 16%;
+  top: 18%;
+  left: 18%;
   width: 28%;
   height: 24%;
-  background: rgba(255, 255, 255, 0.65);
-  border-radius: 3px;
-  box-shadow: 6px 6px 0 rgba(255, 255, 255, 0.25);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.45));
+  border-radius: 10px;
+  box-shadow: 10px 10px 18px rgba(255, 255, 255, 0.45);
 }
 
 .gachapon-capsule--hidden {
@@ -128,25 +149,24 @@
 
 .gachapon-capsule-display {
   position: relative;
-  width: clamp(92px, 35vw, 112px);
-  height: clamp(92px, 35vw, 112px);
+  width: clamp(92px, 35vw, 120px);
+  height: clamp(92px, 35vw, 120px);
   border-radius: 48% 48% 60% 60%;
-  border: 4px solid #35153d;
-  box-shadow: 0 8px 0 #1f0b25, 0 12px 24px rgba(31, 11, 37, 0.35);
+  border: 2px solid rgba(136, 124, 255, 0.35);
+  box-shadow: 0 18px 38px rgba(124, 105, 255, 0.22);
   overflow: hidden;
-  image-rendering: pixelated;
 }
 
 .gachapon-capsule-display::before {
   content: '';
   position: absolute;
-  top: 16%;
-  left: 16%;
+  top: 18%;
+  left: 18%;
   width: 28%;
   height: 24%;
-  background: rgba(255, 255, 255, 0.65);
-  border-radius: 3px;
-  box-shadow: 6px 6px 0 rgba(255, 255, 255, 0.25);
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.45));
+  border-radius: 10px;
+  box-shadow: 10px 10px 18px rgba(255, 255, 255, 0.45);
 }
 
 .gachapon-start-button {
@@ -154,28 +174,29 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(0.85rem, 3vw, 1.1rem) clamp(2rem, 6vw, 3rem);
-  border: 4px solid #35153d;
-  border-radius: 10px;
-  background: repeating-linear-gradient(180deg, #ffe066 0 6px, #ffd54f 6px 12px);
-  color: #35153d;
-  font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+  padding: clamp(0.85rem, 3vw, 1.1rem) clamp(2.1rem, 6vw, 3.25rem);
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(120deg, #7e5bff 0%, #ff7fc8 50%, #ffc27d 100%);
+  color: #ffffff;
+  font-size: clamp(1rem, 3.6vw, 1.15rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1.1;
   cursor: pointer;
-  box-shadow: 0 8px 0 #1f0b25, 0 16px 24px rgba(31, 11, 37, 0.35);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
-  image-rendering: pixelated;
+  box-shadow: 0 22px 36px rgba(130, 112, 255, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .gachapon-start-button::before {
   content: '';
   position: absolute;
-  inset: 4px;
-  border: 2px solid rgba(255, 236, 214, 0.7);
+  inset: 6px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0));
   pointer-events: none;
+  transition: opacity 0.18s ease;
 }
 
 .gachapon-start-button span {
@@ -184,27 +205,27 @@
 }
 
 .gachapon-start-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 0 #1f0b25, 0 18px 26px rgba(31, 11, 37, 0.4);
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 26px 44px rgba(124, 105, 255, 0.4);
   filter: brightness(1.05);
 }
 
 .gachapon-start-button:active:not(:disabled) {
-  transform: translateY(4px);
-  box-shadow: 0 4px 0 #1f0b25, 0 8px 16px rgba(31, 11, 37, 0.35);
+  transform: translateY(3px) scale(0.99);
+  box-shadow: 0 14px 28px rgba(124, 105, 255, 0.32);
 }
 
 .gachapon-start-button:disabled {
   cursor: not-allowed;
-  filter: saturate(0.6) brightness(0.9);
-  box-shadow: 0 6px 0 #1f0b25, 0 12px 18px rgba(31, 11, 37, 0.25);
+  filter: saturate(0.7) brightness(0.95);
+  box-shadow: 0 12px 22px rgba(148, 163, 184, 0.28);
 }
 
 .gachapon-start-button:disabled::before {
-  background: repeating-linear-gradient(180deg, rgba(255, 236, 214, 0.5) 0 6px, rgba(255, 236, 214, 0.2) 6px 12px);
+  opacity: 0.4;
 }
 
 .gachapon-start-button:focus-visible {
-  outline: 4px solid rgba(253, 224, 71, 0.7);
+  outline: 4px solid rgba(129, 124, 255, 0.35);
   outline-offset: 6px;
 }
