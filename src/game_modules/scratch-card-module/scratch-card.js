@@ -618,6 +618,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   const scratchedCellsRef = useRef(new Set());
   const totalCellsRef = useRef(0);
   const scratchCompletedRef = useRef(false);
+  const foilInitHandleRef = useRef(null);
 
   const revealThreshold = useMemo(() => {
     const percent = toPositiveNumber(
@@ -641,6 +642,16 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       isMountedRef.current = false;
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
+      if (foilInitHandleRef.current) {
+        const { type, handle } = foilInitHandleRef.current;
+        if (type === 'raf' && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+          window.cancelAnimationFrame(handle);
+        }
+        if (type === 'timeout') {
+          clearTimeout(handle);
+        }
+        foilInitHandleRef.current = null;
+      }
     };
   }, []);
 
@@ -744,6 +755,17 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   };
 
   const initializeFoil = useCallback(() => {
+    if (foilInitHandleRef.current) {
+      const { type, handle } = foilInitHandleRef.current;
+      if (type === 'raf' && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
+        window.cancelAnimationFrame(handle);
+      }
+      if (type === 'timeout') {
+        clearTimeout(handle);
+      }
+      foilInitHandleRef.current = null;
+    }
+
     if (cardState !== 'ready') {
       return;
     }
@@ -755,16 +777,28 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     }
 
     const rect = surface.getBoundingClientRect();
-    if (!rect.width || !rect.height) {
+    const fallbackWidth = surface.clientWidth || surface.offsetWidth;
+    const fallbackHeight = surface.clientHeight || surface.offsetHeight;
+    const width = rect.width || fallbackWidth;
+    const height = rect.height || fallbackHeight;
+
+    if (!width || !height) {
+      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+        const handle = window.requestAnimationFrame(initializeFoil);
+        foilInitHandleRef.current = { type: 'raf', handle };
+      } else {
+        const handle = setTimeout(initializeFoil, 16);
+        foilInitHandleRef.current = { type: 'timeout', handle };
+      }
       return;
     }
 
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -792,8 +826,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     ctx.globalAlpha = 1;
 
     scratchedCellsRef.current = new Set();
-    const widthCells = Math.ceil(rect.width / SCRATCH_CELL_SIZE);
-    const heightCells = Math.ceil(rect.height / SCRATCH_CELL_SIZE);
+    const widthCells = Math.max(1, Math.ceil(width / SCRATCH_CELL_SIZE));
+    const heightCells = Math.max(1, Math.ceil(height / SCRATCH_CELL_SIZE));
     totalCellsRef.current = widthCells * heightCells;
     setScratchProgress(0);
     setCoverCleared(false);
@@ -1100,7 +1134,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
               <p className="text-[0.68rem] uppercase tracking-[0.28em] text-neutral-600 sm:text-xs">{normalisedConfig.tagline}</p>
               <h1
                 className="mt-2 text-3xl font-semibold text-neutral-900 sm:text-4xl"
-                style={{ fontFamily: '"Source Serif 4", "Georgia", "Times New Roman", serif' }}
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
               >
                 {normalisedConfig.title}
               </h1>
@@ -1194,7 +1228,12 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
         <div className="rounded-[32px] border-[3px] border-neutral-900 bg-white p-6 shadow-[0_12px_0_rgba(17,24,39,0.12)] sm:p-8">
           <div className="flex flex-col items-start justify-between gap-3 text-center sm:flex-row sm:items-center sm:text-left">
             <div>
-              <h2 className="text-lg font-semibold text-neutral-900 sm:text-xl">{normalisedConfig.prizeLedgerTitle}</h2>
+              <h2
+                className="text-lg font-semibold text-neutral-900 sm:text-xl"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                {normalisedConfig.prizeLedgerTitle}
+              </h2>
               {normalisedConfig.prizeLedgerSubtitle ? (
                 <p className="mt-1 text-sm text-neutral-600">{normalisedConfig.prizeLedgerSubtitle}</p>
               ) : null}
@@ -1244,7 +1283,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
             <p className="text-xs uppercase tracking-[0.22em] text-neutral-600 sm:text-sm">{normalisedConfig.resultModalTitle}</p>
             <h3
               className="mt-2 text-2xl font-semibold text-neutral-900 sm:text-3xl"
-              style={{ fontFamily: '"Source Serif 4", "Georgia", "Times New Roman", serif' }}
+              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
             >
               {result.prize.name}
             </h3>
