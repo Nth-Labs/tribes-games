@@ -12,19 +12,27 @@ const SCRATCH_RADIUS = 28;
 const DEFAULT_REVEAL_THRESHOLD = 0.6;
 
 const rarityAccentClasses = {
-  common: 'border-slate-500/70 text-slate-100',
-  uncommon: 'border-emerald-400/70 text-emerald-100',
-  rare: 'border-sky-400/70 text-sky-100',
-  epic: 'border-violet-400/70 text-violet-100',
-  legendary: 'border-amber-300/80 text-amber-100',
+  common: 'border-[#1e3a8a]',
+  uncommon: 'border-[#166534]',
+  rare: 'border-[#1d4ed8]',
+  epic: 'border-[#6d28d9]',
+  legendary: 'border-[#b45309]',
 };
 
 const rarityBackground = {
-  common: 'bg-slate-900/60',
-  uncommon: 'bg-emerald-500/15',
-  rare: 'bg-sky-500/15',
-  epic: 'bg-violet-500/15',
-  legendary: 'bg-amber-500/20',
+  common: 'bg-[#e7f0ff]',
+  uncommon: 'bg-[#e4f5ec]',
+  rare: 'bg-[#e6edff]',
+  epic: 'bg-[#f1e9ff]',
+  legendary: 'bg-[#fff4d6]',
+};
+
+const rarityLabelColors = {
+  common: 'text-[#1e3a8a]',
+  uncommon: 'text-[#166534]',
+  rare: 'text-[#1d4ed8]',
+  epic: 'text-[#6d28d9]',
+  legendary: 'text-[#b45309]',
 };
 
 const defaultRarityLabels = {
@@ -349,21 +357,22 @@ const attemptScratchCard = (config) =>
   });
 
 const PrizeCard = ({ prize, dropRate }) => {
-  const accentClass = rarityAccentClasses[prize.rarity] ?? 'border-slate-500/60 text-slate-200';
-  const backgroundClass = rarityBackground[prize.rarity] ?? 'bg-slate-900/60';
+  const accentClass = rarityAccentClasses[prize.rarity] ?? 'border-neutral-900';
+  const backgroundClass = rarityBackground[prize.rarity] ?? 'bg-[#f4f1ea]';
+  const labelColor = rarityLabelColors[prize.rarity] ?? 'text-neutral-700';
 
   return (
     <div
-      className={`flex h-full flex-col justify-between rounded-2xl border ${accentClass} ${backgroundClass} p-5 shadow-lg shadow-slate-950/40 backdrop-blur`}
+      className={`flex h-full flex-col justify-between rounded-[28px] border-[3px] ${accentClass} ${backgroundClass} p-5 shadow-[0_10px_0_rgba(17,24,39,0.12)]`}
     >
       <div>
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-400">{prize.rarityLabel}</p>
-        <h3 className="mt-2 text-lg font-semibold text-white">{prize.name}</h3>
-        <p className="mt-3 text-sm text-slate-300">{prize.description}</p>
+        <p className={`text-xs uppercase tracking-[0.22em] text-neutral-600 ${labelColor}`}>{prize.rarityLabel}</p>
+        <h3 className="mt-2 text-lg font-semibold text-neutral-900">{prize.name}</h3>
+        <p className="mt-3 text-sm text-neutral-700">{prize.description}</p>
       </div>
-      <div className="mt-5 flex items-center justify-between text-xs uppercase tracking-[0.3em] text-slate-400">
+      <div className="mt-5 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-neutral-600">
         <span>Drop Rate</span>
-        <span className="text-sm font-semibold text-slate-100 normal-case tracking-normal">{dropRate}</span>
+        <span className={`text-sm font-semibold tracking-normal ${labelColor}`}>{dropRate}</span>
       </div>
     </div>
   );
@@ -971,25 +980,25 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
   const statusText =
     cardState === 'idle'
-      ? 'Awaiting attempt'
+      ? 'Awaiting your turn'
       : cardState === 'preparing'
-      ? 'Forging foil card'
+      ? 'Shuffling prizes'
       : cardState === 'ready'
-      ? 'Foil armed & ready'
-      : 'Reward unveiled';
+      ? 'Ready to scratch'
+      : 'Prize revealed';
 
   const foilMessage =
     cardState === 'ready'
       ? normalisedConfig.scratchActionLabel
       : cardState === 'revealed'
-      ? 'Foil fully lifted'
-      : 'Claim a card to begin';
+      ? 'Foil cleared'
+      : 'Pick a card to begin';
 
   const foilMessageDetail =
     cardState === 'ready'
-      ? 'Drag to reveal the hidden reward.'
+      ? "Swipe to see what's underneath."
       : cardState === 'revealed'
-      ? 'Your prize awaits in full splendor.'
+      ? 'Your reward is ready.'
       : null;
 
   const showButtonProgress = cardState === 'preparing';
@@ -1000,7 +1009,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     }
 
     return {
-      backgroundImage: `linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.85)), url(${normalisedConfig.cardBackgroundImage})`,
+      backgroundImage: `linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 241, 234, 0.85)), url(${normalisedConfig.cardBackgroundImage})`,
       backgroundSize: 'cover, 100% 100%',
       backgroundPosition: 'center, center',
     };
@@ -1050,8 +1059,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     }
 
     const gradient = result
-      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(15, 23, 42, 0.92))`
-      : 'linear-gradient(135deg, rgba(148, 163, 184, 0.35), rgba(51, 65, 85, 0.92))';
+      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.9))`
+      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 241, 234, 0.9))';
 
     backgrounds.push(gradient);
     sizes.push('100% 100%');
@@ -1079,36 +1088,43 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     <div
       className="scratch-module-root"
       style={{
-        backgroundImage: `linear-gradient(120deg, rgba(15, 23, 42, 0.82), rgba(30, 41, 59, 0.88)), url(${normalisedConfig.backgroundImage})`,
+        backgroundImage: normalisedConfig.backgroundImage
+          ? `linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 241, 234, 0.85)), url(${normalisedConfig.backgroundImage})`
+          : undefined,
       }}
     >
       <div className="scratch-module-surface">
-        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur sm:p-7">
-          <div className="flex flex-col gap-5 sm:gap-6">
+        <div className="rounded-[32px] border-[3px] border-neutral-900 bg-[#fceecf] p-6 shadow-[0_12px_0_rgba(17,24,39,0.12)] sm:p-8">
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="text-[0.68rem] uppercase tracking-[0.35em] text-indigo-200/70 sm:text-xs">{normalisedConfig.tagline}</p>
-              <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">{normalisedConfig.title}</h1>
-              <p className="mt-4 text-sm text-slate-300 sm:text-base">{normalisedConfig.description}</p>
+              <p className="text-[0.68rem] uppercase tracking-[0.28em] text-neutral-600 sm:text-xs">{normalisedConfig.tagline}</p>
+              <h1
+                className="mt-2 text-3xl font-semibold text-neutral-900 sm:text-4xl"
+                style={{ fontFamily: '"Source Serif 4", "Georgia", "Times New Roman", serif' }}
+              >
+                {normalisedConfig.title}
+              </h1>
+              <p className="mt-4 max-w-xl text-sm text-neutral-700 sm:text-base">{normalisedConfig.description}</p>
             </div>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
               <button
                 type="button"
                 onClick={handleAttempt}
                 disabled={buttonDisabled}
-                className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-fuchsia-500 via-indigo-500 to-sky-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-900/40 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-6"
+                className="flex w-full items-center justify-center rounded-full border-[3px] border-neutral-900 bg-[#fee79b] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.2)] disabled:translate-y-0 disabled:opacity-60 disabled:shadow-[0_6px_0_rgba(17,24,39,0.12)] sm:w-auto"
               >
                 {buttonLabel}
               </button>
               {showButtonProgress ? (
-                <span className="text-xs uppercase tracking-[0.3em] text-indigo-200/70">Forging your foil…</span>
+                <span className="text-xs uppercase tracking-[0.26em] text-neutral-600">Preparing your card…</span>
               ) : cardState === 'ready' ? (
-                <span className="text-xs uppercase tracking-[0.3em] text-indigo-200/70">Foil armed &amp; ready</span>
+                <span className="text-xs uppercase tracking-[0.26em] text-neutral-600">Ready to scratch</span>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="scratch-card-stage rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-950/60 to-fuchsia-900/40 p-5 shadow-[0_35px_80px_rgba(59,7,100,0.45)] sm:p-8">
+        <div className="scratch-card-stage rounded-[32px] border-[3px] border-neutral-900 bg-[#f6f1e1] p-5 shadow-[0_14px_0_rgba(17,24,39,0.12)] sm:p-8">
           <div className="scratch-card-container w-full">
             <div className={cardClassName}>
               <div className="scratch-card__inner" ref={surfaceRef} style={innerStyle}>
@@ -1175,24 +1191,24 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-800/60 bg-slate-950/60 p-6 shadow-[0_30px_70px_rgba(15,23,42,0.45)] backdrop-blur sm:p-7">
+        <div className="rounded-[32px] border-[3px] border-neutral-900 bg-white p-6 shadow-[0_12px_0_rgba(17,24,39,0.12)] sm:p-8">
           <div className="flex flex-col items-start justify-between gap-3 text-center sm:flex-row sm:items-center sm:text-left">
             <div>
-              <h2 className="text-lg font-semibold text-white sm:text-xl">{normalisedConfig.prizeLedgerTitle}</h2>
+              <h2 className="text-lg font-semibold text-neutral-900 sm:text-xl">{normalisedConfig.prizeLedgerTitle}</h2>
               {normalisedConfig.prizeLedgerSubtitle ? (
-                <p className="mt-1 text-sm text-slate-400">{normalisedConfig.prizeLedgerSubtitle}</p>
+                <p className="mt-1 text-sm text-neutral-600">{normalisedConfig.prizeLedgerSubtitle}</p>
               ) : null}
             </div>
             {normalisedConfig.prizeLedgerBadgeLabel ? (
-              <span className="rounded-full border border-indigo-400/30 px-3 py-1 text-xs uppercase tracking-[0.3em] text-indigo-200/70">
+              <span className="rounded-full border-[3px] border-neutral-900 bg-[#dbe6ff] px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-900">
                 {normalisedConfig.prizeLedgerBadgeLabel}
               </span>
             ) : null}
           </div>
           {loadingPrizes ? (
-            <p className="mt-4 text-sm text-slate-400">{normalisedConfig.prizeListLoadingText}</p>
+            <p className="mt-4 text-sm text-neutral-600">{normalisedConfig.prizeListLoadingText}</p>
           ) : prizeError ? (
-            <p className="mt-4 text-sm text-rose-300">{prizeError}</p>
+            <p className="mt-4 text-sm text-rose-600">{prizeError}</p>
           ) : (
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               {prizes.map((prize) => (
@@ -1206,14 +1222,14 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           <button
             type="button"
             onClick={onBack}
-            className="w-full rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white sm:w-auto"
+            className="w-full rounded-full border-[3px] border-neutral-900 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
           >
             Back to Store
           </button>
           {cardState === 'revealed' ? (
             <button
               type="button"
-              className="w-full rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+              className="w-full rounded-full border-[3px] border-neutral-900 bg-[#a5d8ff] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
               onClick={handleAttempt}
             >
               {normalisedConfig.playAgainLabel}
@@ -1223,30 +1239,34 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       </div>
 
       {showResultModal && result ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 px-4 py-10 backdrop-blur">
-          <div className="w-full max-w-lg rounded-3xl border border-indigo-400/40 bg-slate-900/90 p-6 text-center shadow-2xl shadow-indigo-900/50 sm:p-8">
-            <p className="text-xs uppercase tracking-[0.25em] text-indigo-300 sm:text-sm">{normalisedConfig.resultModalTitle}</p>
-            <h3 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{result.prize.name}</h3>
-            <p className="mt-1 text-sm text-slate-400">{result.prize.rarityLabel}</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-10">
+          <div className="w-full max-w-lg rounded-[32px] border-[3px] border-neutral-900 bg-white p-6 text-center shadow-[0_20px_0_rgba(17,24,39,0.18)] sm:p-8">
+            <p className="text-xs uppercase tracking-[0.22em] text-neutral-600 sm:text-sm">{normalisedConfig.resultModalTitle}</p>
+            <h3
+              className="mt-2 text-2xl font-semibold text-neutral-900 sm:text-3xl"
+              style={{ fontFamily: '"Source Serif 4", "Georgia", "Times New Roman", serif' }}
+            >
+              {result.prize.name}
+            </h3>
+            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.22em] text-neutral-600">{result.prize.rarityLabel}</p>
             <div className="mt-5 flex items-center justify-center">
-              <div
-                className="h-28 w-44 rounded-2xl border border-indigo-400/30 bg-gradient-to-br from-slate-700 via-indigo-500/60 to-slate-900 shadow-[0_18px_40px_rgba(79,70,229,0.35)]"
-                style={{ boxShadow: `0 18px 40px ${result.prize.glowColor}` }}
-              >
+              <div className="h-28 w-44 rounded-[24px] border-[3px] border-neutral-900 bg-[#f6f1e1] shadow-[0_10px_0_rgba(17,24,39,0.12)]">
                 <div
-                  className="h-full w-full rounded-2xl"
+                  className="h-full w-full rounded-[20px]"
                   style={{
-                    background: `linear-gradient(135deg, ${result.prize.foilColor}, rgba(15, 23, 42, 0.92))`,
+                    background: result.prize.foilColor
+                      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.85))`
+                      : 'linear-gradient(135deg, #ffffff, #f4f1ea)',
                   }}
                 />
               </div>
             </div>
-            <p className="mt-6 text-sm text-slate-300">{result.prize.description}</p>
-            <p className="mt-4 text-sm text-indigo-200">{result.flairText ?? normalisedConfig.defaultFlairText}</p>
+            <p className="mt-6 text-sm text-neutral-700">{result.prize.description}</p>
+            <p className="mt-4 text-sm font-semibold text-neutral-900">{result.flairText ?? normalisedConfig.defaultFlairText}</p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                className="w-full rounded-full border border-slate-600 px-5 py-2 text-sm font-medium text-slate-200 transition hover:border-slate-400 hover:text-white sm:w-auto"
+                className="w-full rounded-full border-[3px] border-neutral-900 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
                 onClick={() => {
                   closeModal();
                   handleAttempt();
@@ -1256,7 +1276,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
               </button>
               <button
                 type="button"
-                className="w-full rounded-full bg-indigo-500 px-6 py-2 text-sm font-semibold text-white transition hover:bg-indigo-400 sm:w-auto"
+                className="w-full rounded-full border-[3px] border-neutral-900 bg-[#fee79b] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
                 onClick={() => {
                   closeModal();
                   onBack?.();
