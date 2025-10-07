@@ -58,7 +58,6 @@
   .scratch-classic-header {
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
   }
 }
 
@@ -104,6 +103,14 @@
   display: flex;
   gap: 0.75rem;
   align-items: center;
+}
+
+.scratch-classic-actions--footer {
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 0 auto;
+  max-width: 440px;
 }
 
 .scratch-classic-primary,
@@ -164,18 +171,16 @@
   padding: clamp(1.75rem, 3vw, 2.75rem);
   border: 1px solid rgba(var(--scratch-foreground-rgb, 255, 248, 232), 0.18);
   box-shadow: 0 40px 90px -35px rgba(var(--scratch-tertiary-rgb, 10, 10, 10), 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
 }
 
 .scratch-classic-card-wrapper {
-  display: grid;
-  gap: 2rem;
-}
-
-@media (min-width: 900px) {
-  .scratch-classic-card-wrapper {
-    grid-template-columns: minmax(0, 1fr) 280px;
-    align-items: stretch;
-  }
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 .scratch-classic-card {
@@ -260,6 +265,12 @@
   transition: opacity 0.45s ease, transform 0.45s ease, box-shadow 0.45s ease;
   background-size: cover;
   background-position: center;
+}
+
+.scratch-classic-card--idle .scratch-classic-reward,
+.scratch-classic-card--preparing .scratch-classic-reward,
+.scratch-classic-card--ready .scratch-classic-reward {
+  opacity: 0;
 }
 
 .scratch-classic-card--revealed .scratch-classic-reward {
@@ -412,6 +423,10 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  max-width: 420px;
+  align-items: center;
+  text-align: center;
 }
 
 .scratch-classic-status__badge {
@@ -428,6 +443,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .scratch-classic-progress__track {
@@ -435,6 +451,7 @@
   border-radius: 999px;
   background: rgba(var(--scratch-foreground-rgb, 255, 248, 232), 0.25);
   overflow: hidden;
+  width: 100%;
 }
 
 .scratch-classic-progress__fill {
@@ -455,6 +472,7 @@
   font-size: 0.85rem;
   line-height: 1.6;
   opacity: 0.85;
+  text-align: center;
 }
 
 .scratch-classic-status__detail span {
