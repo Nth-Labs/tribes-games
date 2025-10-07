@@ -5,7 +5,6 @@ const ATTEMPT_DELAY_MS = 1100;
 
 const clonePrize = (prize) => ({
   ...prize,
-  weight: Number.isFinite(prize?.weight) && prize.weight > 0 ? prize.weight : 0,
 });
 
 const getPrizesFromConfig = (config) => {
@@ -17,27 +16,13 @@ const getPrizesFromConfig = (config) => {
   return rawPrizes.map((prize) => clonePrize(prize));
 };
 
-const pickWeightedPrize = (weightedPrizes) => {
-  if (!Array.isArray(weightedPrizes) || weightedPrizes.length === 0) {
+const pickRandomPrize = (prizes) => {
+  if (!Array.isArray(prizes) || prizes.length === 0) {
     return null;
   }
 
-  const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
-
-  if (totalWeight <= 0) {
-    return weightedPrizes[0];
-  }
-
-  let threshold = Math.random() * totalWeight;
-
-  for (const entry of weightedPrizes) {
-    threshold -= entry.weight;
-    if (threshold <= 0) {
-      return entry;
-    }
-  }
-
-  return weightedPrizes[weightedPrizes.length - 1];
+  const index = Math.floor(Math.random() * prizes.length);
+  return prizes[index] ?? prizes[0];
 };
 
 const resolveFlairText = (prize, config) => {
@@ -76,16 +61,7 @@ export const attemptGachapon = (config = gachaponConfig) =>
       return;
     }
 
-    const weightedPrizes = prizes.map((prize) => ({ prize, weight: prize.weight }));
-    const totalWeight = weightedPrizes.reduce((sum, entry) => sum + entry.weight, 0);
-
-    if (totalWeight <= 0) {
-      reject(new Error('Gachapon prizes require a positive weight'));
-      return;
-    }
-
-    const selectedEntry = pickWeightedPrize(weightedPrizes) ?? weightedPrizes[0];
-    const selectedPrize = selectedEntry?.prize ?? prizes[0];
+    const selectedPrize = pickRandomPrize(prizes) ?? prizes[0];
     const flairText = resolveFlairText(selectedPrize, config);
 
     setTimeout(() => {

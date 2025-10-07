@@ -60,9 +60,7 @@ const GachaponThemePreview = ({ config }) => {
       const fallback = DEFAULT_PRIZES[index] ?? {};
       const color = pickColor(prize?.capsuleColor, fallback.capsuleColor, capsuleColor);
       const label =
-        toCleanString(prize?.rarityLabel) ||
         toCleanString(prize?.name) ||
-        toCleanString(fallback.rarityLabel) ||
         toCleanString(fallback.name) ||
         `Prize ${index + 1}`;
       const flair = toCleanString(prize?.flairText) || toCleanString(fallback.flairText) || heroFlair;
