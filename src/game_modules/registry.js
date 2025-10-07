@@ -12,6 +12,9 @@ import OverworldExplorerInit, {
 import DinoJumpGameInit, {
   sampleDinoJumpGameDocument,
 } from "./dino-jump-module";
+import PrecisionTimerGameInit, {
+  samplePrecisionTimerGameDocument,
+} from "./precision-timer-module";
 
 /**
  * Keys should match what's coming from backend:
@@ -41,6 +44,10 @@ export const GAME_MODULES = {
   // Dino jump endless runner
   "dino-jump-canyon-run": DinoJumpGameInit,
   "dino-jump": DinoJumpGameInit,
+
+  // Precision timer challenge
+  "precision-timer-classic": PrecisionTimerGameInit,
+  "precision-timer": PrecisionTimerGameInit,
 
   // Example for future templates:
   // "spinthewheel-v1": SpinTheWheelInit,
@@ -110,6 +117,17 @@ export const GAME_LIBRARY = [
       game_type: sampleDinoJumpGameDocument.game_type || "dino-jump",
     },
     sampleConfig: sampleDinoJumpGameDocument,
+  },
+  {
+    slug: "precision-timer-classic",
+    title: samplePrecisionTimerGameDocument.title || "Precision Countdown Challenge",
+    subtitle: samplePrecisionTimerGameDocument.subtitle,
+    thumbnail: samplePrecisionTimerGameDocument.sample_thumbnail,
+    launchPayload: {
+      game_template_id: "precision-timer-classic",
+      game_type: samplePrecisionTimerGameDocument.game_type || "precision-timer",
+    },
+    sampleConfig: samplePrecisionTimerGameDocument,
   },
 ];
 
