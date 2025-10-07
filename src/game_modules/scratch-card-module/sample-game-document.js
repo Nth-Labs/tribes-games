@@ -1,4 +1,5 @@
 const sampleScratchCardGameDocument = {
+  _id: '68e3e13f7fa2f060ddf4a2b8',
   game_id: 'scratch-card-boba-fiesta',
   game_template_id: 'scratch-card-v1',
   game_type: 'scratch-card',
@@ -15,17 +16,12 @@ const sampleScratchCardGameDocument = {
   primary_color: '#6F42C1',
   secondary_color: '#F472B6',
   tertiary_color: '#3BD9D9',
-  background_image:
-    'https://images.unsplash.com/photo-1527169402691-feff5539e52c?auto=format&fit=crop&w=1600&q=80',
-  card_background_image:
-    'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=1200&q=80',
-  scratch_overlay_image:
-    'https://cdn.example.com/assets/scratch/boba-overlay.png',
-  revealed_image: 'https://cdn.example.com/assets/scratch/boba-reveal.png',
-  overlay_pattern:
-    'https://images.unsplash.com/photo-1518873890627-d4bd9f47fca6?auto=format&fit=crop&w=1200&q=80',
-  sample_thumbnail:
-    'https://images.unsplash.com/photo-1489515217757-5fd1be406fef?auto=format&fit=crop&w=400&q=80',
+  background_image: 'https://example.com/assets/scratch-card/background.jpg',
+  card_background_image: 'https://example.com/assets/scratch-card/card-background.jpg',
+  scratch_overlay_image: 'https://example.com/assets/scratch-card/overlay.png',
+  revealed_image: 'https://example.com/assets/scratch-card/revealed.png',
+  overlay_pattern: 'https://example.com/assets/scratch-card/overlay-pattern.png',
+  sample_thumbnail: 'https://example.com/assets/scratch-card/thumbnail.jpg',
   scratch_threshold_percent: 65,
   cta_label: 'Redeem at Counter',
   scratch_action_label: 'Scratch the foil',
@@ -41,6 +37,7 @@ const sampleScratchCardGameDocument = {
   prizes_endpoint: '/api/luckdraw/games/scratch-card-boba-fiesta/prizes',
   results_endpoint: '/api/luckdraw/games/scratch-card-boba-fiesta/rewards',
   defaultFlairText: 'The foil peels away and the prize gleams brilliantly! ✨',
+  default_flair_text: 'The foil peels away and the prize gleams brilliantly! ✨',
   prizes: [
     {
       id: 'fiesta-topping',
@@ -100,7 +97,9 @@ const sampleScratchCardGameDocument = {
     },
   ],
   createdAt: '2024-06-15T10:00:00.000Z',
+  created_at: '2024-06-15T10:00:00.000Z',
   updatedAt: '2024-06-20T08:30:00.000Z',
+  updated_at: '2024-06-20T08:30:00.000Z',
 };
 
 export default sampleScratchCardGameDocument;

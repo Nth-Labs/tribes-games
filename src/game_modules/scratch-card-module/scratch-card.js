@@ -9,7 +9,7 @@ import './scratch-card.css';
 
 const SCRATCH_CELL_SIZE = 32;
 const SCRATCH_RADIUS = 28;
-const REVEAL_THRESHOLD = 0.6;
+const DEFAULT_REVEAL_THRESHOLD = 0.6;
 
 const rarityAccentClasses = {
   common: 'border-slate-500/70 text-slate-100',
@@ -110,13 +110,22 @@ const defaultPrizes = [
 ];
 
 const defaultScratchConfig = {
+  gameId: 'scratch-card-sample',
+  merchantId: 'merchant-sample-001',
+  game_template_id: 'scratch-card-v1',
+  game_type: 'scratch-card',
   title: 'Aurora Scratch Card',
+  name: 'Aurora Scratch Card',
+  headline: 'Scratch for a cosmic surprise!',
+  subtitle: 'Scratch to reveal a radiant upgrade.',
   tagline: 'Glitterforge Games',
   description:
     'Claim a radiant foil, then do the scratching yourself to reveal the treasure hidden beneath. Every swipe clears the nebula shimmer until your prize erupts in full color.',
-  ctaLabel: 'Get a new card',
+  instructions:
+    'Use your finger to clear at least 60% of the foil overlay. Once enough has been revealed the prize will appear automatically.',
+  ctaLabel: 'Redeem at Counter',
   scratchActionLabel: 'Scratch the foil',
-  playAgainLabel: 'Get another card',
+  playAgainLabel: 'Get a new card',
   preparingLabel: 'Preparing card…',
   resultModalTitle: 'Scratch Card Result',
   prizeLedgerTitle: 'Prize Ledger',
@@ -126,9 +135,17 @@ const defaultScratchConfig = {
   prizeListErrorText: 'We could not load the prize ledger. Please refresh to try again.',
   attemptErrorText: 'Something interrupted the scratch card attempt. Please try again.',
   defaultFlairText: 'The foil peels away and the prize gleams brilliantly! ✨',
-  submissionEndpoint: '/api/games/scratch-card/results',
-  backgroundImage:
-    'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?auto=format&fit=crop&w=900&q=80',
+  backgroundImage: 'https://example.com/assets/scratch-card/background.jpg',
+  cardBackgroundImage: 'https://example.com/assets/scratch-card/card-background.jpg',
+  scratchOverlayImage: 'https://example.com/assets/scratch-card/overlay.png',
+  revealedImage: 'https://example.com/assets/scratch-card/revealed.png',
+  overlayPattern: 'https://example.com/assets/scratch-card/overlay-pattern.png',
+  sampleThumbnail: 'https://example.com/assets/scratch-card/thumbnail.jpg',
+  scratchThresholdPercent: 60,
+  distributionType: 'luckdraw',
+  submissionEndpoint: '/api/luckdraw',
+  prizesEndpoint: '/api/luckdraw-prizes/scratch-card-sample',
+  resultsEndpoint: '/api/luckdraw-results/scratch-card-sample',
 };
 
 const FETCH_DELAY_MS = 650;
@@ -368,83 +385,207 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
     const prizes = normalisePrizes(config?.prizes, defaultPrizes, providedDefaultFlair);
 
+    const title = resolveConfigValue(
+      config,
+      ['title', 'headline', 'name'],
+      defaultScratchConfig.title,
+    );
+    const name = resolveConfigValue(config, ['name', 'title'], defaultScratchConfig.name);
+    const headline = resolveConfigValue(
+      config,
+      ['headline', 'title'],
+      defaultScratchConfig.headline,
+    );
+    const subtitle = resolveConfigValue(config, ['subtitle'], defaultScratchConfig.subtitle);
+    const tagline = resolveConfigValue(
+      config,
+      ['tagline', 'subtitle', 'headline'],
+      defaultScratchConfig.tagline,
+    );
+    const description = resolveConfigValue(
+      config,
+      ['description', 'instructions', 'prize', 'body'],
+      defaultScratchConfig.description,
+    );
+    const instructions = resolveConfigValue(
+      config,
+      ['instructions', 'description'],
+      defaultScratchConfig.instructions,
+    );
+    const ctaLabel = resolveConfigValue(
+      config,
+      ['ctaLabel', 'cta_label'],
+      defaultScratchConfig.ctaLabel,
+    );
+    const scratchActionLabel = resolveConfigValue(
+      config,
+      ['scratchActionLabel', 'scratch_action_label'],
+      defaultScratchConfig.scratchActionLabel,
+    );
+    const playAgainLabel = resolveConfigValue(
+      config,
+      ['playAgainLabel', 'play_again_label'],
+      defaultScratchConfig.playAgainLabel,
+    );
+    const preparingLabel = resolveConfigValue(
+      config,
+      ['preparingLabel', 'preparing_label'],
+      defaultScratchConfig.preparingLabel,
+    );
+    const resultModalTitle = resolveConfigValue(
+      config,
+      ['resultModalTitle', 'result_modal_title'],
+      defaultScratchConfig.resultModalTitle,
+    );
+    const prizeLedgerTitle = resolveConfigValue(
+      config,
+      ['prizeLedgerTitle', 'prize_ledger_title'],
+      defaultScratchConfig.prizeLedgerTitle,
+    );
+    const prizeLedgerSubtitle = resolveConfigValue(
+      config,
+      ['prizeLedgerSubtitle', 'prize_ledger_subtitle'],
+      defaultScratchConfig.prizeLedgerSubtitle,
+    );
+    const prizeLedgerBadgeLabel = resolveConfigValue(
+      config,
+      ['prizeLedgerBadgeLabel', 'prize_ledger_badge_label'],
+      defaultScratchConfig.prizeLedgerBadgeLabel,
+    );
+    const prizeListLoadingText = resolveConfigValue(
+      config,
+      ['prizeListLoadingText', 'prize_list_loading_text'],
+      defaultScratchConfig.prizeListLoadingText,
+    );
+    const prizeListErrorText = resolveConfigValue(
+      config,
+      ['prizeListErrorText', 'prize_list_error_text'],
+      defaultScratchConfig.prizeListErrorText,
+    );
+    const attemptErrorText = resolveConfigValue(
+      config,
+      ['attemptErrorText', 'attempt_error_text'],
+      defaultScratchConfig.attemptErrorText,
+    );
+    const submissionEndpoint = resolveConfigValue(
+      config,
+      ['submissionEndpoint', 'submission_endpoint', 'results_endpoint'],
+      defaultScratchConfig.submissionEndpoint,
+    );
+    const prizesEndpoint = resolveConfigValue(
+      config,
+      ['prizesEndpoint', 'prizes_endpoint'],
+      defaultScratchConfig.prizesEndpoint,
+    );
+    const resultsEndpoint = resolveConfigValue(
+      config,
+      ['resultsEndpoint', 'results_endpoint'],
+      defaultScratchConfig.resultsEndpoint,
+    );
+    const distributionType = resolveConfigValue(
+      config,
+      ['distribution_type', 'distributionType'],
+      defaultScratchConfig.distributionType,
+    );
+    const backgroundImage = resolveConfigValue(
+      config,
+      ['backgroundImage', 'background_image'],
+      defaultScratchConfig.backgroundImage,
+    );
+    const cardBackgroundImage = resolveConfigValue(
+      config,
+      ['cardBackgroundImage', 'card_background_image'],
+      defaultScratchConfig.cardBackgroundImage,
+    );
+    const scratchOverlayImage = resolveConfigValue(
+      config,
+      ['scratchOverlayImage', 'scratch_overlay_image'],
+      defaultScratchConfig.scratchOverlayImage,
+    );
+    const revealedImage = resolveConfigValue(
+      config,
+      ['revealedImage', 'revealed_image'],
+      defaultScratchConfig.revealedImage,
+    );
+    const overlayPattern = resolveConfigValue(
+      config,
+      ['overlayPattern', 'overlay_pattern'],
+      defaultScratchConfig.overlayPattern,
+    );
+    const sampleThumbnail = resolveConfigValue(
+      config,
+      ['sampleThumbnail', 'sample_thumbnail'],
+      defaultScratchConfig.sampleThumbnail,
+    );
+    const scratchThresholdPercent = toPositiveNumber(
+      resolveConfigValue(
+        config,
+        ['scratchThresholdPercent', 'scratch_threshold_percent'],
+        defaultScratchConfig.scratchThresholdPercent,
+      ),
+      defaultScratchConfig.scratchThresholdPercent,
+    );
+    const gameId = resolveConfigValue(
+      config,
+      ['game_id', 'gameId'],
+      defaultScratchConfig.gameId,
+    );
+    const merchantId = resolveConfigValue(
+      config,
+      ['merchant_id', 'merchantId'],
+      defaultScratchConfig.merchantId,
+    );
+
     return {
       ...defaultScratchConfig,
       ...config,
       prizes,
-      title: resolveConfigValue(config, ['title', 'name'], defaultScratchConfig.title),
-      tagline: resolveConfigValue(config, ['tagline', 'subtitle'], defaultScratchConfig.tagline),
-      description: resolveConfigValue(
-        config,
-        ['description', 'prize', 'body'],
-        defaultScratchConfig.description,
-      ),
-      ctaLabel: resolveConfigValue(
-        config,
-        ['ctaLabel', 'cta_label'],
-        defaultScratchConfig.ctaLabel,
-      ),
-      scratchActionLabel: resolveConfigValue(
-        config,
-        ['scratchActionLabel', 'scratch_action_label'],
-        defaultScratchConfig.scratchActionLabel,
-      ),
-      playAgainLabel: resolveConfigValue(
-        config,
-        ['playAgainLabel', 'play_again_label'],
-        defaultScratchConfig.playAgainLabel,
-      ),
-      preparingLabel: resolveConfigValue(
-        config,
-        ['preparingLabel', 'preparing_label'],
-        defaultScratchConfig.preparingLabel,
-      ),
-      resultModalTitle: resolveConfigValue(
-        config,
-        ['resultModalTitle', 'result_modal_title'],
-        defaultScratchConfig.resultModalTitle,
-      ),
-      prizeLedgerTitle: resolveConfigValue(
-        config,
-        ['prizeLedgerTitle', 'prize_ledger_title'],
-        defaultScratchConfig.prizeLedgerTitle,
-      ),
-      prizeLedgerSubtitle: resolveConfigValue(
-        config,
-        ['prizeLedgerSubtitle', 'prize_ledger_subtitle'],
-        defaultScratchConfig.prizeLedgerSubtitle,
-      ),
-      prizeLedgerBadgeLabel: resolveConfigValue(
-        config,
-        ['prizeLedgerBadgeLabel', 'prize_ledger_badge_label'],
-        defaultScratchConfig.prizeLedgerBadgeLabel,
-      ),
-      prizeListLoadingText: resolveConfigValue(
-        config,
-        ['prizeListLoadingText', 'prize_list_loading_text'],
-        defaultScratchConfig.prizeListLoadingText,
-      ),
-      prizeListErrorText: resolveConfigValue(
-        config,
-        ['prizeListErrorText', 'prize_list_error_text'],
-        defaultScratchConfig.prizeListErrorText,
-      ),
-      attemptErrorText: resolveConfigValue(
-        config,
-        ['attemptErrorText', 'attempt_error_text'],
-        defaultScratchConfig.attemptErrorText,
-      ),
+      title,
+      name,
+      headline,
+      subtitle,
+      tagline,
+      description,
+      instructions,
+      ctaLabel,
+      scratchActionLabel,
+      playAgainLabel,
+      preparingLabel,
+      resultModalTitle,
+      prizeLedgerTitle,
+      prizeLedgerSubtitle,
+      prizeLedgerBadgeLabel,
+      prizeListLoadingText,
+      prizeListErrorText,
+      attemptErrorText,
       defaultFlairText: providedDefaultFlair,
-      submissionEndpoint: resolveConfigValue(
-        config,
-        ['submissionEndpoint', 'submission_endpoint', 'results_endpoint'],
-        defaultScratchConfig.submissionEndpoint,
-      ),
-      backgroundImage: resolveConfigValue(
-        config,
-        ['backgroundImage', 'background_image'],
-        defaultScratchConfig.backgroundImage,
-      ),
+      default_flair_text: providedDefaultFlair,
+      submissionEndpoint,
+      submission_endpoint: submissionEndpoint,
+      prizesEndpoint,
+      prizes_endpoint: prizesEndpoint,
+      resultsEndpoint,
+      results_endpoint: resultsEndpoint,
+      distributionType,
+      distribution_type: distributionType,
+      backgroundImage,
+      background_image: backgroundImage,
+      cardBackgroundImage,
+      card_background_image: cardBackgroundImage,
+      scratchOverlayImage,
+      scratch_overlay_image: scratchOverlayImage,
+      revealedImage,
+      revealed_image: revealedImage,
+      overlayPattern,
+      overlay_pattern: overlayPattern,
+      sampleThumbnail,
+      sample_thumbnail: sampleThumbnail,
+      scratchThresholdPercent,
+      scratch_threshold_percent: scratchThresholdPercent,
+      gameId,
+      game_id: gameId,
+      merchantId,
+      merchant_id: merchantId,
     };
   }, [baseDefaultFlair, config]);
 
@@ -468,6 +609,21 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   const scratchedCellsRef = useRef(new Set());
   const totalCellsRef = useRef(0);
   const scratchCompletedRef = useRef(false);
+
+  const revealThreshold = useMemo(() => {
+    const percent = toPositiveNumber(
+      normalisedConfig.scratchThresholdPercent,
+      defaultScratchConfig.scratchThresholdPercent,
+    );
+    if (!percent) {
+      return DEFAULT_REVEAL_THRESHOLD;
+    }
+    const fraction = percent / 100;
+    if (!Number.isFinite(fraction) || fraction <= 0) {
+      return DEFAULT_REVEAL_THRESHOLD;
+    }
+    return Math.min(0.95, Math.max(0.2, fraction));
+  }, [normalisedConfig.scratchThresholdPercent]);
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -717,13 +873,13 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
         if (totalCellsRef.current > 0) {
           const ratio = scratchedCellsRef.current.size / totalCellsRef.current;
           setScratchProgress((prev) => (ratio > prev ? ratio : prev));
-          if (ratio >= REVEAL_THRESHOLD) {
+          if (ratio >= revealThreshold) {
             handleScratchComplete();
           }
         }
       }
     },
-    [cardState, handleScratchComplete],
+    [cardState, handleScratchComplete, revealThreshold],
   );
 
   const endScratch = useCallback(() => {
@@ -838,18 +994,86 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
   const showButtonProgress = cardState === 'preparing';
 
-  const rewardStyle = result
-    ? {
-        background: `linear-gradient(135deg, ${result.prize.foilColor}, rgba(15, 23, 42, 0.92))`,
-      }
-    : {};
+  const innerStyle = useMemo(() => {
+    if (!normalisedConfig.cardBackgroundImage) {
+      return undefined;
+    }
 
-  const glowStyle = result
-    ? {
-        boxShadow: `0 0 60px ${result.prize.glowColor}`,
-        background: `radial-gradient(circle, ${result.prize.glowColor} 0%, rgba(15, 23, 42, 0) 70%)`,
-      }
-    : {};
+    return {
+      backgroundImage: `linear-gradient(160deg, rgba(15, 23, 42, 0.92), rgba(30, 41, 59, 0.85)), url(${normalisedConfig.cardBackgroundImage})`,
+      backgroundSize: 'cover, 100% 100%',
+      backgroundPosition: 'center, center',
+    };
+  }, [normalisedConfig.cardBackgroundImage]);
+
+  const foilStyle = useMemo(() => {
+    const layers = [];
+    const sizes = [];
+    const positions = [];
+    const repeats = [];
+
+    if (normalisedConfig.scratchOverlayImage) {
+      layers.push(`url(${normalisedConfig.scratchOverlayImage})`);
+      sizes.push('cover');
+      positions.push('center');
+      repeats.push('no-repeat');
+    }
+
+    if (normalisedConfig.overlayPattern) {
+      layers.push(`url(${normalisedConfig.overlayPattern})`);
+      sizes.push('cover');
+      positions.push('center');
+      repeats.push('repeat');
+    }
+
+    if (!layers.length) {
+      return undefined;
+    }
+
+    return {
+      backgroundImage: layers.join(', '),
+      backgroundSize: sizes.join(', '),
+      backgroundPosition: positions.join(', '),
+      backgroundRepeat: repeats.join(', '),
+    };
+  }, [normalisedConfig.overlayPattern, normalisedConfig.scratchOverlayImage]);
+
+  const rewardStyle = useMemo(() => {
+    const backgrounds = [];
+    const sizes = [];
+    const positions = [];
+
+    if (normalisedConfig.revealedImage) {
+      backgrounds.push(`url(${normalisedConfig.revealedImage})`);
+      sizes.push('cover');
+      positions.push('center');
+    }
+
+    const gradient = result
+      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(15, 23, 42, 0.92))`
+      : 'linear-gradient(135deg, rgba(148, 163, 184, 0.35), rgba(51, 65, 85, 0.92))';
+
+    backgrounds.push(gradient);
+    sizes.push('100% 100%');
+    positions.push('center');
+
+    return {
+      backgroundImage: backgrounds.join(', '),
+      backgroundSize: sizes.join(', '),
+      backgroundPosition: positions.join(', '),
+    };
+  }, [normalisedConfig.revealedImage, result]);
+
+  const glowStyle = useMemo(
+    () =>
+      result
+        ? {
+            boxShadow: `0 0 60px ${result.prize.glowColor}`,
+            background: `radial-gradient(circle, ${result.prize.glowColor} 0%, rgba(15, 23, 42, 0) 70%)`,
+          }
+        : {},
+    [result],
+  );
 
   return (
     <div
@@ -887,7 +1111,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
         <div className="scratch-card-stage rounded-3xl border border-indigo-500/30 bg-gradient-to-br from-indigo-950/70 via-slate-950/60 to-fuchsia-900/40 p-5 shadow-[0_35px_80px_rgba(59,7,100,0.45)] sm:p-8">
           <div className="scratch-card-container w-full">
             <div className={cardClassName}>
-              <div className="scratch-card__inner" ref={surfaceRef}>
+              <div className="scratch-card__inner" ref={surfaceRef} style={innerStyle}>
                 <div className="scratch-card__reward" style={rewardStyle}>
                   <div className="scratch-card__reward-glow" style={glowStyle} />
                   <div className="scratch-card__reward-content">
@@ -908,7 +1132,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
                     </p>
                   </div>
                 </div>
-                <div className={foilClassName}>
+                <div className={foilClassName} style={foilStyle}>
                   <canvas
                     ref={canvasRef}
                     className={canvasClassName}
