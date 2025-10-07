@@ -11,30 +11,6 @@ const SCRATCH_CELL_SIZE = 32;
 const SCRATCH_RADIUS = 28;
 const DEFAULT_REVEAL_THRESHOLD = 0.6;
 
-const rarityAccentClasses = {
-  common: 'border-[#1e3a8a]',
-  uncommon: 'border-[#166534]',
-  rare: 'border-[#1d4ed8]',
-  epic: 'border-[#6d28d9]',
-  legendary: 'border-[#b45309]',
-};
-
-const rarityBackground = {
-  common: 'bg-[#e7f0ff]',
-  uncommon: 'bg-[#e4f5ec]',
-  rare: 'bg-[#e6edff]',
-  epic: 'bg-[#f1e9ff]',
-  legendary: 'bg-[#fff4d6]',
-};
-
-const rarityLabelColors = {
-  common: 'text-[#1e3a8a]',
-  uncommon: 'text-[#166534]',
-  rare: 'text-[#1d4ed8]',
-  epic: 'text-[#6d28d9]',
-  legendary: 'text-[#b45309]',
-};
-
 const defaultRarityLabels = {
   common: 'Common',
   uncommon: 'Uncommon',
@@ -61,59 +37,59 @@ const defaultRarityGlowColors = {
 
 const defaultPrizes = [
   {
-    id: 'starlit-token',
-    name: 'Starlit Token',
+    id: 'bonus-topping',
+    name: 'Bonus Topping',
     rarity: 'common',
     rarityLabel: 'Common',
-    description: 'A token etched with constellations, good for a single campfire wish.',
+    description: 'Add any extra topping to your order on the house.',
     weight: 45,
     foilColor: '#CBD5F5',
     glowColor: 'rgba(96, 165, 250, 0.35)',
-    flairText: 'Starlight flickers across the token as it reveals itself.',
+    flairText: 'A gentle shimmer reveals the topping upgrade.',
   },
   {
-    id: 'glimmer-thread',
-    name: 'Glimmer Thread',
+    id: 'size-upgrade',
+    name: 'Size Upgrade',
     rarity: 'uncommon',
     rarityLabel: 'Uncommon',
-    description: 'Woven from comet tails, it reinforces any gear you stitch it into.',
+    description: 'Enjoy the next size up for free.',
     weight: 30,
     foilColor: '#8DE6C9',
     glowColor: 'rgba(52, 211, 153, 0.45)',
-    flairText: 'Threads of light twirl in the air as the prize emerges.',
+    flairText: 'The foil peels away to show a bigger cup.',
   },
   {
-    id: 'dawn-charm',
-    name: 'Charm of Dawn',
+    id: 'featured-drink',
+    name: 'Featured Drink Voucher',
     rarity: 'rare',
     rarityLabel: 'Rare',
-    description: 'A radiant charm that greets every sunrise with a burst of optimism.',
+    description: 'Redeem a voucher for our featured drink of the week.',
     weight: 18,
     foilColor: '#95C6FF',
     glowColor: 'rgba(59, 130, 246, 0.55)',
-    flairText: 'The charm gleams with the first light of morning.',
+    flairText: 'A bright flash highlights the featured reward.',
   },
   {
-    id: 'eclipse-crest',
-    name: 'Eclipse Crest',
+    id: 'collector-cup',
+    name: 'Collector Cup',
     rarity: 'epic',
     rarityLabel: 'Epic',
-    description: 'A crest forged from shadow and light, empowering the bearer at dusk.',
+    description: 'Take home a limited collector cup.',
     weight: 6,
     foilColor: '#D4B3FF',
     glowColor: 'rgba(167, 139, 250, 0.55)',
-    flairText: 'A halo of twilight blooms around the crest.',
+    flairText: 'Soft light ripples as the cup comes into view.',
   },
   {
-    id: 'aurora-heart',
-    name: 'Aurora Heart',
+    id: 'bogo-voucher',
+    name: 'BOGO Voucher',
     rarity: 'legendary',
     rarityLabel: 'Legendary',
-    description: "A prismatic core that pulses with the aurora's rhythm and courage.",
+    description: 'Buy one drink and get the second free.',
     weight: 1,
     foilColor: '#FDE48A',
     glowColor: 'rgba(251, 191, 36, 0.6)',
-    flairText: 'The aurora surges as the heart ignites in your hands.',
+    flairText: 'Golden confetti bursts around the winning card.',
   },
 ];
 
@@ -122,38 +98,33 @@ const defaultScratchConfig = {
   merchantId: 'merchant-sample-001',
   game_template_id: 'scratch-card-v1',
   game_type: 'scratch-card',
-  title: 'Aurora Scratch Card',
-  name: 'Aurora Scratch Card',
-  headline: 'Scratch for a cosmic surprise!',
-  subtitle: 'Scratch to reveal a radiant upgrade.',
-  tagline: 'Glitterforge Games',
+  title: 'Scratch & Win',
+  name: 'Scratch & Win',
+  headline: 'Reveal your reward',
+  subtitle: 'Scratch the foil to see what you get.',
+  tagline: 'Daily Treats',
   description:
-    'Claim a radiant foil, then do the scratching yourself to reveal the treasure hidden beneath. Every swipe clears the nebula shimmer until your prize erupts in full color.',
+    'Tap the button to arm a new card, then scratch away the foil to uncover your reward.',
   instructions:
-    'Use your finger to clear at least 60% of the foil overlay. Once enough has been revealed the prize will appear automatically.',
-  ctaLabel: 'Redeem at Counter',
-  scratchActionLabel: 'Scratch the foil',
-  playAgainLabel: 'Get a new card',
+    'Clear at least 60% of the foil. Once enough has been scratched away the prize will appear automatically.',
+  ctaLabel: 'Arm a new card',
+  scratchActionLabel: 'Scratch to reveal',
+  playAgainLabel: 'Play again',
   preparingLabel: 'Preparing card…',
-  resultModalTitle: 'Scratch Card Result',
-  prizeLedgerTitle: 'Prize Ledger',
-  prizeLedgerSubtitle: 'Review every reward hiding beneath the aurora foil.',
-  prizeLedgerBadgeLabel: 'Drop Rates',
-  prizeListLoadingText: 'Loading scratch card lineup…',
-  prizeListErrorText: 'We could not load the prize ledger. Please refresh to try again.',
+  resultModalTitle: 'You uncovered',
+  prizeLedgerTitle: 'Available rewards',
+  prizeLedgerSubtitle: 'Every reward in this scratch card, with its drop rate.',
+  prizeLedgerBadgeLabel: 'Drop rates',
+  prizeListLoadingText: 'Loading prize list…',
+  prizeListErrorText: 'We could not load the prize ledger. Please try again.',
   attemptErrorText: 'Something interrupted the scratch card attempt. Please try again.',
   defaultFlairText: 'The foil peels away and the prize gleams brilliantly! ✨',
-  backgroundImage: 'https://example.com/assets/scratch-card/background.jpg',
-  cardBackgroundImage: 'https://example.com/assets/scratch-card/card-background.jpg',
-  scratchOverlayImage: 'https://example.com/assets/scratch-card/overlay.png',
-  revealedImage: 'https://example.com/assets/scratch-card/revealed.png',
-  overlayPattern: 'https://example.com/assets/scratch-card/overlay-pattern.png',
-  sampleThumbnail: 'https://example.com/assets/scratch-card/thumbnail.jpg',
   scratchThresholdPercent: 60,
   distributionType: 'luckdraw',
   submissionEndpoint: '/api/luckdraw',
   prizesEndpoint: '/api/luckdraw-prizes/scratch-card-sample',
   resultsEndpoint: '/api/luckdraw-results/scratch-card-sample',
+  prizes: defaultPrizes,
 };
 
 const FETCH_DELAY_MS = 650;
@@ -356,27 +327,17 @@ const attemptScratchCard = (config) =>
     }, ATTEMPT_DELAY_MS);
   });
 
-const PrizeCard = ({ prize, dropRate }) => {
-  const accentClass = rarityAccentClasses[prize.rarity] ?? 'border-neutral-900';
-  const backgroundClass = rarityBackground[prize.rarity] ?? 'bg-[#f4f1ea]';
-  const labelColor = rarityLabelColors[prize.rarity] ?? 'text-neutral-700';
-
-  return (
-    <div
-      className={`flex h-full flex-col justify-between rounded-[28px] border-[3px] ${accentClass} ${backgroundClass} p-5 shadow-[0_10px_0_rgba(17,24,39,0.12)]`}
-    >
-      <div>
-        <p className={`text-xs uppercase tracking-[0.22em] text-neutral-600 ${labelColor}`}>{prize.rarityLabel}</p>
-        <h3 className="mt-2 text-lg font-semibold text-neutral-900">{prize.name}</h3>
-        <p className="mt-3 text-sm text-neutral-700">{prize.description}</p>
-      </div>
-      <div className="mt-5 flex items-center justify-between text-xs uppercase tracking-[0.18em] text-neutral-600">
-        <span>Drop Rate</span>
-        <span className={`text-sm font-semibold tracking-normal ${labelColor}`}>{dropRate}</span>
-      </div>
+const PrizeCard = ({ prize, dropRate }) => (
+  <article className="prize-card">
+    <span className="prize-card__rarity">{prize.rarityLabel}</span>
+    <h3 className="prize-card__name">{prize.name}</h3>
+    <p className="prize-card__description">{prize.description}</p>
+    <div className="prize-card__footer">
+      <span>Drop rate</span>
+      <span>{dropRate}</span>
     </div>
-  );
-};
+  </article>
+);
 
 const ScratchCardGame = ({ config = {}, onBack }) => {
   const baseDefaultFlair = resolveConfigValue(
@@ -392,28 +353,16 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       baseDefaultFlair,
     );
 
-    const prizes = normalisePrizes(config?.prizes, defaultPrizes, providedDefaultFlair);
+    const prizes = normalisePrizes(config?.prizes, defaultScratchConfig.prizes, providedDefaultFlair);
 
-    const title = resolveConfigValue(
-      config,
-      ['title', 'headline', 'name'],
-      defaultScratchConfig.title,
-    );
+    const title = resolveConfigValue(config, ['title', 'headline', 'name'], defaultScratchConfig.title);
     const name = resolveConfigValue(config, ['name', 'title'], defaultScratchConfig.name);
-    const headline = resolveConfigValue(
-      config,
-      ['headline', 'title'],
-      defaultScratchConfig.headline,
-    );
+    const headline = resolveConfigValue(config, ['headline', 'title'], defaultScratchConfig.headline);
     const subtitle = resolveConfigValue(config, ['subtitle'], defaultScratchConfig.subtitle);
-    const tagline = resolveConfigValue(
-      config,
-      ['tagline', 'subtitle', 'headline'],
-      defaultScratchConfig.tagline,
-    );
+    const tagline = resolveConfigValue(config, ['tagline', 'subtitle', 'headline'], defaultScratchConfig.tagline);
     const description = resolveConfigValue(
       config,
-      ['description', 'instructions', 'prize', 'body'],
+      ['description', 'instructions', 'body'],
       defaultScratchConfig.description,
     );
     const instructions = resolveConfigValue(
@@ -421,11 +370,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       ['instructions', 'description'],
       defaultScratchConfig.instructions,
     );
-    const ctaLabel = resolveConfigValue(
-      config,
-      ['ctaLabel', 'cta_label'],
-      defaultScratchConfig.ctaLabel,
-    );
+    const ctaLabel = resolveConfigValue(config, ['ctaLabel', 'cta_label'], defaultScratchConfig.ctaLabel);
     const scratchActionLabel = resolveConfigValue(
       config,
       ['scratchActionLabel', 'scratch_action_label'],
@@ -478,7 +423,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     );
     const submissionEndpoint = resolveConfigValue(
       config,
-      ['submissionEndpoint', 'submission_endpoint', 'results_endpoint'],
+      ['submissionEndpoint', 'submission_endpoint'],
       defaultScratchConfig.submissionEndpoint,
     );
     const prizesEndpoint = resolveConfigValue(
@@ -493,7 +438,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     );
     const distributionType = resolveConfigValue(
       config,
-      ['distribution_type', 'distributionType'],
+      ['distributionType', 'distribution_type'],
       defaultScratchConfig.distributionType,
     );
     const backgroundImage = resolveConfigValue(
@@ -534,11 +479,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       ),
       defaultScratchConfig.scratchThresholdPercent,
     );
-    const gameId = resolveConfigValue(
-      config,
-      ['game_id', 'gameId'],
-      defaultScratchConfig.gameId,
-    );
+    const gameId = resolveConfigValue(config, ['game_id', 'gameId'], defaultScratchConfig.gameId);
     const merchantId = resolveConfigValue(
       config,
       ['merchant_id', 'merchantId'],
@@ -618,7 +559,6 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   const scratchedCellsRef = useRef(new Set());
   const totalCellsRef = useRef(0);
   const scratchCompletedRef = useRef(false);
-  const foilInitHandleRef = useRef(null);
 
   const revealThreshold = useMemo(() => {
     const percent = toPositiveNumber(
@@ -642,16 +582,6 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       isMountedRef.current = false;
       timeoutsRef.current.forEach(clearTimeout);
       timeoutsRef.current = [];
-      if (foilInitHandleRef.current) {
-        const { type, handle } = foilInitHandleRef.current;
-        if (type === 'raf' && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
-          window.cancelAnimationFrame(handle);
-        }
-        if (type === 'timeout') {
-          clearTimeout(handle);
-        }
-        foilInitHandleRef.current = null;
-      }
     };
   }, []);
 
@@ -755,17 +685,6 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   };
 
   const initializeFoil = useCallback(() => {
-    if (foilInitHandleRef.current) {
-      const { type, handle } = foilInitHandleRef.current;
-      if (type === 'raf' && typeof window !== 'undefined' && typeof window.cancelAnimationFrame === 'function') {
-        window.cancelAnimationFrame(handle);
-      }
-      if (type === 'timeout') {
-        clearTimeout(handle);
-      }
-      foilInitHandleRef.current = null;
-    }
-
     if (cardState !== 'ready') {
       return;
     }
@@ -777,28 +696,16 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     }
 
     const rect = surface.getBoundingClientRect();
-    const fallbackWidth = surface.clientWidth || surface.offsetWidth;
-    const fallbackHeight = surface.clientHeight || surface.offsetHeight;
-    const width = rect.width || fallbackWidth;
-    const height = rect.height || fallbackHeight;
-
-    if (!width || !height) {
-      if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
-        const handle = window.requestAnimationFrame(initializeFoil);
-        foilInitHandleRef.current = { type: 'raf', handle };
-      } else {
-        const handle = setTimeout(initializeFoil, 16);
-        foilInitHandleRef.current = { type: 'timeout', handle };
-      }
+    if (!rect.width || !rect.height) {
       return;
     }
 
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
@@ -807,9 +714,9 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
     ctx.globalCompositeOperation = 'source-over';
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, '#4f46e5');
-    gradient.addColorStop(0.45, '#7c3aed');
-    gradient.addColorStop(1, '#ec4899');
+    gradient.addColorStop(0, '#d4dae7');
+    gradient.addColorStop(0.5, '#f1f5f9');
+    gradient.addColorStop(1, '#c7d1e5');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -819,15 +726,15 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     for (let offset = -canvas.height; offset < canvas.width * 2; offset += stripeStep) {
       ctx.save();
       ctx.translate(0, offset);
-      ctx.rotate((18 * Math.PI) / 180);
-      ctx.fillRect(-canvas.width, 0, canvas.width * 3, 8 * dpr);
+      ctx.rotate((16 * Math.PI) / 180);
+      ctx.fillRect(-canvas.width, 0, canvas.width * 3, 6 * dpr);
       ctx.restore();
     }
     ctx.globalAlpha = 1;
 
     scratchedCellsRef.current = new Set();
-    const widthCells = Math.max(1, Math.ceil(width / SCRATCH_CELL_SIZE));
-    const heightCells = Math.max(1, Math.ceil(height / SCRATCH_CELL_SIZE));
+    const widthCells = Math.ceil(rect.width / SCRATCH_CELL_SIZE);
+    const heightCells = Math.ceil(rect.height / SCRATCH_CELL_SIZE);
     totalCellsRef.current = widthCells * heightCells;
     setScratchProgress(0);
     setCoverCleared(false);
@@ -866,7 +773,7 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
         return;
       }
       setShowResultModal(true);
-    }, 650);
+    }, 500);
   }, [cardState, result]);
 
   const scratchAt = useCallback(
@@ -993,12 +900,12 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
   const cardClassName = `scratch-card ${
     cardState === 'ready' && isScratching ? 'scratch-card--scratching' : ''
   } ${cardState === 'revealed' ? 'scratch-card--revealed' : ''}`;
-  const foilClassName = `scratch-card__foil ${
-    cardState === 'ready' ? 'scratch-card__foil--interactive' : ''
-  } ${coverCleared ? 'scratch-card__foil--cleared' : ''}`;
-  const canvasClassName = `scratch-card__foil-canvas ${
-    cardState !== 'ready' ? 'scratch-card__foil-canvas--inactive' : ''
-  } ${coverCleared ? 'scratch-card__foil-canvas--cleared' : ''}`;
+  const overlayClassName = `scratch-card__overlay ${
+    cardState === 'ready' ? 'scratch-card__overlay--interactive' : ''
+  } ${coverCleared ? 'scratch-card__overlay--cleared' : ''}`;
+  const canvasClassName = `scratch-card__overlay-canvas ${
+    cardState !== 'ready' ? 'scratch-card__overlay-canvas--inactive' : ''
+  } ${coverCleared ? 'scratch-card__overlay-canvas--cleared' : ''}`;
 
   const buttonLabel =
     cardState === 'idle'
@@ -1014,28 +921,26 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
 
   const statusText =
     cardState === 'idle'
-      ? 'Awaiting your turn'
+      ? 'Tap the button to get a new card'
       : cardState === 'preparing'
       ? 'Shuffling prizes'
       : cardState === 'ready'
       ? 'Ready to scratch'
       : 'Prize revealed';
 
-  const foilMessage =
+  const overlayMessage =
     cardState === 'ready'
       ? normalisedConfig.scratchActionLabel
       : cardState === 'revealed'
       ? 'Foil cleared'
-      : 'Pick a card to begin';
+      : 'Arm a card to start';
 
-  const foilMessageDetail =
+  const overlayDetail =
     cardState === 'ready'
-      ? "Swipe to see what's underneath."
+      ? `Clear about ${Math.round(revealThreshold * 100)}% of the foil.`
       : cardState === 'revealed'
-      ? 'Your reward is ready.'
+      ? 'Enjoy your reward.'
       : null;
-
-  const showButtonProgress = cardState === 'preparing';
 
   const innerStyle = useMemo(() => {
     if (!normalisedConfig.cardBackgroundImage) {
@@ -1043,13 +948,13 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     }
 
     return {
-      backgroundImage: `linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 241, 234, 0.85)), url(${normalisedConfig.cardBackgroundImage})`,
+      backgroundImage: `linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(241, 245, 249, 0.85)), url(${normalisedConfig.cardBackgroundImage})`,
       backgroundSize: 'cover, 100% 100%',
       backgroundPosition: 'center, center',
     };
   }, [normalisedConfig.cardBackgroundImage]);
 
-  const foilStyle = useMemo(() => {
+  const overlayStyle = useMemo(() => {
     const layers = [];
     const sizes = [];
     const positions = [];
@@ -1081,194 +986,157 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     };
   }, [normalisedConfig.overlayPattern, normalisedConfig.scratchOverlayImage]);
 
-  const rewardStyle = useMemo(() => {
-    const backgrounds = [];
-    const sizes = [];
-    const positions = [];
-
-    if (normalisedConfig.revealedImage) {
-      backgrounds.push(`url(${normalisedConfig.revealedImage})`);
-      sizes.push('cover');
-      positions.push('center');
+  const rewardHighlightStyle = useMemo(() => {
+    if (!hasRevealed || !result?.prize?.foilColor) {
+      return undefined;
     }
 
-    const gradient = result
-      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.9))`
-      : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(244, 241, 234, 0.9))';
-
-    backgrounds.push(gradient);
-    sizes.push('100% 100%');
-    positions.push('center');
-
     return {
-      backgroundImage: backgrounds.join(', '),
-      backgroundSize: sizes.join(', '),
-      backgroundPosition: positions.join(', '),
+      background: `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.85))`,
+      borderRadius: '12px',
+      padding: '16px',
     };
-  }, [normalisedConfig.revealedImage, result]);
-
-  const glowStyle = useMemo(
-    () =>
-      result
-        ? {
-            boxShadow: `0 0 60px ${result.prize.glowColor}`,
-            background: `radial-gradient(circle, ${result.prize.glowColor} 0%, rgba(15, 23, 42, 0) 70%)`,
-          }
-        : {},
-    [result],
-  );
+  }, [hasRevealed, result]);
 
   return (
-    <div
-      className="scratch-module-root"
-      style={{
-        backgroundImage: normalisedConfig.backgroundImage
-          ? `linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(244, 241, 234, 0.85)), url(${normalisedConfig.backgroundImage})`
-          : undefined,
-      }}
-    >
+    <div className="scratch-module-root">
       <div className="scratch-module-surface">
-        <div className="rounded-[32px] border-[3px] border-neutral-900 bg-[#fceecf] p-6 shadow-[0_12px_0_rgba(17,24,39,0.12)] sm:p-8">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[0.68rem] uppercase tracking-[0.28em] text-neutral-600 sm:text-xs">{normalisedConfig.tagline}</p>
-              <h1
-                className="mt-2 text-3xl font-semibold text-neutral-900 sm:text-4xl"
-                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-              >
-                {normalisedConfig.title}
-              </h1>
-              <p className="mt-4 max-w-xl text-sm text-neutral-700 sm:text-base">{normalisedConfig.description}</p>
-            </div>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:items-end">
-              <button
-                type="button"
-                onClick={handleAttempt}
-                disabled={buttonDisabled}
-                className="flex w-full items-center justify-center rounded-full border-[3px] border-neutral-900 bg-[#fee79b] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.2)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.2)] disabled:translate-y-0 disabled:opacity-60 disabled:shadow-[0_6px_0_rgba(17,24,39,0.12)] sm:w-auto"
-              >
-                {buttonLabel}
-              </button>
-              {showButtonProgress ? (
-                <span className="text-xs uppercase tracking-[0.26em] text-neutral-600">Preparing your card…</span>
-              ) : cardState === 'ready' ? (
-                <span className="text-xs uppercase tracking-[0.26em] text-neutral-600">Ready to scratch</span>
-              ) : null}
-            </div>
+        <section className="scratch-intro-card">
+          <div className="scratch-intro-text">
+            {normalisedConfig.tagline ? (
+              <span className="scratch-intro-tagline">{normalisedConfig.tagline}</span>
+            ) : null}
+            <h1>{normalisedConfig.title ?? normalisedConfig.name}</h1>
+            {normalisedConfig.subtitle ? <p className="scratch-intro-subtitle">{normalisedConfig.subtitle}</p> : null}
+            {normalisedConfig.description ? (
+              <p className="scratch-intro-body">{normalisedConfig.description}</p>
+            ) : null}
           </div>
-        </div>
+          <div className="scratch-intro-actions">
+            <button
+              type="button"
+              className="scratch-button scratch-button--secondary"
+              onClick={onBack}
+            >
+              Back to store
+            </button>
+            <button
+              type="button"
+              className="scratch-button scratch-button--primary"
+              onClick={handleAttempt}
+              disabled={buttonDisabled}
+            >
+              {buttonLabel}
+            </button>
+          </div>
+        </section>
 
-        <div className="scratch-card-stage rounded-[32px] border-[3px] border-neutral-900 bg-[#f6f1e1] p-5 shadow-[0_14px_0_rgba(17,24,39,0.12)] sm:p-8">
-          <div className="scratch-card-container w-full">
-            <div className={cardClassName}>
-              <div className="scratch-card__inner" ref={surfaceRef} style={innerStyle}>
-                <div className="scratch-card__reward" style={rewardStyle}>
-                  <div className="scratch-card__reward-glow" style={glowStyle} />
-                  <div className="scratch-card__reward-content">
-                    <p className="scratch-card__reward-rarity">
-                      {hasRevealed && result ? result.prize.rarityLabel : 'Mystery Reward'}
-                    </p>
+        <section className="scratch-layout">
+          <div className="scratch-card-column">
+            <div className="scratch-card-frame">
+              <div className={cardClassName}>
+                <div className="scratch-card__inner" ref={surfaceRef} style={innerStyle}>
+                  <div className="scratch-card__reward" style={rewardHighlightStyle}>
+                    <span className="scratch-card__reward-rarity">
+                      {hasRevealed && result ? result.prize.rarityLabel : 'Mystery reward'}
+                    </span>
                     <h3 className="scratch-card__reward-name">
                       {hasRevealed && result
                         ? result.prize.name
                         : cardState === 'ready'
                         ? 'Scratch to reveal'
-                        : 'Awaiting scratch'}
+                        : 'Waiting to arm'}
                     </h3>
                     <p className="scratch-card__reward-helper">
                       {hasRevealed && result
                         ? result.flairText ?? normalisedConfig.defaultFlairText
-                        : 'Drag across the foil to lift the shimmer.'}
+                        : normalisedConfig.instructions}
                     </p>
                   </div>
-                </div>
-                <div className={foilClassName} style={foilStyle}>
-                  <canvas
-                    ref={canvasRef}
-                    className={canvasClassName}
-                    onPointerDown={handlePointerDown}
-                    onPointerMove={handlePointerMove}
-                    onPointerUp={handlePointerUp}
-                    onPointerCancel={handlePointerLeave}
-                    onPointerLeave={handlePointerLeave}
-                  />
-                  <div className="scratch-card__foil-noise" />
-                  <div className="scratch-card__foil-shine" />
-                  <div
-                    className={`scratch-card__foil-message ${
-                      cardState !== 'revealed' ? 'scratch-card__foil-message--visible' : ''
-                    }`}
-                  >
-                    <span>{foilMessage}</span>
-                    {foilMessageDetail && <span className="scratch-card__foil-detail">{foilMessageDetail}</span>}
+                  <div className={overlayClassName} style={overlayStyle}>
+                    <canvas
+                      ref={canvasRef}
+                      className={canvasClassName}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerCancel={handlePointerLeave}
+                      onPointerLeave={handlePointerLeave}
+                    />
+                    <div
+                      className={`scratch-card__overlay-message ${
+                        cardState !== 'revealed' ? 'is-visible' : ''
+                      }`}
+                    >
+                      <span>{overlayMessage}</span>
+                      {overlayDetail ? (
+                        <span className="scratch-card__overlay-detail">{overlayDetail}</span>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="scratch-card__status-panel">
-              <div className="scratch-card__status-badge">{statusText}</div>
+
+            <div className="scratch-status">
+              <div className="scratch-status__badge">{statusText}</div>
               {showProgress ? (
-                <div className="scratch-card__progress">
-                  <div className="scratch-card__progress-track">
-                    <div className="scratch-card__progress-fill" style={{ width: `${progressPercent}%` }} />
+                <div className="scratch-progress">
+                  <div className="scratch-progress__track">
+                    <div className="scratch-progress__fill" style={{ width: `${progressPercent}%` }} />
                   </div>
-                  <span className="scratch-card__progress-label">{progressPercent}% revealed</span>
+                  <p className="scratch-progress__label">{progressPercent}% revealed</p>
                 </div>
               ) : null}
               {cardState === 'revealed' && result ? (
-                <p className="scratch-card__status-detail">
+                <p className="scratch-status__text">
                   You uncovered the <span>{result.prize.name}</span>!
                 </p>
               ) : null}
-              {attemptError ? <div className="scratch-card-error">{attemptError}</div> : null}
+              {attemptError ? <p className="scratch-error">{attemptError}</p> : null}
             </div>
           </div>
-        </div>
 
-        <div className="rounded-[32px] border-[3px] border-neutral-900 bg-white p-6 shadow-[0_12px_0_rgba(17,24,39,0.12)] sm:p-8">
-          <div className="flex flex-col items-start justify-between gap-3 text-center sm:flex-row sm:items-center sm:text-left">
-            <div>
-              <h2
-                className="text-lg font-semibold text-neutral-900 sm:text-xl"
-                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-              >
-                {normalisedConfig.prizeLedgerTitle}
-              </h2>
+          <div className="scratch-prize-panel">
+            <div className="scratch-prize-header">
+              <h2>{normalisedConfig.prizeLedgerTitle}</h2>
               {normalisedConfig.prizeLedgerSubtitle ? (
-                <p className="mt-1 text-sm text-neutral-600">{normalisedConfig.prizeLedgerSubtitle}</p>
+                <p>{normalisedConfig.prizeLedgerSubtitle}</p>
               ) : null}
             </div>
             {normalisedConfig.prizeLedgerBadgeLabel ? (
-              <span className="rounded-full border-[3px] border-neutral-900 bg-[#dbe6ff] px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-neutral-900">
-                {normalisedConfig.prizeLedgerBadgeLabel}
-              </span>
+              <span className="scratch-prize-badge">{normalisedConfig.prizeLedgerBadgeLabel}</span>
             ) : null}
+            {loadingPrizes ? (
+              <p>{normalisedConfig.prizeListLoadingText}</p>
+            ) : prizeError ? (
+              <p className="scratch-error">{prizeError}</p>
+            ) : (
+              <div className="scratch-prize-grid">
+                {prizes.map((prize) => (
+                  <PrizeCard
+                    key={prize.id}
+                    prize={prize}
+                    dropRate={formatDropRate(prize.weight ?? 0, totalWeight)}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-          {loadingPrizes ? (
-            <p className="mt-4 text-sm text-neutral-600">{normalisedConfig.prizeListLoadingText}</p>
-          ) : prizeError ? (
-            <p className="mt-4 text-sm text-rose-600">{prizeError}</p>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {prizes.map((prize) => (
-                <PrizeCard key={prize.id} prize={prize} dropRate={formatDropRate(prize.weight ?? 0, totalWeight)} />
-              ))}
-            </div>
-          )}
-        </div>
+        </section>
 
-        <div className="flex w-full flex-col flex-wrap gap-3 sm:flex-row sm:justify-center">
+        <div className="scratch-footer-actions">
           <button
             type="button"
+            className="scratch-button scratch-button--secondary"
             onClick={onBack}
-            className="w-full rounded-full border-[3px] border-neutral-900 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
           >
-            Back to Store
+            Back to store
           </button>
           {cardState === 'revealed' ? (
             <button
               type="button"
-              className="w-full rounded-full border-[3px] border-neutral-900 bg-[#a5d8ff] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
+              className="scratch-button scratch-button--primary"
               onClick={handleAttempt}
             >
               {normalisedConfig.playAgainLabel}
@@ -1278,34 +1146,16 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       </div>
 
       {showResultModal && result ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 py-10">
-          <div className="w-full max-w-lg rounded-[32px] border-[3px] border-neutral-900 bg-white p-6 text-center shadow-[0_20px_0_rgba(17,24,39,0.18)] sm:p-8">
-            <p className="text-xs uppercase tracking-[0.22em] text-neutral-600 sm:text-sm">{normalisedConfig.resultModalTitle}</p>
-            <h3
-              className="mt-2 text-2xl font-semibold text-neutral-900 sm:text-3xl"
-              style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
-            >
-              {result.prize.name}
-            </h3>
-            <p className="mt-1 text-sm font-semibold uppercase tracking-[0.22em] text-neutral-600">{result.prize.rarityLabel}</p>
-            <div className="mt-5 flex items-center justify-center">
-              <div className="h-28 w-44 rounded-[24px] border-[3px] border-neutral-900 bg-[#f6f1e1] shadow-[0_10px_0_rgba(17,24,39,0.12)]">
-                <div
-                  className="h-full w-full rounded-[20px]"
-                  style={{
-                    background: result.prize.foilColor
-                      ? `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.85))`
-                      : 'linear-gradient(135deg, #ffffff, #f4f1ea)',
-                  }}
-                />
-              </div>
-            </div>
-            <p className="mt-6 text-sm text-neutral-700">{result.prize.description}</p>
-            <p className="mt-4 text-sm font-semibold text-neutral-900">{result.flairText ?? normalisedConfig.defaultFlairText}</p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+        <div className="scratch-modal" role="dialog" aria-modal="true">
+          <div className="scratch-modal__dialog">
+            <span className="scratch-card__reward-rarity">{normalisedConfig.resultModalTitle}</span>
+            <h3>{result.prize.name}</h3>
+            <p>{result.prize.description}</p>
+            <p>{result.flairText ?? normalisedConfig.defaultFlairText}</p>
+            <div className="scratch-modal__actions">
               <button
                 type="button"
-                className="w-full rounded-full border-[3px] border-neutral-900 bg-white px-5 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
+                className="scratch-button scratch-button--primary"
                 onClick={() => {
                   closeModal();
                   handleAttempt();
@@ -1315,13 +1165,13 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
               </button>
               <button
                 type="button"
-                className="w-full rounded-full border-[3px] border-neutral-900 bg-[#fee79b] px-6 py-2.5 text-sm font-semibold text-neutral-900 shadow-[0_6px_0_rgba(17,24,39,0.12)] transition hover:-translate-y-0.5 hover:shadow-[0_9px_0_rgba(17,24,39,0.12)] sm:w-auto"
+                className="scratch-button scratch-button--secondary"
                 onClick={() => {
                   closeModal();
                   onBack?.();
                 }}
               >
-                Back to Store
+                Back to store
               </button>
             </div>
           </div>
