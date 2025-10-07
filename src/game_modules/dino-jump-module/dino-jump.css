@@ -83,9 +83,9 @@
 
 .dino-player {
   position: absolute;
-  left: clamp(3.75rem, 7vw, 5.5rem);
-  width: clamp(3.4rem, 5vw, 3.9rem);
-  height: clamp(3.4rem, 5vw, 3.9rem);
+  left: var(--dino-left, 14%);
+  width: var(--dino-size, clamp(3.4rem, 5vw, 3.9rem));
+  height: var(--dino-size, clamp(3.4rem, 5vw, 3.9rem));
   border-radius: 10px 10px 4px 4px;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(59, 130, 246, 0.8));
   box-shadow: 0 16px 28px rgba(14, 165, 233, 0.35);
@@ -120,8 +120,10 @@
 
 .dino-obstacle {
   position: absolute;
-  bottom: 22%;
-  width: 2.2rem;
+  bottom: var(--obstacle-bottom, 22%);
+  left: var(--obstacle-left, 0);
+  width: var(--obstacle-width, 2.2rem);
+  height: var(--obstacle-height, 4.5rem);
   border-radius: 999px 999px 4px 4px;
   background: linear-gradient(180deg, rgba(148, 163, 184, 0.9), rgba(71, 85, 105, 0.95));
   border: 1px solid rgba(148, 163, 184, 0.4);
@@ -129,12 +131,10 @@
 }
 
 .dino-obstacle[data-variant='tall'] {
-  width: 2.75rem;
   border-radius: 999px;
 }
 
 .dino-obstacle[data-variant='wide'] {
-  width: 3.25rem;
   border-radius: 18px 18px 6px 6px;
 }
 
