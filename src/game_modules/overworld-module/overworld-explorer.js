@@ -134,6 +134,12 @@ const createDefaultState = (config) => {
       left: false,
       right: false,
     },
+    touchKeys: {
+      up: false,
+      down: false,
+      left: false,
+      right: false,
+    },
     position: {
       x: (startX + 0.5) * TILE_SIZE,
       y: (startY + 0.5) * TILE_SIZE,
@@ -149,6 +155,10 @@ const OverworldExplorerGame = ({ config, onBack }) => {
   const stateRef = useRef(createDefaultState(config));
   const [nearbyItem, setNearbyItem] = useState(null);
   const [eventLog, setEventLog] = useState([]);
+  const [joystickOffset, setJoystickOffset] = useState({ x: 0, y: 0 });
+  const joystickBaseRef = useRef(null);
+  const joystickPointerIdRef = useRef(null);
+  const [aButtonPressed, setAButtonPressed] = useState(false);
 
   const world = useMemo(() => config?.world ?? { tiles: [[]], width: 1, height: 1 }, [config]);
   const tileColors = useMemo(() => {
@@ -156,6 +166,107 @@ const OverworldExplorerGame = ({ config, onBack }) => {
     const entries = Object.entries(legend).map(([key, value]) => [key, value?.color]);
     return Object.fromEntries(entries);
   }, [world]);
+
+  const resetTouchKeys = useCallback(() => {
+    const { touchKeys } = stateRef.current;
+    touchKeys.up = false;
+    touchKeys.down = false;
+    touchKeys.left = false;
+    touchKeys.right = false;
+  }, []);
+
+  const applyJoystickVector = useCallback((x, y) => {
+    const { touchKeys } = stateRef.current;
+    touchKeys.up = false;
+    touchKeys.down = false;
+    touchKeys.left = false;
+    touchKeys.right = false;
+
+    const magnitude = Math.hypot(x, y);
+    const threshold = 0.25;
+
+    if (magnitude < threshold) {
+      return;
+    }
+
+    if (y < -threshold) {
+      touchKeys.up = true;
+    }
+    if (y > threshold) {
+      touchKeys.down = true;
+    }
+    if (x < -threshold) {
+      touchKeys.left = true;
+    }
+    if (x > threshold) {
+      touchKeys.right = true;
+    }
+  }, []);
+
+  const handleJoystickMove = useCallback(
+    (clientX, clientY) => {
+      const base = joystickBaseRef.current;
+      if (!base) {
+        return;
+      }
+
+      const rect = base.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const rawX = clientX - centerX;
+      const rawY = clientY - centerY;
+      const radius = rect.width / 2;
+
+      const distance = Math.hypot(rawX, rawY);
+      const maxDistance = radius * 0.85;
+      const clampFactor = distance > maxDistance ? maxDistance / distance : 1;
+      const clampedX = rawX * clampFactor;
+      const clampedY = rawY * clampFactor;
+
+      setJoystickOffset({ x: clampedX, y: clampedY });
+      applyJoystickVector(clampedX / radius, clampedY / radius);
+    },
+    [applyJoystickVector],
+  );
+
+  const handleJoystickRelease = useCallback(() => {
+    setJoystickOffset({ x: 0, y: 0 });
+    resetTouchKeys();
+    joystickPointerIdRef.current = null;
+  }, [resetTouchKeys]);
+
+  const handleJoystickPointerDown = useCallback(
+    (event) => {
+      event.preventDefault();
+      joystickPointerIdRef.current = event.pointerId;
+      event.currentTarget.setPointerCapture(event.pointerId);
+      handleJoystickMove(event.clientX, event.clientY);
+    },
+    [handleJoystickMove],
+  );
+
+  const handleJoystickPointerMove = useCallback(
+    (event) => {
+      if (joystickPointerIdRef.current !== event.pointerId) {
+        return;
+      }
+      event.preventDefault();
+      handleJoystickMove(event.clientX, event.clientY);
+    },
+    [handleJoystickMove],
+  );
+
+  const handleJoystickPointerUp = useCallback(
+    (event) => {
+      if (joystickPointerIdRef.current !== event.pointerId) {
+        return;
+      }
+      event.preventDefault();
+      event.currentTarget.releasePointerCapture(event.pointerId);
+      handleJoystickRelease();
+    },
+    [handleJoystickRelease],
+  );
 
   const handleInteract = useCallback(() => {
     const { nearbyItemId } = stateRef.current;
@@ -184,7 +295,10 @@ const OverworldExplorerGame = ({ config, onBack }) => {
 
   useEffect(() => {
     stateRef.current = createDefaultState(config);
-  }, [config]);
+    setNearbyItem(null);
+    setJoystickOffset({ x: 0, y: 0 });
+    resetTouchKeys();
+  }, [config, resetTouchKeys]);
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -376,14 +490,20 @@ const OverworldExplorerGame = ({ config, onBack }) => {
       lastTime = now;
       const deltaMultiplier = Math.min(3, deltaMs / 16.67);
 
-      const { keys, position } = stateRef.current;
+      const { keys, touchKeys, position } = stateRef.current;
+      const combined = {
+        up: Boolean(keys.up || touchKeys.up),
+        down: Boolean(keys.down || touchKeys.down),
+        left: Boolean(keys.left || touchKeys.left),
+        right: Boolean(keys.right || touchKeys.right),
+      };
       let dx = 0;
       let dy = 0;
 
-      if (keys.up) dy -= 1;
-      if (keys.down) dy += 1;
-      if (keys.left) dx -= 1;
-      if (keys.right) dx += 1;
+      if (combined.up) dy -= 1;
+      if (combined.down) dy += 1;
+      if (combined.left) dx -= 1;
+      if (combined.right) dx += 1;
 
       if (dx !== 0 || dy !== 0) {
         const length = Math.hypot(dx, dy) || 1;
@@ -430,8 +550,26 @@ const OverworldExplorerGame = ({ config, onBack }) => {
   }, [config, tileColors, world]);
 
   const interactionHint = nearbyItem
-    ? `Press Space or Enter to inspect the ${nearbyItem.name}.`
-    : 'WASD or arrow keys to move. Explore and find something curious!';
+    ? `Tap the A button or press Space/Enter to inspect the ${nearbyItem.name}.`
+    : 'Use the joystick or WASD/arrow keys to move. Explore and find something curious!';
+
+  const joystickStyle = {
+    transform: `translate(calc(-50% + ${joystickOffset.x}px), calc(-50% + ${joystickOffset.y}px))`,
+  };
+
+  const handleAButtonPointerDown = useCallback(
+    (event) => {
+      event.preventDefault();
+      setAButtonPressed(true);
+      handleInteract();
+    },
+    [handleInteract],
+  );
+
+  const handleAButtonPointerUp = useCallback((event) => {
+    event.preventDefault();
+    setAButtonPressed(false);
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col gap-6 bg-gradient-to-br from-sky-100 via-emerald-100 to-amber-100 p-6">
@@ -452,8 +590,9 @@ const OverworldExplorerGame = ({ config, onBack }) => {
           )}
         </div>
         <p className="text-sm text-slate-600">
-          Use the keyboard to roam the glade. Placeholder sprites (triangles and rectangles) show direction while
-          walking. Stand near glowing objects and interact to read flavour text.
+          Use the keyboard or on-screen joystick to roam the glade. Placeholder sprites (triangles and rectangles) show
+          direction while walking. Stand near glowing objects and interact (Space, Enter, or the A button) to read
+          flavour text.
         </p>
       </header>
 
@@ -510,6 +649,44 @@ const OverworldExplorerGame = ({ config, onBack }) => {
             )}
           </div>
         </aside>
+      </div>
+
+      <div className="pointer-events-none fixed inset-0 flex flex-col justify-end gap-4 p-6 lg:hidden">
+        <div className="flex items-end justify-between">
+          <div className="pointer-events-auto">
+            <div
+              ref={joystickBaseRef}
+              className="relative h-32 w-32 rounded-full border border-emerald-200 bg-white/70 shadow-xl backdrop-blur"
+              onPointerDown={handleJoystickPointerDown}
+              onPointerMove={handleJoystickPointerMove}
+              onPointerUp={handleJoystickPointerUp}
+              onPointerCancel={handleJoystickPointerUp}
+              role="presentation"
+            >
+              <div
+                className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-400/90 shadow-inner transition-colors"
+                style={joystickStyle}
+              />
+            </div>
+          </div>
+
+          <div className="pointer-events-auto">
+            <button
+              type="button"
+              aria-label="Interact"
+              className={`flex h-20 w-20 items-center justify-center rounded-full border-4 border-amber-200 text-2xl font-semibold shadow-xl transition active:scale-95 ${
+                aButtonPressed ? 'bg-amber-500 text-white' : 'bg-white/80 text-amber-600'
+              }`}
+              onPointerDown={handleAButtonPointerDown}
+              onPointerUp={handleAButtonPointerUp}
+              onPointerCancel={handleAButtonPointerUp}
+              onPointerLeave={handleAButtonPointerUp}
+              onClick={handleInteract}
+            >
+              A
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
