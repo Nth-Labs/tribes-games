@@ -7,74 +7,53 @@ import './gachapon-game.css';
 const defaultCardStyle = {
   card: 'border-slate-200/80 bg-gradient-to-br from-white via-slate-50 to-white/70 text-slate-600 shadow-[0_20px_45px_rgba(148,163,184,0.2)]',
   accentBlob: 'from-slate-200/60 via-white/50 to-transparent',
-  rarityBadge: 'bg-slate-200 text-slate-700',
-  dropBadge: 'bg-slate-100 text-slate-700',
+  highlight: 'bg-slate-100 text-slate-700',
   title: 'text-slate-900',
   body: 'text-slate-600',
   accent: 'text-slate-500',
 };
 
-const rarityStyles = {
-  common: {
+const cardThemes = [
+  {
     ...defaultCardStyle,
   },
-  uncommon: {
+  {
     ...defaultCardStyle,
     card: 'border-emerald-200/70 bg-gradient-to-br from-white via-emerald-50 to-teal-50/70 text-emerald-700 shadow-[0_22px_45px_rgba(45,212,191,0.16)]',
     accentBlob: 'from-emerald-200/60 via-teal-100/40 to-transparent',
-    rarityBadge: 'bg-emerald-200 text-emerald-800',
-    dropBadge: 'bg-emerald-100 text-emerald-700',
+    highlight: 'bg-emerald-100 text-emerald-700',
     title: 'text-emerald-900',
     body: 'text-emerald-600',
     accent: 'text-emerald-500',
   },
-  rare: {
+  {
     ...defaultCardStyle,
     card: 'border-sky-200/70 bg-gradient-to-br from-white via-sky-50 to-cyan-50/70 text-sky-700 shadow-[0_22px_45px_rgba(56,189,248,0.18)]',
     accentBlob: 'from-sky-200/60 via-cyan-100/40 to-transparent',
-    rarityBadge: 'bg-sky-200 text-sky-800',
-    dropBadge: 'bg-sky-100 text-sky-700',
+    highlight: 'bg-sky-100 text-sky-700',
     title: 'text-sky-900',
     body: 'text-sky-600',
     accent: 'text-sky-500',
   },
-  epic: {
+  {
     ...defaultCardStyle,
     card: 'border-violet-200/70 bg-gradient-to-br from-white via-violet-50 to-fuchsia-50/70 text-violet-700 shadow-[0_22px_48px_rgba(167,139,250,0.22)]',
     accentBlob: 'from-violet-200/60 via-fuchsia-100/40 to-transparent',
-    rarityBadge: 'bg-violet-200 text-violet-800',
-    dropBadge: 'bg-violet-100 text-violet-700',
+    highlight: 'bg-violet-100 text-violet-700',
     title: 'text-violet-900',
     body: 'text-violet-600',
     accent: 'text-violet-500',
   },
-  legendary: {
+  {
     ...defaultCardStyle,
     card: 'border-amber-200/70 bg-gradient-to-br from-white via-amber-50 to-orange-50/70 text-amber-700 shadow-[0_22px_48px_rgba(251,191,36,0.22)]',
     accentBlob: 'from-amber-200/60 via-orange-100/40 to-transparent',
-    rarityBadge: 'bg-amber-200 text-amber-800',
-    dropBadge: 'bg-amber-100 text-amber-700',
+    highlight: 'bg-amber-100 text-amber-700',
     title: 'text-amber-900',
     body: 'text-amber-600',
     accent: 'text-amber-500',
   },
-};
-
-const defaultRarityLabels = {
-  common: 'Common',
-  uncommon: 'Uncommon',
-  rare: 'Rare',
-  epic: 'Epic',
-  legendary: 'Legendary',
-};
-
-const defaultRarityCapsuleColors = {
-  common: '#E5E7EB',
-  uncommon: '#86EFAC',
-  rare: '#93C5FD',
-  epic: '#C4B5FD',
-  legendary: '#FDE68A',
-};
+];
 
 const toNonNegativeInteger = (value, fallback) => {
   const parsed = Math.floor(Number(value));
@@ -83,6 +62,8 @@ const toNonNegativeInteger = (value, fallback) => {
   }
   return fallback;
 };
+
+const fallbackCapsulePalette = ['#38bdf8', '#86EFAC', '#93C5FD', '#C4B5FD', '#FDE68A'];
 
 const normalisePrizes = (rawPrizes, fallbackPrizes, fallbackFlairText, defaultCapsuleColor) => {
   const basePrizes = Array.isArray(rawPrizes) ? rawPrizes.filter((prize) => prize && typeof prize === 'object') : [];
@@ -98,9 +79,6 @@ const normalisePrizes = (rawPrizes, fallbackPrizes, fallbackFlairText, defaultCa
         id: 'gachapon-placeholder-1',
         name: 'Mystery Capsule',
         description: 'Configure gachapon prizes to replace this placeholder reward.',
-        rarity: 'common',
-        rarityLabel: 'Mystery',
-        weight: 1,
         capsuleColor: defaultCapsuleColor,
         flairText: fallbackFlairText,
       },
@@ -108,19 +86,10 @@ const normalisePrizes = (rawPrizes, fallbackPrizes, fallbackFlairText, defaultCa
   }
 
   return effectivePrizes.map((prize, index) => {
-    const rarityValue =
-      typeof prize.rarity === 'string' && prize.rarity.trim()
-        ? prize.rarity.trim().toLowerCase()
-        : 'common';
-    const rarityLabel =
-      typeof prize.rarityLabel === 'string' && prize.rarityLabel.trim()
-        ? prize.rarityLabel
-        : defaultRarityLabels[rarityValue] ?? rarityValue.charAt(0).toUpperCase() + rarityValue.slice(1);
-    const weight = Number.isFinite(prize.weight) && prize.weight > 0 ? prize.weight : 1;
     const capsuleColor =
       typeof prize.capsuleColor === 'string' && prize.capsuleColor.trim()
         ? prize.capsuleColor
-        : defaultRarityCapsuleColors[rarityValue] ?? defaultCapsuleColor;
+        : fallbackCapsulePalette[index % fallbackCapsulePalette.length] ?? defaultCapsuleColor;
     const flairText =
       typeof prize.flairText === 'string' && prize.flairText.trim() ? prize.flairText : fallbackFlairText;
 
@@ -129,50 +98,41 @@ const normalisePrizes = (rawPrizes, fallbackPrizes, fallbackFlairText, defaultCa
       id: prize.id ?? `gachapon-prize-${index}`,
       name: prize.name ?? `Prize ${index + 1}`,
       description: prize.description ?? 'Configure prize details in the template options.',
-      rarity: rarityValue,
-      rarityLabel,
-      weight,
       capsuleColor,
       flairText,
+      themeIndex: index % cardThemes.length,
     };
   });
 };
 
-const formatDropRate = (weight, totalWeight) => {
-  if (!totalWeight) {
-    return '—';
-  }
-
-  const percentage = (weight / totalWeight) * 100;
-  if (percentage < 0.1) {
-    return '<0.1%';
-  }
-
-  return `${percentage.toFixed(1)}%`;
-};
-
-const PrizeCard = ({ prize, dropRate }) => {
-  const style = rarityStyles[prize.rarity] ?? defaultCardStyle;
+const PrizeCard = ({ prize }) => {
+  const theme = cardThemes[prize.themeIndex ?? 0] ?? defaultCardStyle;
 
   return (
     <div
-      className={`relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border p-6 transition-shadow duration-150 hover:shadow-[0_28px_48px_rgba(129,140,248,0.18)] ${style.card}`}
+      className={`relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border p-6 transition-shadow duration-150 hover:shadow-[0_28px_48px_rgba(129,140,248,0.18)] ${theme.card}`}
     >
       <div
-        className={`pointer-events-none absolute -right-14 top-12 h-28 w-28 rounded-full bg-gradient-to-br blur-3xl ${style.accentBlob}`}
+        className={`pointer-events-none absolute -right-14 top-12 h-28 w-28 rounded-full bg-gradient-to-br blur-3xl ${theme.accentBlob}`}
       />
       <div className="pointer-events-none absolute -left-12 top-16 h-20 w-20 rounded-full bg-white/60 blur-3xl" />
       <div className="flex flex-col gap-3">
-        <span className={`inline-flex w-max items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-wide ${style.rarityBadge}`}>
-          {prize.rarityLabel}
+        <h3 className={`text-2xl font-semibold ${theme.title}`}>{prize.name}</h3>
+        <p className={`text-sm leading-relaxed ${theme.body}`}>{prize.description}</p>
+      </div>
+      <div className={`mt-6 flex items-center justify-between text-[0.7rem] font-semibold uppercase tracking-[0.2em] ${theme.accent}`}>
+        <span>Capsule Colour</span>
+        <span className={`flex items-center gap-2 rounded-full px-3 py-1 text-sm font-semibold tracking-normal ${theme.highlight}`}>
+          <span
+            className="h-3 w-3 rounded-full border border-white/60"
+            style={{ background: prize.capsuleColor }}
+          />
+          {prize.capsuleColor}
         </span>
-        <h3 className={`text-2xl font-semibold ${style.title}`}>{prize.name}</h3>
-        <p className={`text-sm leading-relaxed ${style.body}`}>{prize.description}</p>
       </div>
-      <div className={`mt-6 flex items-center justify-between text-[0.7rem] font-semibold uppercase tracking-[0.2em] ${style.accent}`}>
-        <span>Drop Rate</span>
-        <span className={`rounded-full px-3 py-1 text-sm font-semibold tracking-normal ${style.dropBadge}`}>{dropRate}</span>
-      </div>
+      {prize.flairText ? (
+        <p className={`mt-4 text-xs leading-relaxed ${theme.body}`}>{prize.flairText}</p>
+      ) : null}
     </div>
   );
 };
@@ -323,8 +283,6 @@ const GachaponGame = ({ config = gachaponConfig }) => {
       cancelled = true;
     };
   }, [normalisedConfig]);
-
-  const totalWeight = useMemo(() => prizes.reduce((sum, prize) => sum + (prize.weight ?? 0), 0), [prizes]);
 
   const queueTimeout = (callback, delay) => {
     const timeoutId = setTimeout(callback, delay);
@@ -509,11 +467,7 @@ const GachaponGame = ({ config = gachaponConfig }) => {
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {prizes.map((prize) => (
-                  <PrizeCard
-                    key={prize.id}
-                    prize={prize}
-                    dropRate={formatDropRate(prize.weight ?? 0, totalWeight)}
-                  />
+                  <PrizeCard key={prize.id} prize={prize} />
                 ))}
               </div>
             )}
@@ -526,7 +480,6 @@ const GachaponGame = ({ config = gachaponConfig }) => {
           <div className="w-full max-w-lg rounded-3xl border border-white/70 bg-white/90 p-8 shadow-[0_35px_70px_rgba(129,140,248,0.25)]">
             <p className="text-sm uppercase tracking-[0.25em] text-sky-500">{normalisedConfig.resultModalTitle}</p>
             <h3 className="mt-2 text-3xl font-semibold text-slate-900">{result.prize.name}</h3>
-            <p className="mt-1 text-sm text-slate-500">{result.prize.rarityLabel}</p>
             <div className="mt-5 flex items-center justify-center">
               <div className="gachapon-capsule-display" style={{ background: result.prize.capsuleColor }} />
             </div>

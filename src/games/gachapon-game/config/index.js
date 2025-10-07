@@ -2,50 +2,35 @@ const gachaponPrizes = [
   {
     id: 'luminous-orb',
     name: 'Luminous Orb',
-    rarity: 'common',
-    rarityLabel: 'Common',
     description: 'A softly glowing orb that keeps your camp lit through the night.',
-    weight: 45,
     capsuleColor: '#E5E7EB',
     flairText: 'The orb hums gently as it rolls into your hands.'
   },
   {
     id: 'ember-charm',
     name: 'Ember Charm',
-    rarity: 'uncommon',
-    rarityLabel: 'Uncommon',
     description: 'A flickering charm that warms nearby allies by a few cozy degrees.',
-    weight: 30,
     capsuleColor: '#86EFAC',
     flairText: 'Sparks of emberlight trace the capsule as it opens.'
   },
   {
     id: 'aurora-cape',
     name: 'Aurora Cape',
-    rarity: 'rare',
-    rarityLabel: 'Rare',
     description: 'Shimmers with the northern lights and lets you glide short distances.',
-    weight: 18,
     capsuleColor: '#93C5FD',
     flairText: 'The cape unfurls with a cascade of aurora hues.'
   },
   {
     id: 'celestial-compass',
     name: 'Celestial Compass',
-    rarity: 'epic',
-    rarityLabel: 'Epic',
     description: 'Always points toward the nearest secret, no matter where you roam.',
-    weight: 6,
     capsuleColor: '#C4B5FD',
     flairText: 'Starlit runes ignite as the compass clicks into place.'
   },
   {
     id: 'dragon-heartfire',
     name: 'Dragon Heartfire',
-    rarity: 'legendary',
-    rarityLabel: 'Legendary',
     description: "A fragment of dragon flame that grants a surge of courage to its bearer.",
-    weight: 1,
     capsuleColor: '#FDE68A',
     flairText: "A plume of golden flame roars from the capsule's core."
   }
@@ -57,7 +42,7 @@ const gachaponConfig = {
   title: 'Celestial Capsule Gachapon',
   tagline: 'Arcade Feature',
   description:
-    'Pull the lever to see what treasure is sealed within the capsule. Every attempt draws from the same prize pool, and your luck determines the rarity of your reward.',
+    'Pull the lever to see what treasure is sealed within the capsule. Every attempt reveals one colourful surprise from the same prize pool.',
   ctaLabel: 'Start Gachapon',
   preparingLabel: 'Dispensing…',
   resultModalTitle: 'Gachapon Result',
