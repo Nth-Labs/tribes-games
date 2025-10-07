@@ -513,44 +513,46 @@ const ScratchCardClassicGame = ({ config }) => {
               <p className="scratch-classic-description">{mergedConfig.description}</p>
             </div>
           </div>
-          <div className="scratch-classic-actions">
-            <button type="button" className="scratch-classic-secondary" onClick={() => navigate(-1)}>
-              Back to store
-            </button>
-            <button
-              type="button"
-              className="scratch-classic-primary"
-              onClick={handleAttempt}
-              disabled={buttonDisabled}
-            >
-              {buttonLabel}
-            </button>
-          </div>
         </header>
 
         <main className="scratch-classic-layout">
           <section className="scratch-classic-stage">
+            <aside className="scratch-classic-status">
+              <div className="scratch-classic-status__badge">{statusText}</div>
+              {showProgress ? (
+                <div className="scratch-classic-progress">
+                  <div className="scratch-classic-progress__track">
+                    <div
+                      className="scratch-classic-progress__fill"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                  <span className="scratch-classic-progress__label">{progressPercent}% revealed</span>
+                </div>
+              ) : null}
+              {cardState === 'revealed' && result ? (
+                <p className="scratch-classic-status__detail">
+                  You uncovered the <span>{result.prize.name}</span>!
+                </p>
+              ) : null}
+              {attemptError ? <div className="scratch-classic-error">{attemptError}</div> : null}
+            </aside>
+
             <div className="scratch-classic-card-wrapper">
               <div className={cardClassName}>
                 <div className="scratch-classic-card__inner" ref={surfaceRef}>
                   <div className="scratch-classic-reward" style={rewardImageStyle}>
                     <div className="scratch-classic-reward__glow" style={glowStyle} />
-                    <div className="scratch-classic-reward__body">
-                      <p className="scratch-classic-reward__rarity">
-                        {hasRevealed && result ? result.prize.rarityLabel : 'Mystery Reward'}
-                      </p>
-                      <h3 className="scratch-classic-reward__title">
-                        {hasRevealed && result
-                          ? result.prize.name
-                          : cardState === 'ready'
-                          ? 'Scratch to reveal'
-                          : 'Awaiting scratch'}
-                      </h3>
-                      <p className="scratch-classic-reward__helper">
-                        {hasRevealed && result
-                          ? result.flairText || 'The prize gleams brilliantly!'
-                          : 'Drag across the foil to lift the shimmer.'}
-                      </p>
+                    <div className="scratch-classic-reward__body" aria-live="polite">
+                      {hasRevealed && result ? (
+                        <>
+                          <p className="scratch-classic-reward__rarity">{result.prize.rarityLabel}</p>
+                          <h3 className="scratch-classic-reward__title">{result.prize.name}</h3>
+                          <p className="scratch-classic-reward__helper">
+                            {result.flairText || 'The prize gleams brilliantly!'}
+                          </p>
+                        </>
+                      ) : null}
                     </div>
                   </div>
                   <div className={foilClassName}>
@@ -578,26 +580,20 @@ const ScratchCardClassicGame = ({ config }) => {
                   </div>
                 </div>
               </div>
-              <aside className="scratch-classic-status">
-                <div className="scratch-classic-status__badge">{statusText}</div>
-                {showProgress ? (
-                  <div className="scratch-classic-progress">
-                    <div className="scratch-classic-progress__track">
-                      <div
-                        className="scratch-classic-progress__fill"
-                        style={{ width: `${progressPercent}%` }}
-                      />
-                    </div>
-                    <span className="scratch-classic-progress__label">{progressPercent}% revealed</span>
-                  </div>
-                ) : null}
-                {cardState === 'revealed' && result ? (
-                  <p className="scratch-classic-status__detail">
-                    You uncovered the <span>{result.prize.name}</span>!
-                  </p>
-                ) : null}
-                {attemptError ? <div className="scratch-classic-error">{attemptError}</div> : null}
-              </aside>
+            </div>
+
+            <div className="scratch-classic-actions scratch-classic-actions--footer">
+              <button type="button" className="scratch-classic-secondary" onClick={() => navigate(-1)}>
+                Back to store
+              </button>
+              <button
+                type="button"
+                className="scratch-classic-primary"
+                onClick={handleAttempt}
+                disabled={buttonDisabled}
+              >
+                {buttonLabel}
+              </button>
             </div>
           </section>
 
