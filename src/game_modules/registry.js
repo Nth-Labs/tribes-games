@@ -6,6 +6,9 @@ import GachaponGameInit, { sampleGachaponGameDocument } from "./gachapon-module"
 import ScratchCardGameInit, {
   sampleScratchCardGameDocument,
 } from "./scratch-card-module";
+import OverworldExplorerInit, {
+  sampleOverworldGameDocument,
+} from "./overworld-module";
 
 /**
  * Keys should match what's coming from backend:
@@ -27,6 +30,10 @@ export const GAME_MODULES = {
   // Scratch card module
   "scratch-card-starlight": ScratchCardGameInit,
   "scratch-card": ScratchCardGameInit,
+
+  // Overworld explorer prototype
+  "overworld-adventure": OverworldExplorerInit,
+  overworld: OverworldExplorerInit,
 
   // Example for future templates:
   // "spinthewheel-v1": SpinTheWheelInit,
@@ -72,6 +79,17 @@ export const GAME_LIBRARY = [
       game_type: sampleScratchCardGameDocument.game_type,
     },
     sampleConfig: sampleScratchCardGameDocument,
+  },
+  {
+    slug: "overworld-adventure",
+    title: sampleOverworldGameDocument.title || "Sprite Walkabout",
+    subtitle: sampleOverworldGameDocument.subtitle,
+    thumbnail: sampleOverworldGameDocument.sample_thumbnail,
+    launchPayload: {
+      game_template_id: "overworld-adventure",
+      game_type: sampleOverworldGameDocument.game_type || "overworld",
+    },
+    sampleConfig: sampleOverworldGameDocument,
   },
 ];
 
