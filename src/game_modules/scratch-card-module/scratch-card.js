@@ -93,6 +93,20 @@ const defaultPrizes = [
   },
 ];
 
+const InstructionPanel = ({ headline, body, detail }) => {
+  if (!headline && !body && !detail) {
+    return null;
+  }
+
+  return (
+    <div className="scratch-card-instructions">
+      {headline ? <p className="scratch-card-instructions__headline">{headline}</p> : null}
+      {body ? <p className="scratch-card-instructions__body">{body}</p> : null}
+      {detail ? <p className="scratch-card-instructions__detail">{detail}</p> : null}
+    </div>
+  );
+};
+
 const defaultScratchConfig = {
   gameId: 'scratch-card-sample',
   merchantId: 'merchant-sample-001',
@@ -907,6 +921,13 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     cardState !== 'ready' ? 'scratch-card__overlay-canvas--inactive' : ''
   } ${coverCleared ? 'scratch-card__overlay-canvas--cleared' : ''}`;
 
+  const overlayAriaLabel =
+    cardState === 'ready'
+      ? normalisedConfig.scratchActionLabel
+      : cardState === 'revealed'
+      ? 'Foil cleared'
+      : 'Scratch card is not armed yet';
+
   const buttonLabel =
     cardState === 'idle'
       ? normalisedConfig.ctaLabel
@@ -941,6 +962,12 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
       : cardState === 'revealed'
       ? 'Enjoy your reward.'
       : null;
+
+  const instructionHeadline = overlayMessage;
+  const instructionBody = hasRevealed && result
+    ? result.flairText ?? normalisedConfig.defaultFlairText
+    : normalisedConfig.instructions;
+  const instructionDetail = cardState === 'ready' ? overlayDetail : null;
 
   const innerStyle = useMemo(() => {
     if (!normalisedConfig.cardBackgroundImage) {
@@ -994,7 +1021,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
     return {
       background: `linear-gradient(135deg, ${result.prize.foilColor}, rgba(255, 255, 255, 0.85))`,
       borderRadius: '12px',
-      padding: '16px',
+      width: '100%',
+      height: '100%',
     };
   }, [hasRevealed, result]);
 
@@ -1012,23 +1040,6 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
               <p className="scratch-intro-body">{normalisedConfig.description}</p>
             ) : null}
           </div>
-          <div className="scratch-intro-actions">
-            <button
-              type="button"
-              className="scratch-button scratch-button--secondary"
-              onClick={onBack}
-            >
-              Back to store
-            </button>
-            <button
-              type="button"
-              className="scratch-button scratch-button--primary"
-              onClick={handleAttempt}
-              disabled={buttonDisabled}
-            >
-              {buttonLabel}
-            </button>
-          </div>
         </section>
 
         <section className="scratch-layout">
@@ -1036,24 +1047,8 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
             <div className="scratch-card-frame">
               <div className={cardClassName}>
                 <div className="scratch-card__inner" ref={surfaceRef} style={innerStyle}>
-                  <div className="scratch-card__reward" style={rewardHighlightStyle}>
-                    <span className="scratch-card__reward-rarity">
-                      {hasRevealed && result ? result.prize.rarityLabel : 'Mystery reward'}
-                    </span>
-                    <h3 className="scratch-card__reward-name">
-                      {hasRevealed && result
-                        ? result.prize.name
-                        : cardState === 'ready'
-                        ? 'Scratch to reveal'
-                        : 'Waiting to arm'}
-                    </h3>
-                    <p className="scratch-card__reward-helper">
-                      {hasRevealed && result
-                        ? result.flairText ?? normalisedConfig.defaultFlairText
-                        : normalisedConfig.instructions}
-                    </p>
-                  </div>
-                  <div className={overlayClassName} style={overlayStyle}>
+                  <div className="scratch-card__reward" style={rewardHighlightStyle} aria-hidden="true" />
+                  <div className={overlayClassName} style={overlayStyle} aria-label={overlayAriaLabel}>
                     <canvas
                       ref={canvasRef}
                       className={canvasClassName}
@@ -1063,19 +1058,33 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
                       onPointerCancel={handlePointerLeave}
                       onPointerLeave={handlePointerLeave}
                     />
-                    <div
-                      className={`scratch-card__overlay-message ${
-                        cardState !== 'revealed' ? 'is-visible' : ''
-                      }`}
-                    >
-                      <span>{overlayMessage}</span>
-                      {overlayDetail ? (
-                        <span className="scratch-card__overlay-detail">{overlayDetail}</span>
-                      ) : null}
-                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+
+            <InstructionPanel
+              headline={instructionHeadline}
+              body={instructionBody}
+              detail={instructionDetail}
+            />
+
+            <div className="scratch-card-controls">
+              <button
+                type="button"
+                className="scratch-button scratch-button--secondary"
+                onClick={onBack}
+              >
+                Back to store
+              </button>
+              <button
+                type="button"
+                className="scratch-button scratch-button--primary"
+                onClick={handleAttempt}
+                disabled={buttonDisabled}
+              >
+                {buttonLabel}
+              </button>
             </div>
 
             <div className="scratch-status">
@@ -1125,24 +1134,6 @@ const ScratchCardGame = ({ config = {}, onBack }) => {
           </div>
         </section>
 
-        <div className="scratch-footer-actions">
-          <button
-            type="button"
-            className="scratch-button scratch-button--secondary"
-            onClick={onBack}
-          >
-            Back to store
-          </button>
-          {cardState === 'revealed' ? (
-            <button
-              type="button"
-              className="scratch-button scratch-button--primary"
-              onClick={handleAttempt}
-            >
-              {normalisedConfig.playAgainLabel}
-            </button>
-          ) : null}
-        </div>
       </div>
 
       {showResultModal && result ? (
