@@ -7,10 +7,15 @@ import React, {
 } from 'react';
 import './dino-jump.css';
 
-const STAGE_WIDTH = 640;
+const BASE_STAGE_WIDTH = 640;
+const BASE_STAGE_HEIGHT = (BASE_STAGE_WIDTH * 9) / 16;
 const DINO_WIDTH = 60;
 const DINO_X = 90;
 const GROUND_OFFSET = 40;
+const DINO_X_RATIO = DINO_X / BASE_STAGE_WIDTH;
+const DINO_WIDTH_RATIO = DINO_WIDTH / BASE_STAGE_WIDTH;
+const GROUND_OFFSET_RATIO = GROUND_OFFSET / BASE_STAGE_HEIGHT;
+const OBSTACLE_BOTTOM_RATIO = GROUND_OFFSET_RATIO * 2;
 
 const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 
@@ -97,10 +102,15 @@ const DinoJumpGame = ({ config, onBack }) => {
   const [obstacles, setObstacles] = useState([]);
 
   const animationRef = useRef(null);
+  const stageRef = useRef(null);
   const runtimeRef = useRef(createRuntimeState(physics));
   const previousTimestampRef = useRef(null);
   const gameStateRef = useRef(gameState);
   const scoreRef = useRef(score);
+  const [stageSize, setStageSize] = useState(() => ({
+    width: BASE_STAGE_WIDTH,
+    height: BASE_STAGE_HEIGHT,
+  }));
 
   useEffect(() => {
     gameStateRef.current = gameState;
@@ -170,7 +180,7 @@ const DinoJumpGame = ({ config, onBack }) => {
           physics.spawnIntervalMin,
           physics.spawnIntervalMax,
         );
-        runtime.obstacles.push(createObstacle(STAGE_WIDTH, GROUND_OFFSET * 2.2));
+        runtime.obstacles.push(createObstacle(BASE_STAGE_WIDTH, GROUND_OFFSET * 2.2));
       }
 
       const movement = physics.groundSpeed * deltaSeconds;
@@ -221,6 +231,29 @@ const DinoJumpGame = ({ config, onBack }) => {
       stopAnimation();
     };
   }, [stopAnimation]);
+
+  useEffect(() => {
+    const element = stageRef.current;
+    if (!element) {
+      return undefined;
+    }
+
+    const updateSize = () => {
+      const rect = element.getBoundingClientRect();
+      setStageSize({ width: rect.width, height: rect.height });
+    };
+
+    updateSize();
+
+    if (typeof ResizeObserver === 'function') {
+      const resizeObserver = new ResizeObserver(updateSize);
+      resizeObserver.observe(element);
+      return () => resizeObserver.disconnect();
+    }
+
+    window.addEventListener('resize', updateSize);
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
   const startRun = useCallback(() => {
     if (gameStateRef.current === 'playing') {
@@ -284,6 +317,24 @@ const DinoJumpGame = ({ config, onBack }) => {
     return null;
   }, [gameState, score]);
 
+  const stageMetrics = useMemo(() => {
+    const width = stageSize.width || BASE_STAGE_WIDTH;
+    const height = stageSize.height || BASE_STAGE_HEIGHT;
+    const scaleX = width / BASE_STAGE_WIDTH;
+    const scaleY = height / BASE_STAGE_HEIGHT;
+
+    return {
+      width,
+      height,
+      scaleX,
+      scaleY,
+      groundOffset: height * GROUND_OFFSET_RATIO,
+      dinoSize: width * DINO_WIDTH_RATIO,
+      dinoLeft: `${DINO_X_RATIO * 100}%`,
+      obstacleBottom: height * OBSTACLE_BOTTOM_RATIO,
+    };
+  }, [stageSize.height, stageSize.width]);
+
   return (
     <div className="dino-jump-shell">
       <div className="dino-jump-card">
@@ -314,12 +365,16 @@ const DinoJumpGame = ({ config, onBack }) => {
           </div>
         </header>
         <div className="dino-jump-body">
-          <section className="dino-stage">
+          <section className="dino-stage" ref={stageRef}>
             <div className="dino-stage__stars" aria-hidden />
             <div className="dino-sun" aria-hidden />
             <div
               className="dino-player"
-              style={{ bottom: `${GROUND_OFFSET + dinoY}px` }}
+              style={{
+                '--dino-left': stageMetrics.dinoLeft,
+                '--dino-size': `${stageMetrics.dinoSize}px`,
+                bottom: `${stageMetrics.groundOffset + dinoY * stageMetrics.scaleY}px`,
+              }}
             >
               <div className="dino-player__eye" aria-hidden />
             </div>
@@ -329,8 +384,10 @@ const DinoJumpGame = ({ config, onBack }) => {
                 className="dino-obstacle"
                 data-variant={obstacle.variant}
                 style={{
-                  left: `${obstacle.x}px`,
-                  height: `${obstacle.height}px`,
+                  '--obstacle-left': `${obstacle.x * stageMetrics.scaleX}px`,
+                  '--obstacle-width': `${obstacle.width * stageMetrics.scaleX}px`,
+                  '--obstacle-height': `${obstacle.height * stageMetrics.scaleY}px`,
+                  '--obstacle-bottom': `${stageMetrics.obstacleBottom}px`,
                 }}
               />
             ))}
