@@ -5,6 +5,7 @@ import {
   normaliseScoreThresholdResponse,
   submitScoreThresholdResults,
 } from './score-threshold-service';
+import './precision-timer-styles.css';
 
 const formatSeconds = (value) => {
   const numeric = Number(value);
@@ -46,6 +47,29 @@ const buildTheme = (config) => {
     subtleText: palette.subtle_text || '#64748b',
     outline: palette.outline || '#cbd5f5',
   };
+};
+
+const withOpacity = (color, opacity) => {
+  if (!color) {
+    return `rgba(0, 0, 0, ${opacity})`;
+  }
+
+  if (color.startsWith('#')) {
+    const normalized = color.slice(1);
+    const hex =
+      normalized.length === 3
+        ? normalized
+            .split('')
+            .map((char) => char + char)
+            .join('')
+        : normalized.padEnd(6, '0').slice(0, 6);
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+
+  return color;
 };
 
 const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack }) => {
@@ -257,6 +281,23 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
     }
   })();
 
+  const containerStyle = useMemo(
+    () => ({
+      backgroundImage: `linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.backgroundTo})`,
+      color: theme.surfaceText,
+    }),
+    [theme],
+  );
+
+  const cardStyle = useMemo(
+    () => ({
+      backgroundColor: theme.surface,
+      color: theme.surfaceText,
+      border: `1px solid ${withOpacity(theme.outline, 0.4)}`,
+    }),
+    [theme],
+  );
+
   if (result) {
     return (
       <ResultsScreen
@@ -269,96 +310,88 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
   }
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4 py-16"
-      style={{
-        backgroundImage: `linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.backgroundTo})`,
-        color: theme.surfaceText,
-      }}
-    >
-      <div
-        className="w-full max-w-xl space-y-8 rounded-3xl border p-8 shadow-xl backdrop-blur"
-        style={{
-          background: theme.surface,
-          borderColor: `${theme.outline}40`,
-          color: theme.surfaceText,
-        }}
-      >
-        <header className="space-y-2 text-center">
+    <div className="precision-timer" style={containerStyle}>
+      <div className="precision-timer__card" style={cardStyle}>
+        <header className="precision-timer__header">
           <p
-            className="mx-auto inline-flex rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em]"
+            className="precision-timer__eyebrow"
             style={{
-              backgroundColor: `${theme.accentSoft}80`,
+              backgroundColor: withOpacity(theme.accentSoft, 0.8),
               color: theme.accent,
             }}
           >
             Precision Timer
           </p>
-          <h1 className="text-3xl font-semibold text-slate-900" style={{ color: theme.surfaceText }}>
+          <h1 className="precision-timer__title" style={{ color: theme.surfaceText }}>
             {title}
           </h1>
           {subtitle && (
-            <p className="text-base" style={{ color: theme.subtleText }}>
+            <p className="precision-timer__subtitle" style={{ color: theme.subtleText }}>
               {subtitle}
             </p>
           )}
           {instructions && (
-            <p className="text-sm" style={{ color: `${theme.subtleText}cc` }}>
+            <p
+              className="precision-timer__instructions"
+              style={{ color: withOpacity(theme.subtleText, 0.85) }}
+            >
               {instructions}
             </p>
           )}
         </header>
 
-        <div className="flex flex-col items-center gap-6 text-center">
+        <div className="precision-timer__countdown-wrapper">
           <span
-            className="rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]"
+            className="precision-timer__status-chip"
             style={{
-              backgroundColor: `${theme.accentSoft}60`,
+              backgroundColor: withOpacity(theme.accentSoft, 0.6),
               color: theme.accent,
             }}
           >
             {statusLabels[status] || statusLabels.idle}
           </span>
-          <div className="flex h-48 w-48 items-center justify-center rounded-full border-4 text-6xl font-mono font-semibold tabular-nums shadow-inner"
+          <div
+            className="precision-timer__countdown"
             style={{
               borderColor: theme.accent,
+              boxShadow: `inset 0 0 0 8px ${withOpacity(theme.accentSoft, 0.5)}`,
               color: theme.surfaceText,
-              boxShadow: `inset 0 0 0 8px ${theme.accentSoft}80`,
             }}
           >
             {displaySeconds}
           </div>
-          <p className="text-sm" style={{ color: theme.subtleText }}>
+          <p className="precision-timer__status-copy" style={{ color: theme.subtleText }}>
             {statusMessage}
           </p>
         </div>
 
-        <dl className="grid gap-4 rounded-2xl bg-white/40 p-5 text-left sm:grid-cols-2"
+        <dl
+          className="precision-timer__stats"
           style={{
-            backgroundColor: `${theme.accentSoft}33`,
+            backgroundColor: withOpacity(theme.accentSoft, 0.25),
             color: theme.surfaceText,
           }}
         >
           <div>
-            <dt className="text-xs uppercase tracking-[0.25em]" style={{ color: theme.subtleText }}>
+            <dt className="precision-timer__stat-label" style={{ color: theme.subtleText }}>
               Countdown
             </dt>
-            <dd className="mt-1 text-xl font-semibold">{formatSeconds(countdownSeconds)}s</dd>
+            <dd className="precision-timer__stat-value">{formatSeconds(countdownSeconds)}s</dd>
           </div>
           <div>
-            <dt className="text-xs uppercase tracking-[0.25em]" style={{ color: theme.subtleText }}>
+            <dt className="precision-timer__stat-label" style={{ color: theme.subtleText }}>
               Target
             </dt>
-            <dd className="mt-1 text-xl font-semibold">Tap stop at zero</dd>
+            <dd className="precision-timer__stat-value">Tap stop at zero</dd>
           </div>
         </dl>
 
-        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+        <div className="precision-timer__actions">
           <button
             type="button"
             onClick={startCountdown}
             disabled={status !== 'idle'}
-            className="w-full rounded-full px-6 py-3 text-base font-semibold shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            className="precision-timer__button precision-timer__button--start"
             style={{
               backgroundColor: theme.accent,
               color: theme.accentContrast,
@@ -371,7 +404,7 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
             type="button"
             onClick={stopCountdown}
             disabled={status !== 'counting'}
-            className="w-full rounded-full px-6 py-3 text-base font-semibold shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            className="precision-timer__button precision-timer__button--stop"
             style={{
               backgroundColor: theme.stopAccent,
               color: theme.stopContrast,
@@ -382,19 +415,24 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
           </button>
         </div>
 
-        <div className="rounded-2xl px-5 py-4 text-sm"
+        <div
+          className="precision-timer__note"
           style={{
-            backgroundColor: `${theme.accentSoft}26`,
-            color: theme.subtleText,
+            backgroundColor: withOpacity(theme.accentSoft, 0.15),
+            color: withOpacity(theme.subtleText, 0.95),
           }}
         >
           {isSubmitting && (
-            <p className="font-medium" role="status" aria-live="polite">
+            <p className="precision-timer__status-copy" role="status" aria-live="polite">
               Submitting your results…
             </p>
           )}
           {!isSubmitting && (
-            <p>{status === 'idle' ? 'Press start to launch the countdown.' : 'Focus on the rhythm of the timer and trust your instincts.'}</p>
+            <p className="precision-timer__status-copy">
+              {status === 'idle'
+                ? 'Press start to launch the countdown.'
+                : 'Focus on the rhythm of the timer and trust your instincts.'}
+            </p>
           )}
         </div>
 
@@ -402,8 +440,8 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
           <button
             type="button"
             onClick={onBack}
-            className="mx-auto block text-sm font-medium underline-offset-4 hover:underline"
-            style={{ color: theme.subtleText }}
+            className="precision-timer__back-button"
+            style={{ color: withOpacity(theme.subtleText, 0.9) }}
           >
             Back to games
           </button>

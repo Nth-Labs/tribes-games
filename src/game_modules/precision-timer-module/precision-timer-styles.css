@@ -1,0 +1,248 @@
+.precision-timer,
+.precision-timer-results {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1.5rem;
+  box-sizing: border-box;
+}
+
+.precision-timer__card,
+.precision-timer-results__card {
+  width: 100%;
+  max-width: 44rem;
+  border-radius: 28px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.18);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  box-sizing: border-box;
+}
+
+.precision-timer__header,
+.precision-timer-results__header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.precision-timer__eyebrow,
+.precision-timer-results__eyebrow {
+  display: inline-flex;
+  align-self: center;
+  padding: 0.25rem 1.25rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+
+.precision-timer__title,
+.precision-timer-results__title {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 2.5rem);
+  font-weight: 600;
+}
+
+.precision-timer__subtitle,
+.precision-timer__instructions,
+.precision-timer__status-copy,
+.precision-timer-results__meta,
+.precision-timer-results__note {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.precision-timer__status-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 1.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.precision-timer__countdown-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.precision-timer__countdown {
+  width: 12rem;
+  height: 12rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 4px solid currentColor;
+  font-size: 3.5rem;
+  font-weight: 600;
+  font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+.precision-timer__stats {
+  display: grid;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 22px;
+}
+
+@media (min-width: 640px) {
+  .precision-timer__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.precision-timer__stat-label {
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.precision-timer__stat-value {
+  margin: 0.5rem 0 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.precision-timer__actions,
+.precision-timer-results__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .precision-timer__actions,
+  .precision-timer-results__actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+.precision-timer__button,
+.precision-timer-results__button {
+  flex: 1 1 auto;
+  min-width: 10rem;
+  border-radius: 999px;
+  padding: 0.85rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, opacity 150ms ease;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+}
+
+.precision-timer__button:disabled,
+.precision-timer-results__button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  box-shadow: none;
+}
+
+.precision-timer-results__button--secondary {
+  background: none;
+  box-shadow: none;
+}
+
+.precision-timer__note {
+  padding: 1rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
+}
+
+.precision-timer__back-button {
+  align-self: center;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: underline transparent;
+  transition: text-decoration-color 150ms ease;
+}
+
+.precision-timer__back-button:hover,
+.precision-timer__back-button:focus {
+  text-decoration-color: currentColor;
+}
+
+.precision-timer-results__metrics,
+.precision-timer-results__rewards,
+.precision-timer-results__breakdown {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .precision-timer-results__metrics,
+  .precision-timer-results__rewards,
+  .precision-timer-results__breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.precision-timer-results__metric,
+.precision-timer-results__reward,
+.precision-timer-results__breakdown-item {
+  border-radius: 22px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.precision-timer-results__metric-label,
+.precision-timer-results__breakdown-label,
+.precision-timer-results__reward-threshold {
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.precision-timer-results__metric-value,
+.precision-timer-results__reward-title,
+.precision-timer-results__breakdown-value {
+  margin: 0;
+  font-weight: 600;
+}
+
+.precision-timer-results__reward-description {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.precision-timer-results__section-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+  .precision-timer__card,
+  .precision-timer-results__card {
+    padding: 2rem;
+    gap: 2rem;
+  }
+
+  .precision-timer__countdown {
+    width: 10rem;
+    height: 10rem;
+    font-size: 3rem;
+  }
+}

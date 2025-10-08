@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import './precision-timer-styles.css';
 
 const formatSeconds = (value) => {
   if (value === null || typeof value === 'undefined') {
@@ -37,6 +38,29 @@ const buildTheme = (config) => {
   };
 };
 
+const withOpacity = (color, opacity) => {
+  if (!color) {
+    return `rgba(0, 0, 0, ${opacity})`;
+  }
+
+  if (color.startsWith('#')) {
+    const normalized = color.slice(1);
+    const hex =
+      normalized.length === 3
+        ? normalized
+            .split('')
+            .map((char) => char + char)
+            .join('')
+        : normalized.padEnd(6, '0').slice(0, 6);
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+  }
+
+  return color;
+};
+
 const mapScoreBreakdown = (scoreBreakdown) => {
   if (!scoreBreakdown || typeof scoreBreakdown !== 'object') {
     return [];
@@ -53,6 +77,22 @@ const mapScoreBreakdown = (scoreBreakdown) => {
 
 const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) => {
   const theme = buildTheme(config);
+  const containerStyle = useMemo(
+    () => ({
+      backgroundImage: `linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.backgroundTo})`,
+      color: theme.surfaceText,
+    }),
+    [theme],
+  );
+
+  const cardStyle = useMemo(
+    () => ({
+      backgroundColor: theme.surface,
+      color: theme.surfaceText,
+      border: `1px solid ${withOpacity(theme.accentSoft, 0.4)}`,
+    }),
+    [theme],
+  );
   const heading = pick(config, ['results_heading', 'resultsHeading'], 'Countdown Summary');
   const retryLabel = pick(config, ['retry_button_label', 'retryButtonLabel'], 'Play again');
   const backLabel = pick(config, ['back_button_label', 'backButtonLabel'], 'Back to games');
@@ -91,59 +131,52 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
   const rewardTitle = prizes.length > 0 ? 'Unlocked rewards' : 'Reward thresholds';
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center px-4 py-16"
-      style={{
-        backgroundImage: `linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.backgroundTo})`,
-        color: theme.surfaceText,
-      }}
-    >
-      <div
-        className="w-full max-w-3xl space-y-8 rounded-3xl border p-10 shadow-xl backdrop-blur"
-        style={{
-          background: theme.surface,
-          borderColor: `${theme.accentSoft}40`,
-          color: theme.surfaceText,
-        }}
-      >
-        <header className="space-y-3 text-center">
+    <div className="precision-timer-results" style={containerStyle}>
+      <div className="precision-timer-results__card" style={cardStyle}>
+        <header className="precision-timer-results__header">
           <p
-            className="mx-auto inline-flex rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em]"
+            className="precision-timer-results__eyebrow"
             style={{
-              backgroundColor: `${theme.accentSoft}80`,
+              backgroundColor: withOpacity(theme.accentSoft, 0.8),
               color: theme.accent,
             }}
           >
             Precision Timer
           </p>
-          <h2 className="text-3xl font-semibold text-slate-900" style={{ color: theme.surfaceText }}>
+          <h2 className="precision-timer-results__title" style={{ color: theme.surfaceText }}>
             {heading}
           </h2>
-          <p className="text-sm" style={{ color: theme.subtleText }}>
+          <p className="precision-timer-results__meta" style={{ color: theme.subtleText }}>
             Outcome: {outcome}
           </p>
           {submittedAt && (
-            <p className="text-xs" style={{ color: `${theme.subtleText}cc` }}>
+            <p className="precision-timer-results__note" style={{ color: withOpacity(theme.subtleText, 0.85) }}>
               Submitted at {new Date(submittedAt).toLocaleString()}
             </p>
           )}
         </header>
 
         {metrics.length > 0 && (
-          <dl className="grid gap-4 text-left sm:grid-cols-2">
+          <dl className="precision-timer-results__metrics">
             {metrics.map((metric) => (
               <div
                 key={metric.label}
-                className="rounded-2xl border px-5 py-4"
+                className="precision-timer-results__metric"
                 style={{
-                  borderColor: `${theme.accentSoft}80`,
-                  backgroundColor: `${theme.accentSoft}33`,
+                  backgroundColor: withOpacity(theme.accentSoft, 0.2),
+                  border: `1px solid ${withOpacity(theme.accentSoft, 0.6)}`,
                 }}
               >
-                <dt className="text-xs uppercase tracking-[0.25em]" style={{ color: theme.subtleText }}>
+                <dt
+                  className="precision-timer-results__metric-label"
+                  style={{ color: theme.subtleText }}
+                >
                   {metric.label}
                 </dt>
-                <dd className="mt-2 text-2xl font-semibold" style={{ color: theme.surfaceText }}>
+                <dd
+                  className="precision-timer-results__metric-value"
+                  style={{ color: theme.surfaceText }}
+                >
                   {metric.value}
                 </dd>
               </div>
@@ -152,24 +185,33 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
         )}
 
         {scoreBreakdown.length > 0 && (
-          <section className="space-y-3 text-left">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.3em]" style={{ color: theme.accent }}>
+          <section>
+            <h3
+              className="precision-timer-results__section-title"
+              style={{ color: theme.accent }}
+            >
               Score breakdown
             </h3>
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <ul className="precision-timer-results__breakdown">
               {scoreBreakdown.map((item) => (
                 <li
                   key={item.key}
-                  className="rounded-2xl border px-4 py-3"
+                  className="precision-timer-results__breakdown-item"
                   style={{
-                    borderColor: `${theme.accentSoft}60`,
-                    backgroundColor: `${theme.accentSoft}26`,
+                    backgroundColor: withOpacity(theme.accentSoft, 0.18),
+                    border: `1px solid ${withOpacity(theme.accentSoft, 0.55)}`,
                   }}
                 >
-                  <p className="text-xs uppercase tracking-[0.2em]" style={{ color: theme.subtleText }}>
+                  <p
+                    className="precision-timer-results__breakdown-label"
+                    style={{ color: theme.subtleText }}
+                  >
                     {item.label}
                   </p>
-                  <p className="mt-1 text-base font-semibold" style={{ color: theme.surfaceText }}>
+                  <p
+                    className="precision-timer-results__breakdown-value"
+                    style={{ color: theme.surfaceText }}
+                  >
                     {item.value}
                   </p>
                 </li>
@@ -179,11 +221,14 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
         )}
 
         {displayRewards.length > 0 && (
-          <section className="space-y-3 text-left">
-            <h3 className="text-sm font-semibold uppercase tracking-[0.3em]" style={{ color: theme.accent }}>
+          <section>
+            <h3
+              className="precision-timer-results__section-title"
+              style={{ color: theme.accent }}
+            >
               {rewardTitle}
             </h3>
-            <ul className="grid gap-3 sm:grid-cols-2">
+            <ul className="precision-timer-results__rewards">
               {displayRewards.map((reward) => {
                 const threshold = pick(reward, ['threshold']);
                 const name = pick(reward, ['title', 'name'], 'Reward');
@@ -191,22 +236,31 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
                 return (
                   <li
                     key={`${name}-${threshold}`}
-                    className="rounded-2xl border px-4 py-4"
+                    className="precision-timer-results__reward"
                     style={{
-                      borderColor: `${theme.accentSoft}60`,
-                      backgroundColor: `${theme.accentSoft}26`,
+                      backgroundColor: withOpacity(theme.accentSoft, 0.18),
+                      border: `1px solid ${withOpacity(theme.accentSoft, 0.55)}`,
                     }}
                   >
-                    <p className="text-base font-semibold" style={{ color: theme.surfaceText }}>
+                    <p
+                      className="precision-timer-results__reward-title"
+                      style={{ color: theme.surfaceText }}
+                    >
                       {name}
                     </p>
                     {description && (
-                      <p className="mt-1 text-sm" style={{ color: `${theme.subtleText}cc` }}>
+                      <p
+                        className="precision-timer-results__reward-description"
+                        style={{ color: withOpacity(theme.subtleText, 0.85) }}
+                      >
                         {description}
                       </p>
                     )}
                     {typeof threshold === 'number' && (
-                      <p className="mt-2 text-xs uppercase tracking-[0.2em]" style={{ color: theme.subtleText }}>
+                      <p
+                        className="precision-timer-results__reward-threshold"
+                        style={{ color: theme.subtleText }}
+                      >
                         Threshold: ≤ {formatSeconds(threshold)}s
                       </p>
                     )}
@@ -217,11 +271,11 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
           </section>
         )}
 
-        <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="precision-timer-results__actions">
           <button
             type="button"
             onClick={onPlayAgain}
-            className="w-full rounded-full px-6 py-3 text-sm font-semibold shadow focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            className="precision-timer-results__button precision-timer-results__button--primary"
             style={{
               backgroundColor: theme.accent,
               color: theme.accentContrast,
@@ -233,9 +287,9 @@ const PrecisionTimerResultsScreen = ({ config, result, onPlayAgain, onBack }) =>
             <button
               type="button"
               onClick={onBack}
-              className="w-full rounded-full border px-6 py-3 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+              className="precision-timer-results__button precision-timer-results__button--secondary"
               style={{
-                borderColor: `${theme.accentSoft}80`,
+                borderColor: withOpacity(theme.accentSoft, 0.6),
                 color: theme.surfaceText,
               }}
             >
