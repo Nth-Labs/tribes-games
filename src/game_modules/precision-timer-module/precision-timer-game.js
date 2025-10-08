@@ -1,6 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ResultsScreen from './results-screen';
 import samplePrecisionTimerGameDocument from './sample-game-document';
+import {
+  normaliseScoreThresholdResponse,
+  submitScoreThresholdResults,
+} from './score-threshold-service';
 
 const formatSeconds = (value) => {
   const numeric = Number(value);
@@ -27,14 +31,54 @@ const resolveConfigValue = (config, keys, fallback) => {
   return fallback;
 };
 
+const buildTheme = (config) => {
+  const palette = config?.theme || {};
+  return {
+    backgroundFrom: palette.background_from || palette.background || '#0f172a',
+    backgroundTo: palette.background_to || palette.highlight || '#2563eb',
+    surface: palette.surface || '#ffffff',
+    surfaceText: palette.surface_text || '#0f172a',
+    accent: palette.highlight || '#2563eb',
+    accentContrast: palette.highlight_contrast || '#ffffff',
+    accentSoft: palette.highlight_soft || '#dbeafe',
+    stopAccent: palette.accent || '#f97316',
+    stopContrast: palette.accent_contrast || '#0f172a',
+    subtleText: palette.subtle_text || '#64748b',
+    outline: palette.outline || '#cbd5f5',
+  };
+};
+
 const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack }) => {
   const countdownSeconds = parseCountdownSeconds(
     resolveConfigValue(config, ['countdownSeconds', 'countdown_seconds'], 5),
   );
   const startLabel =
     resolveConfigValue(config, ['startButtonLabel', 'start_button_label'], null) || 'Start';
-  const stopLabel =
-    resolveConfigValue(config, ['stopButtonLabel', 'stop_button_label'], null) || 'Stop';
+  const stopLabel = resolveConfigValue(config, ['stopButtonLabel', 'stop_button_label'], null) || 'Stop';
+  const instructions = resolveConfigValue(config, ['description', 'instructions'], null);
+  const title = resolveConfigValue(config, ['title', 'name'], 'Precision Timer');
+  const subtitle = resolveConfigValue(config, ['subtitle'], null);
+  const theme = useMemo(() => buildTheme(config), [config]);
+  const idToken = useMemo(
+    () => resolveConfigValue(config, ['id_token', 'idToken'], null),
+    [config],
+  );
+  const gameId = useMemo(
+    () => resolveConfigValue(config, ['game_id', 'gameId'], ''),
+    [config],
+  );
+  const gameTemplateId = useMemo(
+    () => resolveConfigValue(config, ['game_template_id', 'gameTemplateId'], ''),
+    [config],
+  );
+  const gameType = useMemo(
+    () => resolveConfigValue(config, ['game_type', 'gameType'], 'precision-timer'),
+    [config],
+  );
+  const playerId = useMemo(
+    () => resolveConfigValue(config, ['player_id', 'playerId'], null),
+    [config],
+  );
 
   const [displaySeconds, setDisplaySeconds] = useState(() => formatSeconds(countdownSeconds));
   const [status, setStatus] = useState('idle');
@@ -117,7 +161,7 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
     setStatus('submitting');
     setIsSubmitting(true);
 
-    const startedAt = startTimeRef.current || stopTime;
+    const startedAtMs = startTimeRef.current || stopTime || Date.now();
     const resolvedStopTime = stopTime || Date.now();
 
     let pressedAtSeconds = null;
@@ -130,33 +174,53 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
     } else {
       const deltaMs = targetTimeRef.current - resolvedStopTime;
       timeRemainingSeconds = Number((deltaMs / 1000).toFixed(3));
-      pressedAtSeconds = Number(((resolvedStopTime - startedAt) / 1000).toFixed(3));
+      pressedAtSeconds = Number(((resolvedStopTime - startedAtMs) / 1000).toFixed(3));
       score = Number(Math.abs(deltaMs / 1000).toFixed(3));
     }
 
-    const payload = {
-      gameId: resolveConfigValue(config, ['gameId', 'game_id'], ''),
-      gameType: resolveConfigValue(config, ['gameType', 'game_type'], 'precision-timer'),
-      gameTitle: config?.title,
-      outcome: reason === 'timeout' ? 'Missed' : 'Completed',
-      countdownSeconds,
-      pressedAtSeconds,
-      timeRemainingSeconds,
+    const startedAtIso = new Date(startedAtMs).toISOString();
+    const completedAtIso = new Date(resolvedStopTime).toISOString();
+    const outcome = reason === 'timeout' ? 'Missed' : 'Completed';
+
+    const resultsPayload = {
+      countdown_seconds: countdownSeconds,
+      pressed_at_seconds: pressedAtSeconds,
+      time_remaining_seconds: timeRemainingSeconds,
       score,
+      outcome,
+      started_at: startedAtIso,
+      completed_at: completedAtIso,
     };
 
-    const endpoint =
-      resolveConfigValue(config, ['submissionEndpoint', 'submission_endpoint'], null) ||
-      `/api/${payload.gameType || 'precision-timer'}/${payload.gameId || 'demo'}`;
+    const submissionPayload = {
+      game_id: gameId,
+      game_template_id: gameTemplateId,
+      game_type: gameType,
+      results: resultsPayload,
+    };
 
-    mockSubmitResults(endpoint, payload)
+    if (playerId) {
+      submissionPayload.player_id = playerId;
+    }
+
+    if (config?.metadata) {
+      submissionPayload.metadata = config.metadata;
+    }
+
+    if (idToken) {
+      submissionPayload.id_token = idToken;
+    }
+
+    const fallbackResult = normaliseScoreThresholdResponse({}, submissionPayload);
+
+    submitScoreThresholdResults({ payload: submissionPayload, idToken })
       .then((response) => {
-        setResult(response);
+        setResult(response || fallbackResult);
         setStatus('submitted');
       })
       .catch((error) => {
-        console.warn('[PrecisionTimer] Failed to submit results, falling back to mock payload.', error);
-        setResult({ ...payload, submissionEndpoint: endpoint, submittedAt: new Date().toISOString() });
+        console.warn('[PrecisionTimer] Falling back to local result after submission failure.', error);
+        setResult({ ...fallbackResult, error });
         setStatus('submitted');
       })
       .finally(() => {
@@ -174,22 +238,22 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
   };
 
   const statusLabels = {
-    idle: 'Ready',
+    idle: 'Ready to begin',
     counting: 'Counting down',
-    submitting: 'Submitting',
+    submitting: 'Submitting results',
     submitted: 'Complete',
   };
 
   const statusMessage = (() => {
     switch (status) {
       case 'counting':
-        return 'Trust your instincts and stop the countdown as close to zero as you can.';
+        return 'Stay focused and hit stop when your internal clock reaches zero.';
       case 'submitting':
-        return 'Locking in your timing—hang tight while we record the results.';
+        return 'Recording your precision. Hold tight while we sync with the server.';
       case 'submitted':
-        return 'Great timing! Review your summary below.';
+        return 'Great timing! Review your summary below or try again for an even tighter score.';
       default:
-        return 'Start the countdown when you are ready and aim for absolute precision.';
+        return 'Start the countdown when you are ready and see how close you can get to zero.';
     }
   })();
 
@@ -205,115 +269,148 @@ const PrecisionTimerGame = ({ config = samplePrecisionTimerGameDocument, onBack 
   }
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-slate-950 py-16 px-4 text-white">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-sky-500/25 blur-3xl" />
-        <div className="absolute bottom-0 right-12 h-72 w-72 rounded-full bg-violet-500/20 blur-3xl" />
-        <div className="absolute -bottom-20 left-8 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
-      </div>
-
-      <div className="relative mx-auto flex w-full max-w-4xl flex-col items-center gap-10">
-        <header className="space-y-3 text-center">
-          <p className="text-sm uppercase tracking-[0.35em] text-sky-300">Precision Timer</p>
-          <h2 className="text-4xl font-semibold text-white drop-shadow">{config?.title}</h2>
-          {config?.subtitle && <p className="text-lg text-slate-300">{config.subtitle}</p>}
-          {config?.description && (
-            <p className="mx-auto max-w-2xl text-base text-slate-400">{config.description}</p>
+    <div
+      className="flex min-h-screen items-center justify-center px-4 py-16"
+      style={{
+        backgroundImage: `linear-gradient(135deg, ${theme.backgroundFrom}, ${theme.backgroundTo})`,
+        color: theme.surfaceText,
+      }}
+    >
+      <div
+        className="w-full max-w-xl space-y-8 rounded-3xl border p-8 shadow-xl backdrop-blur"
+        style={{
+          background: theme.surface,
+          borderColor: `${theme.outline}40`,
+          color: theme.surfaceText,
+        }}
+      >
+        <header className="space-y-2 text-center">
+          <p
+            className="mx-auto inline-flex rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em]"
+            style={{
+              backgroundColor: `${theme.accentSoft}80`,
+              color: theme.accent,
+            }}
+          >
+            Precision Timer
+          </p>
+          <h1 className="text-3xl font-semibold text-slate-900" style={{ color: theme.surfaceText }}>
+            {title}
+          </h1>
+          {subtitle && (
+            <p className="text-base" style={{ color: theme.subtleText }}>
+              {subtitle}
+            </p>
+          )}
+          {instructions && (
+            <p className="text-sm" style={{ color: `${theme.subtleText}cc` }}>
+              {instructions}
+            </p>
           )}
         </header>
 
-        <div className="relative w-full overflow-hidden rounded-[2rem] border border-slate-800/60 bg-slate-900/70 p-10 text-center shadow-2xl shadow-sky-900/30 backdrop-blur">
-          <div className="absolute inset-x-16 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/60 to-transparent" />
-          <div className="flex flex-col items-center gap-10">
-            <div className="flex flex-col items-center gap-4">
-              <span className="rounded-full border border-sky-400/60 bg-slate-900/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-sky-200">
-                {statusLabels[status] || statusLabels.idle}
-              </span>
-              <div className="relative">
-                <div className="absolute inset-0 -translate-y-6 scale-125 rounded-full bg-sky-500/25 blur-3xl" />
-                <div className="relative flex h-56 w-56 items-center justify-center rounded-full border border-sky-400/40 bg-slate-950/80 shadow-[0_22px_45px_rgba(15,23,42,0.55)]">
-                  <div className="absolute inset-4 rounded-full border border-sky-500/20 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 shadow-inner shadow-[inset_0_-8px_18px_rgba(15,23,42,0.55)]" />
-                  <span className="relative text-6xl font-mono font-semibold tabular-nums text-sky-100">{displaySeconds}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid w-full gap-4 text-left text-sm text-slate-300 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
-                <h3 className="text-xs uppercase tracking-[0.25em] text-slate-400">Challenge</h3>
-                <p className="mt-2 text-slate-200">
-                  Stop the timer as close to zero as possible. Every millisecond counts towards your final score.
-                </p>
-              </div>
-              <div className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/60 p-5">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-slate-400">Countdown duration</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{formatSeconds(countdownSeconds)}s</p>
-                </div>
-                <div className="text-right text-xs text-slate-500">
-                  <p>Press stop the moment you sense the final second vanish.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <button
-                type="button"
-                onClick={startCountdown}
-                disabled={status !== 'idle'}
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-emerald-400 via-sky-500 to-indigo-500 px-8 py-3 text-lg font-semibold text-white shadow-[0_18px_35px_rgba(14,116,144,0.45)] transition-transform disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <span className="relative drop-shadow-[0_2px_6px_rgba(6,182,212,0.5)]">{startLabel}</span>
-              </button>
-              <button
-                type="button"
-                onClick={stopCountdown}
-                disabled={status !== 'counting'}
-                className="group relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-rose-500 via-orange-500 to-amber-500 px-8 py-3 text-lg font-semibold text-white shadow-[0_18px_35px_rgba(190,24,93,0.45)] transition-transform disabled:cursor-not-allowed disabled:opacity-70"
-              >
-                <span className="relative drop-shadow-[0_2px_6px_rgba(249,115,22,0.5)]">{stopLabel}</span>
-              </button>
-            </div>
-
-            <div className="w-full rounded-2xl border border-slate-800 bg-slate-950/60 p-5 text-sm text-slate-200">
-              <p>{statusMessage}</p>
-              {status === 'counting' && (
-                <p className="mt-2 text-xs uppercase tracking-[0.25em] text-slate-500">
-                  Countdown began at {formatSeconds(countdownSeconds)} seconds
-                </p>
-              )}
-              {isSubmitting && !result && (
-                <p className="mt-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-300" role="status" aria-live="polite">
-                  Submitting results…
-                </p>
-              )}
-            </div>
-
-            {typeof onBack === 'function' && (
-              <button
-                type="button"
-                onClick={onBack}
-                className="mt-2 text-sm font-medium text-slate-300 underline-offset-2 hover:text-white hover:underline"
-              >
-                Back to games
-              </button>
-            )}
+        <div className="flex flex-col items-center gap-6 text-center">
+          <span
+            className="rounded-full px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]"
+            style={{
+              backgroundColor: `${theme.accentSoft}60`,
+              color: theme.accent,
+            }}
+          >
+            {statusLabels[status] || statusLabels.idle}
+          </span>
+          <div className="flex h-48 w-48 items-center justify-center rounded-full border-4 text-6xl font-mono font-semibold tabular-nums shadow-inner"
+            style={{
+              borderColor: theme.accent,
+              color: theme.surfaceText,
+              boxShadow: `inset 0 0 0 8px ${theme.accentSoft}80`,
+            }}
+          >
+            {displaySeconds}
           </div>
+          <p className="text-sm" style={{ color: theme.subtleText }}>
+            {statusMessage}
+          </p>
         </div>
+
+        <dl className="grid gap-4 rounded-2xl bg-white/40 p-5 text-left sm:grid-cols-2"
+          style={{
+            backgroundColor: `${theme.accentSoft}33`,
+            color: theme.surfaceText,
+          }}
+        >
+          <div>
+            <dt className="text-xs uppercase tracking-[0.25em]" style={{ color: theme.subtleText }}>
+              Countdown
+            </dt>
+            <dd className="mt-1 text-xl font-semibold">{formatSeconds(countdownSeconds)}s</dd>
+          </div>
+          <div>
+            <dt className="text-xs uppercase tracking-[0.25em]" style={{ color: theme.subtleText }}>
+              Target
+            </dt>
+            <dd className="mt-1 text-xl font-semibold">Tap stop at zero</dd>
+          </div>
+        </dl>
+
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <button
+            type="button"
+            onClick={startCountdown}
+            disabled={status !== 'idle'}
+            className="w-full rounded-full px-6 py-3 text-base font-semibold shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            style={{
+              backgroundColor: theme.accent,
+              color: theme.accentContrast,
+              opacity: status !== 'idle' ? 0.65 : 1,
+            }}
+          >
+            {startLabel}
+          </button>
+          <button
+            type="button"
+            onClick={stopCountdown}
+            disabled={status !== 'counting'}
+            className="w-full rounded-full px-6 py-3 text-base font-semibold shadow transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto"
+            style={{
+              backgroundColor: theme.stopAccent,
+              color: theme.stopContrast,
+              opacity: status !== 'counting' ? 0.65 : 1,
+            }}
+          >
+            {stopLabel}
+          </button>
+        </div>
+
+        <div className="rounded-2xl px-5 py-4 text-sm"
+          style={{
+            backgroundColor: `${theme.accentSoft}26`,
+            color: theme.subtleText,
+          }}
+        >
+          {isSubmitting && (
+            <p className="font-medium" role="status" aria-live="polite">
+              Submitting your results…
+            </p>
+          )}
+          {!isSubmitting && (
+            <p>{status === 'idle' ? 'Press start to launch the countdown.' : 'Focus on the rhythm of the timer and trust your instincts.'}</p>
+          )}
+        </div>
+
+        {typeof onBack === 'function' && (
+          <button
+            type="button"
+            onClick={onBack}
+            className="mx-auto block text-sm font-medium underline-offset-4 hover:underline"
+            style={{ color: theme.subtleText }}
+          >
+            Back to games
+          </button>
+        )}
       </div>
     </div>
   );
 };
-
-const mockSubmitResults = (url, payload) =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        ...payload,
-        submissionEndpoint: url,
-        submittedAt: new Date().toISOString(),
-      });
-    }, 600);
-  });
 
 export default PrecisionTimerGame;
